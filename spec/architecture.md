@@ -55,7 +55,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 ## Technology Stack
 
 ### Backend
-- **Language**: Go (1.21+)
+- **Language**: Go (1.25+)
 - **Web Framework**: Standard library `net/http` with gorilla/mux for routing
 - **Database**: SQLite
 - **ORM/Database Driver**: database/sql with appropriate drivers
@@ -64,8 +64,8 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 
 ### Frontend
 - **Template Engine**: Go html/template
-- **CSS Framework**: Bootstrap or Tailwind CSS
-- **JavaScript**: Vanilla JS or lightweight framework (Alpine.js/htmx)
+- **CSS Framework**: To be determined
+- **JavaScript**: [htmx](https://htmx.org)
 
 ### Infrastructure
 - **Containerization**: Docker
@@ -84,6 +84,17 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 - Service date and type
 - Mileage at service
 - Cost and provider
+- Notes and attachments
+
+### Fuel Record
+- Date and time
+- Mileage at fill up
+- Price
+- Volume (gallons)
+- Percentage city driving
+- Octane rating
+- Location
+- Brand
 - Notes and attachments
 
 ### User
@@ -106,34 +117,7 @@ See [restful-api.md](./restful-api.md) for detailed API endpoint documentation.
 
 ## Data Storage
 
-### Database Schema
-
-**Users Table**
-- id (primary key)
-- username (unique)
-- email (unique)
-- password_hash
-- created_at, updated_at
-
-**Vehicles Table**
-- id (primary key)
-- user_id (foreign key)
-- vin (unique)
-- make, model, year
-- purchase_date, purchase_price
-- status (active, sold, etc.)
-- created_at, updated_at
-
-**Maintenance Records Table**
-- id (primary key)
-- vehicle_id (foreign key)
-- service_type
-- service_date
-- mileage
-- cost
-- provider
-- notes
-- created_at, updated_at
+See [data-schema.md](./data-schema.md) for detailed database schema documentation.
 
 ## Testing Strategy
 

@@ -73,3 +73,35 @@ Updates an existing maintenance record.
 DELETE /api/v1/maintenance/{id}
 ```
 Deletes a maintenance record.
+
+### Fuel Records
+
+#### List fuel records for a vehicle
+```
+GET /api/v1/vehicles/{id}/fuel
+```
+Returns all fuel records for a specific vehicle.
+
+#### Add fuel record
+```
+POST /api/v1/vehicles/{id}/fuel
+```
+Creates a new fuel record for a vehicle.
+
+#### Get fuel record
+```
+GET /api/v1/fuel/{id}
+```
+Returns details for a specific fuel record.
+
+#### Update fuel record
+```
+PUT /api/v1/fuel/{id}
+```
+Updates an existing fuel record.
+
+#### Delete fuel record
+```
+DELETE /api/v1/fuel/{id}
+```
+Deletes a fuel record.
