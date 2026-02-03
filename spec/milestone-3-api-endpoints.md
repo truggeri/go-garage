@@ -3,9 +3,6 @@
 ## Objective
 Implement a complete RESTful API for managing vehicles and maintenance records, with proper authentication, authorization, and error handling.
 
-## Duration
-Estimated: 2-3 weeks
-
 ## Prerequisites
 - Milestone 1: Project Setup and Core Infrastructure
 - Milestone 2: Vehicle Data Model and Database Layer

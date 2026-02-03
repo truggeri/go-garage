@@ -3,9 +3,6 @@
 ## Objective
 Ensure the application is production-ready through comprehensive testing, complete documentation, and deployment automation.
 
-## Duration
-Estimated: 2-3 weeks
-
 ## Prerequisites
 - Milestone 1: Project Setup and Core Infrastructure
 - Milestone 2: Vehicle Data Model and Database Layer

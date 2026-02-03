@@ -3,9 +3,6 @@
 ## Objective
 Implement the core data models and database layer for vehicle management, including database schema, repositories, and basic CRUD operations.
 
-## Duration
-Estimated: 2 weeks
-
 ## Prerequisites
 - Milestone 1 completed (project setup and infrastructure)
 

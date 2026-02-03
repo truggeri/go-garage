@@ -3,9 +3,6 @@
 ## Objective
 Establish the foundational project structure, development environment, and core infrastructure components needed to build the Go-Garage application.
 
-## Duration
-Estimated: 1-2 weeks
-
 ## Goals
 
 ### 1. Project Initialization

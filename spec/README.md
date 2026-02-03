@@ -10,6 +10,7 @@ Go-Garage is a Go-based web application designed to help users manage their vehi
 
 ### Architecture
 - **[architecture.md](./architecture.md)** - Complete system architecture, technology stack, and design decisions
+- **[restful-api.md](./restful-api.md)** - RESTful API endpoint specifications
 
 ### Milestones
 
@@ -18,21 +19,18 @@ Go-Garage is a Go-based web application designed to help users manage their vehi
    - Development environment setup
    - Basic HTTP server and configuration
    - Docker and CI/CD setup
-   - **Duration**: 1-2 weeks
 
 2. **[milestone-2-data-layer.md](./milestone-2-data-layer.md)** - Vehicle Data Model and Database Layer
    - Database schema design
    - Data models (Vehicle, Maintenance, User)
    - Repository interfaces and implementations
    - Data validation and error handling
-   - **Duration**: 2 weeks
 
 3. **[milestone-3-api-endpoints.md](./milestone-3-api-endpoints.md)** - RESTful API Endpoints
    - Service layer implementation
    - Authentication and authorization (JWT)
    - API endpoints for vehicles, maintenance, and users
    - Request/response handling and validation
-   - **Duration**: 2-3 weeks
 
 4. **[milestone-4-web-interface.md](./milestone-4-web-interface.md)** - Web Interface and Frontend
    - Template system and static assets
@@ -40,18 +38,16 @@ Go-Garage is a Go-based web application designed to help users manage their vehi
    - Dashboard and vehicle management UI
    - Maintenance tracking interface
    - Responsive design and accessibility
-   - **Duration**: 3-4 weeks
 
 5. **[milestone-5-testing-deployment.md](./milestone-5-testing-deployment.md)** - Testing, Documentation, and Deployment
    - Comprehensive testing (unit, integration, E2E)
    - Code quality and security review
    - Complete documentation
    - Production deployment and monitoring
-   - **Duration**: 2-3 weeks
 
 ## Total Project Timeline
 
-**Estimated Duration**: 10-14 weeks (2.5-3.5 months)
+See individual milestone documents for detailed task lists and acceptance criteria.
 
 ## Project Workflow
 
@@ -75,10 +71,10 @@ Each milestone includes testing and validation before proceeding to the next pha
 ## Technology Stack
 
 - **Backend**: Go 1.21+
-- **Database**: PostgreSQL (production) / SQLite (development)
+- **Database**: SQLite
 - **Frontend**: HTML/CSS/JavaScript with Go templates
 - **Authentication**: JWT tokens
-- **Deployment**: Docker, Kubernetes (optional)
+- **Deployment**: Docker, Docker Compose
 - **CI/CD**: GitHub Actions
 
 ## Getting Started

@@ -47,7 +47,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 │                                                         │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  │
 │  │  Repository  │  │   Database   │  │    Cache     │  │
-│  │  Interface   │  │  (SQLite/PG) │  │  (Optional)  │  │
+│  │  Interface   │  │   (SQLite)   │  │  (Optional)  │  │
 │  └──────────────┘  └──────────────┘  └──────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
@@ -57,7 +57,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 ### Backend
 - **Language**: Go (1.21+)
 - **Web Framework**: Standard library `net/http` with gorilla/mux for routing
-- **Database**: SQLite (development) / PostgreSQL (production)
+- **Database**: SQLite
 - **ORM/Database Driver**: database/sql with appropriate drivers
 - **Authentication**: JWT tokens
 - **Configuration**: Environment variables and config files
@@ -69,9 +69,8 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 
 ### Infrastructure
 - **Containerization**: Docker
-- **Deployment**: Docker Compose / Kubernetes
+- **Deployment**: Docker Compose
 - **CI/CD**: GitHub Actions
-- **Monitoring**: Prometheus + Grafana (optional)
 
 ## Core Domain Models
 
@@ -94,27 +93,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 
 ## API Design
 
-### RESTful Endpoints
-
-```
-/api/v1/vehicles
-  GET    - List all vehicles
-  POST   - Create new vehicle
-  
-/api/v1/vehicles/{id}
-  GET    - Get vehicle details
-  PUT    - Update vehicle
-  DELETE - Delete vehicle
-  
-/api/v1/vehicles/{id}/maintenance
-  GET    - List maintenance records
-  POST   - Add maintenance record
-  
-/api/v1/maintenance/{id}
-  GET    - Get maintenance record
-  PUT    - Update maintenance record
-  DELETE - Delete maintenance record
-```
+See [restful-api.md](./restful-api.md) for detailed API endpoint documentation.
 
 ## Security Considerations
 
@@ -124,7 +103,6 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 - **SQL Injection Prevention**: Use parameterized queries
 - **XSS Prevention**: Escape output in templates
 - **CSRF Protection**: Implement CSRF tokens for forms
-- **HTTPS**: Enforce HTTPS in production
 
 ## Data Storage
 
@@ -157,41 +135,9 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 - notes
 - created_at, updated_at
 
-## Deployment Architecture
-
-### Development
-- Local SQLite database
-- Hot-reload for development
-- Mock external services
-
-### Production
-- PostgreSQL database with replication
-- Load balancer (if needed)
-- Container orchestration (Docker/K8s)
-- Automated backups
-- Monitoring and alerting
-
-## Performance Considerations
-
-- Database connection pooling
-- Efficient query design with proper indexing
-- Response caching where appropriate
-- Concurrent request handling with goroutines
-- Rate limiting for API endpoints
-
 ## Testing Strategy
 
 - **Unit Tests**: Test individual functions and methods
 - **Integration Tests**: Test database interactions and API endpoints
 - **End-to-End Tests**: Test complete user workflows
-- **Load Tests**: Validate performance under load
 - **Coverage Goal**: Minimum 80% code coverage
-
-## Future Enhancements
-
-- Mobile application (iOS/Android)
-- Integration with third-party services (insurance, parts suppliers)
-- Advanced reporting and analytics
-- Multi-tenant support
-- Real-time notifications
-- Document/photo storage for vehicles and maintenance

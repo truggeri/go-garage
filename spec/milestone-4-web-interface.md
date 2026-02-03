@@ -3,9 +3,6 @@
 ## Objective
 Build a user-friendly web interface for the Go-Garage application, allowing users to manage their vehicles and maintenance records through a browser.
 
-## Duration
-Estimated: 3-4 weeks
-
 ## Prerequisites
 - Milestone 1: Project Setup and Core Infrastructure
 - Milestone 2: Vehicle Data Model and Database Layer
