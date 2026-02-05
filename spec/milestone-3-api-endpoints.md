@@ -35,7 +35,6 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement GetUser(ctx, id)
 - [ ] Implement UpdateUser(ctx, id, updates)
 - [ ] Implement password hashing (bcrypt)
-- [ ] Implement user authentication
 
 ### 2. Authentication & Authorization
 
