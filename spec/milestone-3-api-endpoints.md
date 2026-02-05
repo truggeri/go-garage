@@ -252,7 +252,6 @@ Error response format:
 - [ ] Error responses are consistent and informative
 - [ ] API tests achieve >80% coverage
 - [ ] API documentation is complete and accurate
-- [ ] Performance is acceptable (< 200ms for simple requests)
 
 ## Dependencies
 - Milestone 1: Project Setup and Core Infrastructure
