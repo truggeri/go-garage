@@ -28,7 +28,6 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement GetVehicleMaintenance(ctx, vehicleID)
 - [ ] Implement UpdateMaintenance(ctx, id, updates)
 - [ ] Implement DeleteMaintenance(ctx, id)
-- [ ] Generate maintenance summaries
 
 #### User Service
 - [ ] Create UserService interface
