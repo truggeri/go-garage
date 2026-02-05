@@ -9,7 +9,6 @@ Implement the core data models and database layer for vehicle management, includ
 ## Goals
 
 ### 1. Database Setup
-- [ ] Choose database (SQLite for dev, PostgreSQL for prod)
 - [ ] Configure database connection with connection pooling
 - [ ] Implement health check for database connectivity
 - [ ] Setup database migrations system
@@ -19,7 +18,7 @@ Implement the core data models and database layer for vehicle management, includ
 
 #### Vehicle Model
 Define the Vehicle struct with the following fields:
-- [ ] ID (UUID or integer)
+- [ ] ID (UUID)
 - [ ] User ID (foreign key)
 - [ ] VIN (Vehicle Identification Number)
 - [ ] Make
@@ -46,8 +45,6 @@ Define the MaintenanceRecord struct:
 - [ ] Cost
 - [ ] Service provider
 - [ ] Notes/description
-- [ ] Next service due date (optional)
-- [ ] Next service due mileage (optional)
 - [ ] Created at timestamp
 - [ ] Updated at timestamp
 
@@ -99,9 +96,9 @@ Create repository interfaces for:
   - Delete(id)
 
 ### 5. Repository Implementation
-- [ ] Implement PostgreSQL/SQLite repository for vehicles
-- [ ] Implement PostgreSQL/SQLite repository for maintenance records
-- [ ] Implement PostgreSQL/SQLite repository for users
+- [ ] Implement SQLite repository for vehicles
+- [ ] Implement SQLite repository for maintenance records
+- [ ] Implement SQLite repository for users
 - [ ] Use prepared statements for all queries
 - [ ] Implement transaction support
 - [ ] Add context support for cancellation
@@ -138,7 +135,7 @@ Create repository interfaces for:
 - [ ] Mock database for unit tests
 
 #### Integration Tests
-- [ ] Test with real database (test container)
+- [ ] Test with test database
 - [ ] Test CRUD operations end-to-end
 - [ ] Test concurrent access scenarios
 - [ ] Test transaction rollback scenarios

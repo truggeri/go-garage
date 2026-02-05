@@ -56,7 +56,7 @@ Stores fuel fill-up records for each vehicle.
 - mileage (mileage at fill-up)
 - price (total price paid)
 - volume (gallons)
-- city_driving_percentage (percentage city driving)
+- city_driving_percentage (0-100)
 - octane_rating
 - location
 - brand

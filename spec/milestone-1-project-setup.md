@@ -8,15 +8,11 @@ Establish the foundational project structure, development environment, and core 
 ### 1. Project Initialization
 - [x] Create GitHub repository
 - [ ] Initialize Go module (`go mod init`)
-- [ ] Setup .gitignore for Go projects
-- [ ] Create README.md with project overview
-- [ ] Add LICENSE file
 
 ### 2. Development Environment
-- [ ] Define Go version requirements (1.21+)
 - [ ] Create Makefile for common tasks (build, test, run, clean)
-- [ ] Setup development Docker container (optional)
-- [ ] Configure VSCode/GoLand settings (optional)
+- [ ] Setup development Docker container
+- [ ] Configure VSCode/GoLand settings
 - [ ] Setup pre-commit hooks (gofmt, golint)
 
 ### 3. Project Structure
@@ -46,7 +42,7 @@ Install and configure:
 - [ ] gorilla/mux - HTTP router and URL matcher
 - [ ] godotenv - Environment variable management
 - [ ] golang-migrate - Database migration tool
-- [ ] Database driver (lib/pq for PostgreSQL or mattn/go-sqlite3 for SQLite)
+- [ ] Database driver (mattn/go-sqlite3 for SQLite)
 - [ ] testify - Testing toolkit
 
 ### 5. Configuration Management
@@ -60,7 +56,7 @@ Configuration items to include:
 - Database connection string
 - Log level and format
 - JWT secret key
-- Environment (dev, staging, prod)
+- Environment name (dev, prod)
 
 ### 6. Basic HTTP Server
 - [ ] Implement main.go in cmd/server/
@@ -79,7 +75,6 @@ Configuration items to include:
 ### 8. Docker Setup
 - [ ] Create Dockerfile for the application
 - [ ] Create docker-compose.yml for local development
-- [ ] Include database service in docker-compose
 - [ ] Volume configuration for persistence
 - [ ] Network configuration
 
@@ -116,7 +111,7 @@ Configuration items to include:
 - [ ] Development documentation is complete and accurate
 
 ## Dependencies
-None (initial milestone)
+None
 
 ## Risks and Mitigations
 
