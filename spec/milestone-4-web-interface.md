@@ -36,9 +36,9 @@ web/templates/
 │   ├── maintenance/
 │   └── profile/
 └── errors/
+    ├── 403.html
     ├── 404.html
-    ├── 500.html
-    └── 403.html
+    └── 500.html
 ```
 
 ### 2. Static Assets Setup
@@ -92,10 +92,8 @@ web/static/
 - [ ] Welcome message with user name
 - [ ] Vehicle count summary
 - [ ] Recent maintenance activities
-- [ ] Upcoming maintenance reminders
 - [ ] Quick action buttons (Add Vehicle, Add Maintenance)
 - [ ] Statistics widgets (total vehicles, total spent, etc.)
-- [ ] Chart/graph for maintenance costs over time (optional)
 
 ### 5. Vehicle Management Pages
 
@@ -280,12 +278,6 @@ web/static/
 - [ ] Auto-complete for vehicle makes/models
 - [ ] Confirmation prompts
 
-#### Optional Enhancements
-- [ ] Live search/filtering
-- [ ] Sort without page reload
-- [ ] Charts for statistics (Chart.js)
-- [ ] Image upload preview
-
 ### 14. Testing
 
 #### Manual Testing
@@ -293,13 +285,7 @@ web/static/
 - [ ] Test form submissions
 - [ ] Test validations
 - [ ] Test error handling
-- [ ] Cross-browser testing (Chrome, Firefox, Safari, Edge)
 - [ ] Mobile device testing
-
-#### Automated Testing (Optional)
-- [ ] End-to-end tests (Selenium, Playwright)
-- [ ] Visual regression tests
-- [ ] Accessibility tests
 
 ### 15. Documentation
 - [ ] UI component documentation
@@ -350,7 +336,5 @@ web/static/
 - Keep UI simple and clean
 - Prioritize usability over fancy features
 - Use progressive enhancement
-- Consider using htmx for dynamic updates (optional)
+- Use htmx for dynamic updates
 - Focus on core workflows first, add enhancements later
-- Ensure security best practices (CSRF tokens, XSS prevention)
-- Test with real users if possible

@@ -71,7 +71,7 @@ Each milestone includes testing and validation before proceeding to the next pha
 
 ## Technology Stack
 
-- **Backend**: Go 1.21+
+- **Backend**: Go 1.25+
 - **Database**: SQLite
 - **Frontend**: HTML/CSS/JavaScript with Go templates
 - **Authentication**: JWT tokens
@@ -88,7 +88,6 @@ Each milestone includes testing and validation before proceeding to the next pha
 ## Success Metrics
 
 - **Code Coverage**: Minimum 80%
-- **Performance**: API response time < 200ms for simple requests
 - **Security**: No critical vulnerabilities
 - **Documentation**: Complete and up-to-date
 - **User Experience**: Intuitive and responsive interface

@@ -36,11 +36,11 @@ PUT /api/v1/vehicles/{id}
 ```
 Updates an existing vehicle record.
 
-#### Delete vehicle
+#### Archive vehicle
 ```
-DELETE /api/v1/vehicles/{id}
+PATCH /api/v1/vehicles/{id}
 ```
-Deletes a vehicle record.
+Archives a vehicle record.
 
 ### Maintenance Records
 

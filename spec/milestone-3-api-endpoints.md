@@ -17,9 +17,8 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement GetVehicle(ctx, id)
 - [ ] Implement GetUserVehicles(ctx, userID)
 - [ ] Implement UpdateVehicle(ctx, id, updates)
-- [ ] Implement DeleteVehicle(ctx, id)
+- [ ] Implement ArchiveVehicle(ctx, id)
 - [ ] Implement ListVehicles(ctx, filters, pagination)
-- [ ] Add business logic validation
 - [ ] Implement ownership verification
 
 #### Maintenance Service
@@ -29,7 +28,6 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement GetVehicleMaintenance(ctx, vehicleID)
 - [ ] Implement UpdateMaintenance(ctx, id, updates)
 - [ ] Implement DeleteMaintenance(ctx, id)
-- [ ] Calculate next service due dates
 - [ ] Generate maintenance summaries
 
 #### User Service
@@ -37,7 +35,6 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement CreateUser(ctx, user)
 - [ ] Implement GetUser(ctx, id)
 - [ ] Implement UpdateUser(ctx, id, updates)
-- [ ] Implement DeleteUser(ctx, id)
 - [ ] Implement password hashing (bcrypt)
 - [ ] Implement user authentication
 
@@ -202,7 +199,6 @@ Error response format:
 - [ ] Request logging
 - [ ] CORS headers
 - [ ] Request ID generation
-- [ ] Rate limiting
 - [ ] Request timeout
 - [ ] Panic recovery
 - [ ] Security headers (X-Content-Type-Options, etc.)
@@ -231,12 +227,11 @@ Error response format:
 - [ ] Test filtering and sorting
 
 #### API Documentation
-- [ ] Create OpenAPI/Swagger specification
+- [ ] Create OpenAPI specification
 - [ ] Document all endpoints
 - [ ] Document request/response schemas
 - [ ] Document authentication requirements
 - [ ] Provide example requests/responses
-- [ ] Setup Swagger UI (optional)
 
 ## Deliverables
 
@@ -278,5 +273,3 @@ Error response format:
 - Use standard HTTP status codes appropriately
 - Keep endpoints simple and focused
 - Consider API versioning from the start
-- Document breaking changes clearly
-- Implement rate limiting to prevent abuse
