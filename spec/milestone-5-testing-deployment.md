@@ -131,7 +131,7 @@ Ensure the application is production-ready through comprehensive testing, comple
 - [ ] Configure appropriate timeouts
 - [ ] Setup caching where beneficial
 - [ ] Optimize database queries
-- [ ] Enable gzip or brotoli compression
+- [ ] Enable gzip or brotli compression
 - [ ] Optimize asset delivery
 
 ### 5. Monitoring and Logging
