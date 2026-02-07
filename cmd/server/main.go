@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/config"
+	"github.com/truggeri/go-garage/internal/middleware"
 )
 
 func main() {
@@ -25,9 +26,13 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
+	// Apply middleware
+	handler := middleware.RecoverFromPanic(router)
+	handler = middleware.RequestLogger(handler)
+
 	server := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
-		Handler:      router,
+		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
