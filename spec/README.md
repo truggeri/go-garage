@@ -71,7 +71,7 @@ Each milestone includes testing and validation before proceeding to the next pha
 
 ## Technology Stack
 
-- **Backend**: Go 1.25+
+- **Backend**: Go 1.24+
 - **Database**: SQLite
 - **Frontend**: HTML/CSS/JavaScript with Go templates
 - **Authentication**: JWT tokens
