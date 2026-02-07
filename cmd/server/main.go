@@ -10,20 +10,23 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
+	"github.com/truggeri/go-garage/internal/config"
 )
 
 func main() {
-	// Load .env file if it exists (for local development)
-	_ = godotenv.Load()
+	// Load configuration
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatalf("Failed to load configuration: %v", err)
+	}
 
-	port := getEnvOrDefault("APP_PORT", "8080")
+	log.Printf("Starting Go-Garage server in %s environment", cfg.Env)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
 	server := &http.Server{
-		Addr:         fmt.Sprintf(":%s", port),
+		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
 		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -47,7 +50,7 @@ func main() {
 		close(done)
 	}()
 
-	log.Printf("Starting server on port %s", port)
+	log.Printf("Starting server on %s:%d", cfg.Server.Host, cfg.Server.Port)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("Failed to start server: %v", err)
 	}
@@ -60,11 +63,4 @@ func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprintf(w, `{"status":"healthy","timestamp":"%s"}`, time.Now().Format(time.RFC3339))
-}
-
-func getEnvOrDefault(key, defaultValue string) string {
-	if value := os.Getenv(key); value != "" {
-		return value
-	}
-	return defaultValue
 }
