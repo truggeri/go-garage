@@ -145,6 +145,25 @@ make lint
 make vet
 ```
 
+### Continuous Integration
+
+The project uses GitHub Actions for automated testing and quality checks. Every pull request and push to main triggers:
+
+- **Code Quality Checks**
+  - Go module tidiness verification
+  - Code formatting validation (gofmt)
+  - Static analysis (go vet)
+  - Comprehensive linting (golangci-lint)
+  - Test suite execution with race detection
+  - Code coverage reporting to Codecov
+
+- **Docker Validation**
+  - Multi-stage Docker image build
+  - Container health check verification
+  - Image structure validation
+
+All CI checks must pass before merging pull requests. View the workflow configuration in `.github/workflows/go-garage-quality.yml`.
+
 ## Docker
 
 For detailed Docker setup and usage instructions, see [docs/DOCKER.md](docs/DOCKER.md).
