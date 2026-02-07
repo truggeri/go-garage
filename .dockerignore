@@ -1,0 +1,52 @@
+# Git files
+.git
+.gitignore
+.githooks
+.github
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Build artifacts
+bin/
+dist/
+*.exe
+*.dll
+*.so
+*.dylib
+go-garage
+
+# Test files
+*.test
+*.out
+coverage.txt
+coverage.html
+
+# Documentation
+*.md
+LICENSE
+
+# Development files
+.env
+.env.local
+.env.*.local
+docker-compose.override.yml
+
+# Data files
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
