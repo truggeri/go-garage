@@ -79,7 +79,6 @@ go-garage/
 - Escape output in HTML templates to prevent XSS
 - Use JWT tokens for authentication
 - Never commit secrets or API keys
-- Use HTTPS in production
 - Implement CSRF protection for forms
 - Use prepared statements for all SQL queries
 
