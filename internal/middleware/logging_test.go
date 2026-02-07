@@ -11,28 +11,23 @@ import (
 )
 
 func TestRequestLogger_LogsRequestDetails(t *testing.T) {
-	// Capture log output
 	var logBuffer bytes.Buffer
 	originalOutput := log.Writer()
 	log.SetOutput(&logBuffer)
 	defer log.SetOutput(originalOutput)
 
-	// Create test handler
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	// Wrap with logging middleware
 	loggedHandler := RequestLogger(testHandler)
 
-	// Make request
 	req := httptest.NewRequest(http.MethodGet, "/test-path", nil)
 	recorder := httptest.NewRecorder()
 	loggedHandler.ServeHTTP(recorder, req)
 
-	// Verify log output contains expected information
 	logOutput := logBuffer.String()
-	assert.Contains(t, logOutput, "[Go-Garage]", "Log should contain Go-Garage tag")
+	assert.Contains(t, logOutput, "[Go-Garage-Web]", "Log should contain Go-Garage-Web tag")
 	assert.Contains(t, logOutput, "GET", "Log should contain HTTP method")
 	assert.Contains(t, logOutput, "/test-path", "Log should contain request path")
 	assert.Contains(t, logOutput, "Status: 200", "Log should contain status code")
@@ -68,14 +63,12 @@ func TestRequestLogger_CapturesStatusCode(t *testing.T) {
 			loggedHandler.ServeHTTP(recorder, req)
 
 			logOutput := logBuffer.String()
-			// Check for the status code in log
 			assert.Contains(t, logOutput, "Status:", "Log should contain status label")
 		})
 	}
 }
 
 func TestRequestLogger_PassesRequestThrough(t *testing.T) {
-	// Capture and restore log output
 	var logBuffer bytes.Buffer
 	originalOutput := log.Writer()
 	log.SetOutput(&logBuffer)

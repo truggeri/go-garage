@@ -13,7 +13,6 @@ func RecoverFromPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				// Log panic details with stack trace
 				log.Printf("[Go-Garage PANIC] Request: %s %s - Error: %v\nStack Trace:\n%s",
 					r.Method,
 					r.URL.Path,
@@ -21,7 +20,6 @@ func RecoverFromPanic(next http.Handler) http.Handler {
 					string(debug.Stack()),
 				)
 
-				// Send error response to client
 				errorResponse := map[string]string{
 					"error":   "Internal server error",
 					"message": "An unexpected error occurred",

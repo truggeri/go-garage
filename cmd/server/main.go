@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
@@ -26,8 +25,6 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// Apply middleware (order matters: outermost first)
-	// RequestLogger wraps RecoverFromPanic so all requests are logged, even panicked ones
 	handler := middleware.RequestLogger(router)
 	handler = middleware.RecoverFromPanic(handler)
 
@@ -39,7 +36,6 @@ func main() {
 		IdleTimeout:  60 * time.Second,
 	}
 
-	// Channel for graceful shutdown
 	done := make(chan bool, 1)
 	quit := make(chan os.Signal, 1)
 

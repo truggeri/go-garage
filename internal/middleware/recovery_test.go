@@ -12,36 +12,29 @@ import (
 )
 
 func TestRecoverFromPanic_CatchesPanic(t *testing.T) {
-	// Capture log output
 	var logBuffer bytes.Buffer
 	originalOutput := log.Writer()
 	log.SetOutput(&logBuffer)
 	defer log.SetOutput(originalOutput)
 
-	// Create handler that panics
 	panicHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("test panic message")
 	})
 
-	// Wrap with recovery middleware
 	recoveredHandler := RecoverFromPanic(panicHandler)
 
-	// Make request - should not panic
 	req := httptest.NewRequest(http.MethodGet, "/panic-endpoint", nil)
 	recorder := httptest.NewRecorder()
 
-	// This should not cause the test to fail
 	require.NotPanics(t, func() {
 		recoveredHandler.ServeHTTP(recorder, req)
 	}, "Middleware should catch panic")
 
-	// Verify error response
 	assert.Equal(t, http.StatusInternalServerError, recorder.Code)
 	assert.Contains(t, recorder.Body.String(), "Internal server error")
 	assert.Contains(t, recorder.Body.String(), "error")
 	assert.Equal(t, "application/json", recorder.Header().Get("Content-Type"))
 
-	// Verify panic was logged
 	logOutput := logBuffer.String()
 	assert.Contains(t, logOutput, "[Go-Garage PANIC]")
 	assert.Contains(t, logOutput, "test panic message")
@@ -54,25 +47,20 @@ func TestRecoverFromPanic_NormalRequestPassesThrough(t *testing.T) {
 	log.SetOutput(&logBuffer)
 	defer log.SetOutput(originalOutput)
 
-	// Create normal handler
 	normalHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("success"))
 	})
 
-	// Wrap with recovery middleware
 	recoveredHandler := RecoverFromPanic(normalHandler)
 
-	// Make request
 	req := httptest.NewRequest(http.MethodGet, "/normal", nil)
 	recorder := httptest.NewRecorder()
 	recoveredHandler.ServeHTTP(recorder, req)
 
-	// Verify normal response
 	assert.Equal(t, http.StatusOK, recorder.Code)
 	assert.Equal(t, "success", recorder.Body.String())
 
-	// Verify no panic was logged
 	logOutput := logBuffer.String()
 	assert.NotContains(t, logOutput, "PANIC")
 }
@@ -108,7 +96,6 @@ func TestRecoverFromPanic_ReturnsJSONError(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	recoveredHandler.ServeHTTP(recorder, req)
 
-	// Verify JSON response
 	body := recorder.Body.String()
 	assert.Contains(t, body, `"error"`, "Response should contain error field")
 	assert.Contains(t, body, `"message"`, "Response should contain message field")
