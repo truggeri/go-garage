@@ -9,6 +9,8 @@ import (
 )
 
 // Config holds all configuration for the application
+//
+//nolint:govet
 type Config struct {
 	Server   ServerConfig
 	Database DatabaseConfig
@@ -42,8 +44,10 @@ type JWTConfig struct {
 // Load creates a new Config by loading values from environment variables
 // It automatically loads .env file if it exists (for local development)
 func Load() (*Config, error) {
-	// Load .env file if it exists (ignore errors for production environments)
-	_ = godotenv.Load()
+	err := godotenv.Load()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load .env file: %w", err)
+	}
 
 	config := &Config{
 		Server: ServerConfig{
