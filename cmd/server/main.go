@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,21 +11,24 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/config"
 	"github.com/truggeri/go-garage/internal/middleware"
+	"github.com/truggeri/go-garage/pkg/applog"
 )
 
 func main() {
 	cfg, err := config.Load()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		fmt.Fprintf(os.Stderr, "Failed to load configuration: %v\n", err)
+		os.Exit(1)
 	}
 
-	log.Printf("Starting Go-Garage server in %s environment", cfg.Env)
+	vehicleLog := applog.BuildVehicleAppLog(cfg.Logging.Level, cfg.Logging.Format, nil)
+	vehicleLog.RecordAppStartup(cfg.Env, cfg.Server.Host, cfg.Server.Port)
 
 	router := mux.NewRouter()
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	handler := middleware.RequestLogger(router)
-	handler = middleware.RecoverFromPanic(handler)
+	handler := middleware.RequestLogger(vehicleLog)(router)
+	handler = middleware.RecoverFromPanic(vehicleLog)(handler)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
@@ -42,23 +44,25 @@ func main() {
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 	go func() {
-		<-quit
-		log.Println("Server is shutting down...")
+		sig := <-quit
+		vehicleLog.RecordAppShutdown(fmt.Sprintf("Signal %v received", sig))
 
 		if err := server.Close(); err != nil {
-			log.Fatalf("Server forced to shutdown: %v", err)
+			vehicleLog.RecordError("Server forced to shutdown", "error", err.Error())
+			os.Exit(1)
 		}
 
 		close(done)
 	}()
 
-	log.Printf("Starting server on %s:%d", cfg.Server.Host, cfg.Server.Port)
+	vehicleLog.RecordInfo("Server listening", "address", server.Addr)
 	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-		log.Fatalf("Failed to start server: %v", err)
+		vehicleLog.RecordError("Server failed to start", "error", err.Error())
+		os.Exit(1)
 	}
 
 	<-done
-	log.Println("Server stopped")
+	vehicleLog.RecordInfo("Server stopped successfully")
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {

@@ -2,26 +2,24 @@ package middleware
 
 import (
 	"bytes"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/truggeri/go-garage/pkg/applog"
 )
 
 func TestRecoverFromPanic_CatchesPanic(t *testing.T) {
-	var logBuffer bytes.Buffer
-	originalOutput := log.Writer()
-	log.SetOutput(&logBuffer)
-	defer log.SetOutput(originalOutput)
+	logBuffer := &bytes.Buffer{}
+	vehicleLog := applog.BuildVehicleAppLog("error", "json", logBuffer)
 
 	panicHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("test panic message")
 	})
 
-	recoveredHandler := RecoverFromPanic(panicHandler)
+	recoveredHandler := RecoverFromPanic(vehicleLog)(panicHandler)
 
 	req := httptest.NewRequest(http.MethodGet, "/panic-endpoint", nil)
 	recorder := httptest.NewRecorder()
@@ -36,23 +34,21 @@ func TestRecoverFromPanic_CatchesPanic(t *testing.T) {
 	assert.Equal(t, "application/json", recorder.Header().Get("Content-Type"))
 
 	logOutput := logBuffer.String()
-	assert.Contains(t, logOutput, "[Go-Garage PANIC]")
+	assert.Contains(t, logOutput, "go-garage panic recovered")
 	assert.Contains(t, logOutput, "test panic message")
-	assert.Contains(t, logOutput, "Stack Trace:")
+	assert.Contains(t, logOutput, "stack_trace")
 }
 
 func TestRecoverFromPanic_NormalRequestPassesThrough(t *testing.T) {
-	var logBuffer bytes.Buffer
-	originalOutput := log.Writer()
-	log.SetOutput(&logBuffer)
-	defer log.SetOutput(originalOutput)
+	logBuffer := &bytes.Buffer{}
+	vehicleLog := applog.BuildVehicleAppLog("error", "json", logBuffer)
 
 	normalHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("success"))
 	})
 
-	recoveredHandler := RecoverFromPanic(normalHandler)
+	recoveredHandler := RecoverFromPanic(vehicleLog)(normalHandler)
 
 	req := httptest.NewRequest(http.MethodGet, "/normal", nil)
 	recorder := httptest.NewRecorder()
@@ -62,20 +58,18 @@ func TestRecoverFromPanic_NormalRequestPassesThrough(t *testing.T) {
 	assert.Equal(t, "success", recorder.Body.String())
 
 	logOutput := logBuffer.String()
-	assert.NotContains(t, logOutput, "PANIC")
+	assert.NotContains(t, logOutput, "panic")
 }
 
 func TestRecoverFromPanic_LogsRequestDetails(t *testing.T) {
-	var logBuffer bytes.Buffer
-	originalOutput := log.Writer()
-	log.SetOutput(&logBuffer)
-	defer log.SetOutput(originalOutput)
+	logBuffer := &bytes.Buffer{}
+	vehicleLog := applog.BuildVehicleAppLog("error", "json", logBuffer)
 
 	panicHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("error in handler")
 	})
 
-	recoveredHandler := RecoverFromPanic(panicHandler)
+	recoveredHandler := RecoverFromPanic(vehicleLog)(panicHandler)
 	req := httptest.NewRequest(http.MethodPost, "/api/vehicles/123", nil)
 	recorder := httptest.NewRecorder()
 	recoveredHandler.ServeHTTP(recorder, req)
@@ -87,11 +81,14 @@ func TestRecoverFromPanic_LogsRequestDetails(t *testing.T) {
 }
 
 func TestRecoverFromPanic_ReturnsJSONError(t *testing.T) {
+	logBuffer := &bytes.Buffer{}
+	vehicleLog := applog.BuildVehicleAppLog("error", "json", logBuffer)
+
 	panicHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panic("something went wrong")
 	})
 
-	recoveredHandler := RecoverFromPanic(panicHandler)
+	recoveredHandler := RecoverFromPanic(vehicleLog)(panicHandler)
 	req := httptest.NewRequest(http.MethodGet, "/test", nil)
 	recorder := httptest.NewRecorder()
 	recoveredHandler.ServeHTTP(recorder, req)
@@ -115,16 +112,14 @@ func TestRecoverFromPanic_DifferentPanicTypes(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var logBuffer bytes.Buffer
-			originalOutput := log.Writer()
-			log.SetOutput(&logBuffer)
-			defer log.SetOutput(originalOutput)
+			logBuffer := &bytes.Buffer{}
+			vehicleLog := applog.BuildVehicleAppLog("error", "json", logBuffer)
 
 			panicHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 				panic(tt.panicValue)
 			})
 
-			recoveredHandler := RecoverFromPanic(panicHandler)
+			recoveredHandler := RecoverFromPanic(vehicleLog)(panicHandler)
 			req := httptest.NewRequest(http.MethodGet, "/test", nil)
 			recorder := httptest.NewRecorder()
 
@@ -136,3 +131,4 @@ func TestRecoverFromPanic_DifferentPanicTypes(t *testing.T) {
 		})
 	}
 }
+
