@@ -37,13 +37,13 @@ go-garage/
 └── tests/               # Integration and E2E tests
 ```
 
-### 4. Core Dependencies
+### 4. Core Dependencies ✅
 Install and configure:
-- [ ] gorilla/mux - HTTP router and URL matcher
-- [ ] godotenv - Environment variable management
-- [ ] golang-migrate - Database migration tool
-- [ ] Database driver (mattn/go-sqlite3 for SQLite)
-- [ ] testify - Testing toolkit
+- [x] gorilla/mux - HTTP router and URL matcher
+- [x] godotenv - Environment variable management
+- [x] golang-migrate - Database migration tool
+- [x] Database driver (mattn/go-sqlite3 for SQLite)
+- [x] testify - Testing toolkit
 
 ### 5. Configuration Management
 - [ ] Create config package to load environment variables
