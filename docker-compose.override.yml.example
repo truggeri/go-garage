@@ -2,8 +2,6 @@
 # Copy this file to docker-compose.override.yml and customize as needed
 # The override file is gitignored and won't be committed
 
-version: '3.9'
-
 services:
   app:
     # Example: Override environment variables
