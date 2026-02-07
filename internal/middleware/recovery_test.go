@@ -131,4 +131,3 @@ func TestRecoverFromPanic_DifferentPanicTypes(t *testing.T) {
 		})
 	}
 }
-

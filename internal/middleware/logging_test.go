@@ -115,4 +115,3 @@ func TestRequestLogger_DifferentHTTPMethods(t *testing.T) {
 		})
 	}
 }
-
