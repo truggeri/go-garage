@@ -1,4 +1,3 @@
-.golangci.yml
 root: true
 
 linters:

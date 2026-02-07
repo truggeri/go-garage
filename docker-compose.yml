@@ -13,7 +13,7 @@ services:
       - APP_PORT=8080
       - LOG_LEVEL=debug
     volumes:
-      - ./data:/app/data
+      - garage-data:/app/data
     restart: unless-stopped
     networks:
       - garage-network

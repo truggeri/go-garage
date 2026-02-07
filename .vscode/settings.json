@@ -7,7 +7,9 @@
   "[go]": {
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
-    }
+    },
+    "editor.insertSpaces": false,
+    "editor.tabSize": 4
   },
   "go.lintTool": "golangci-lint",
   "go.lintFlags": [
@@ -19,10 +21,6 @@
   "files.eol": "\n",
   "editor.insertSpaces": false,
   "editor.detectIndentation": false,
-  "[go]": {
-    "editor.insertSpaces": false,
-    "editor.tabSize": 4
-  },
   "files.exclude": {
     "**/.git": true,
     "**/bin": true,
