@@ -13,9 +13,10 @@ func RequestLogger(next http.Handler) http.Handler {
 		startTime := time.Now()
 
 		// Create custom response writer to capture status code
+		// Default is 200 OK per HTTP spec when handlers write without calling WriteHeader
 		wrapper := &statusCapture{
 			ResponseWriter: w,
-			statusCode:     http.StatusOK, // default if WriteHeader not called
+			statusCode:     http.StatusOK,
 		}
 
 		// Process the request

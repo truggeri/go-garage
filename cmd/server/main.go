@@ -26,9 +26,10 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
-	// Apply middleware
-	handler := middleware.RecoverFromPanic(router)
-	handler = middleware.RequestLogger(handler)
+	// Apply middleware (order matters: outermost first)
+	// RequestLogger wraps RecoverFromPanic so all requests are logged, even panicked ones
+	handler := middleware.RequestLogger(router)
+	handler = middleware.RecoverFromPanic(handler)
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),

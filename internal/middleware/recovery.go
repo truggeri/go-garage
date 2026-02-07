@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 	"runtime/debug"
@@ -22,9 +22,15 @@ func RecoverFromPanic(next http.Handler) http.Handler {
 				)
 
 				// Send error response to client
+				errorResponse := map[string]string{
+					"error":   "Internal server error",
+					"message": "An unexpected error occurred",
+				}
+				responseJSON, _ := json.Marshal(errorResponse)
+				
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusInternalServerError)
-				fmt.Fprintf(w, `{"error":"Internal server error","message":"An unexpected error occurred"}`)
+				w.Write(responseJSON)
 			}
 		}()
 
