@@ -8,17 +8,23 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	// Load .env file if it exists (for local development)
+	_ = godotenv.Load()
+
 	port := getEnvOrDefault("APP_PORT", "8080")
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/health", healthCheckHandler)
+	router := mux.NewRouter()
+	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", port),
-		Handler:      mux,
+		Handler:      router,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
