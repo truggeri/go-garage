@@ -35,7 +35,7 @@ func TestLoad_WithEnvironmentVariables(t *testing.T) {
 	t.Setenv("LOG_LEVEL", "debug")
 	t.Setenv("LOG_FORMAT", "text")
 	t.Setenv("JWT_SECRET", "test-secret-key")
-	t.Setenv("ENVIRONMENT", "staging")
+	t.Setenv("ENVIRONMENT", "production")
 
 	config, err := Load()
 
@@ -46,7 +46,7 @@ func TestLoad_WithEnvironmentVariables(t *testing.T) {
 	assert.Equal(t, "debug", config.Logging.Level)
 	assert.Equal(t, "text", config.Logging.Format)
 	assert.Equal(t, "test-secret-key", config.JWT.Secret)
-	assert.Equal(t, "staging", config.Env)
+	assert.Equal(t, "production", config.Env)
 }
 
 func TestLoad_InvalidPort(t *testing.T) {
@@ -184,7 +184,6 @@ func TestIsDevelopment(t *testing.T) {
 		expected bool
 	}{
 		{"Development environment", "development", true},
-		{"Staging environment", "staging", false},
 		{"Production environment", "production", false},
 	}
 
@@ -204,7 +203,6 @@ func TestIsProduction(t *testing.T) {
 		expected bool
 	}{
 		{"Development environment", "development", false},
-		{"Staging environment", "staging", false},
 		{"Production environment", "production", true},
 	}
 

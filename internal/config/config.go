@@ -100,11 +100,10 @@ func (c *Config) Validate() error {
 	// Validate environment
 	validEnvironments := map[string]bool{
 		"development": true,
-		"staging":     true,
 		"production":  true,
 	}
 	if !validEnvironments[c.Env] {
-		return fmt.Errorf("invalid environment: %s (must be one of: development, staging, production)", c.Env)
+		return fmt.Errorf("invalid environment: %s (must be one of: development, production)", c.Env)
 	}
 
 	// JWT secret is required in production
