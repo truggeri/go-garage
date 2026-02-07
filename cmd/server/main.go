@@ -11,10 +11,10 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/config"
+	"github.com/truggeri/go-garage/internal/middleware"
 )
 
 func main() {
-	// Load configuration
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("Failed to load configuration: %v", err)
@@ -25,15 +25,17 @@ func main() {
 	router := mux.NewRouter()
 	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
 
+	handler := middleware.RequestLogger(router)
+	handler = middleware.RecoverFromPanic(handler)
+
 	server := &http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.Server.Host, cfg.Server.Port),
-		Handler:      router,
+		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
 	}
 
-	// Channel for graceful shutdown
 	done := make(chan bool, 1)
 	quit := make(chan os.Signal, 1)
 
