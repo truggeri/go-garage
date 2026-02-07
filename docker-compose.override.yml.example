@@ -1,0 +1,18 @@
+# Docker Compose Override Example
+# Copy this file to docker-compose.override.yml and customize as needed
+# The override file is gitignored and won't be committed
+
+services:
+  app:
+    # Example: Override environment variables
+    environment:
+      - LOG_LEVEL=debug
+      - LOG_FORMAT=text
+    
+    # Example: Mount local source code for development
+    # volumes:
+    #   - ./:/app/src
+    
+    # Example: Override ports
+    # ports:
+    #   - "3000:8080"
