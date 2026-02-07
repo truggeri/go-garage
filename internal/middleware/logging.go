@@ -1,33 +1,37 @@
 package middleware
 
 import (
-	"log"
 	"net/http"
 	"time"
+
+	"github.com/truggeri/go-garage/pkg/applog"
 )
 
 // RequestLogger creates middleware that logs HTTP requests for Go-Garage
 // It captures method, path, duration, and status code for each request
-func RequestLogger(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		startTime := time.Now()
+func RequestLogger(vehicleLog *applog.VehicleAppLog) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requestStart := time.Now()
 
-		wrapper := &statusCapture{
-			ResponseWriter: w,
-			statusCode:     http.StatusOK,
-		}
+			respRecorder := &statusCapture{
+				ResponseWriter: w,
+				statusCode:     http.StatusOK,
+			}
 
-		next.ServeHTTP(wrapper, r)
+			next.ServeHTTP(respRecorder, r)
 
-		elapsed := time.Since(startTime)
+			processingDuration := time.Since(requestStart)
 
-		log.Printf("[Go-Garage-Web] %s %s - Status: %d - Duration: %v",
-			r.Method,
-			r.URL.Path,
-			wrapper.statusCode,
-			elapsed,
-		)
-	})
+			vehicleLog.RecordHTTPActivity(
+				r.Method,
+				r.URL.Path,
+				respRecorder.statusCode,
+				processingDuration.Milliseconds(),
+				r.RemoteAddr,
+			)
+		})
+	}
 }
 
 type statusCapture struct {
