@@ -44,10 +44,8 @@ type JWTConfig struct {
 // Load creates a new Config by loading values from environment variables
 // It automatically loads .env file if it exists (for local development)
 func Load() (*Config, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("failed to load .env file: %w", err)
-	}
+	//nolint:errcheck
+	_ = godotenv.Load()
 
 	config := &Config{
 		Server: ServerConfig{
