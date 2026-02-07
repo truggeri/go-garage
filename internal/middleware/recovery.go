@@ -25,7 +25,7 @@ func RecoverFromPanic(next http.Handler) http.Handler {
 					"message": "An unexpected error occurred",
 				}
 				responseJSON, _ := json.Marshal(errorResponse)
-				
+
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write(responseJSON)
