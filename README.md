@@ -195,17 +195,21 @@ docker compose down
 
 ## Documentation
 
-- [Docker Setup Guide](docs/DOCKER.md)
-- [Logging Documentation](docs/LOGGING.md)
-- [Project Specifications](spec/)
+- [Development Setup Guide](docs/DEVELOPMENT.md) - Comprehensive guide for setting up your development environment
+- [Docker Setup Guide](docs/DOCKER.md) - Docker installation and usage instructions
+- [Logging Documentation](docs/LOGGING.md) - Logging configuration and best practices
+- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to the project
+- [Project Specifications](spec/) - Detailed project specifications and milestones
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run tests and linters
-5. Submit a pull request
+We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on:
+
+- Setting up your development environment
+- Coding standards and best practices
+- Testing requirements
+- Pull request process
+- Reporting issues
 
 ## License
 
