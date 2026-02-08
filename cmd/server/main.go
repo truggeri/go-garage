@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/config"
+	"github.com/truggeri/go-garage/internal/database"
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/pkg/applog"
 )
@@ -24,8 +26,40 @@ func main() {
 	vehicleLog := applog.BuildVehicleAppLog(cfg.Logging.Level, cfg.Logging.Format, nil)
 	vehicleLog.RecordAppStartup(cfg.Env, cfg.Server.Host, cfg.Server.Port)
 
+	// Initialize database connection
+	vehicleLog.RecordInfo("Establishing database connection", "path", cfg.Database.Path)
+	garageDB, err := database.InitializeGarage(cfg.Database.Path, database.StandardWorkerPoolSettings())
+	if err != nil {
+		vehicleLog.RecordError("Failed to establish database connection", "error", err.Error())
+		os.Exit(1)
+	}
+	defer func() {
+		if err := garageDB.Terminate(); err != nil {
+			vehicleLog.RecordError("Failed to close database connection", "error", err.Error())
+		}
+	}()
+
+	// Verify database connectivity
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	if err := garageDB.DiagnoseHealth(ctx); err != nil {
+		cancel()
+		vehicleLog.RecordError("Database connectivity check failed", "error", err.Error())
+		os.Exit(1)
+	}
+	cancel()
+	vehicleLog.RecordInfo("Database connectivity verified")
+
+	// Run database migrations
+	vehicleLog.RecordInfo("Running database migrations")
+	migrationsPath := "./migrations"
+	if err := database.BootstrapSchema(context.Background(), garageDB, migrationsPath); err != nil {
+		vehicleLog.RecordError("Failed to run database migrations", "error", err.Error())
+		os.Exit(1)
+	}
+	vehicleLog.RecordInfo("Database migrations completed successfully")
+
 	router := mux.NewRouter()
-	router.HandleFunc("/health", healthCheckHandler).Methods("GET")
+	router.HandleFunc("/health", createHealthCheckHandler(garageDB)).Methods("GET")
 
 	handler := middleware.RequestLogger(vehicleLog)(router)
 	handler = middleware.RecoverFromPanic(vehicleLog)(handler)
@@ -65,9 +99,23 @@ func main() {
 	vehicleLog.RecordInfo("Server stopped successfully")
 }
 
-func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	//nolint:errcheck
-	fmt.Fprintf(w, `{"status":"healthy","timestamp":"%s"}`, time.Now().Format(time.RFC3339))
+// createHealthCheckHandler returns a handler that includes database health check
+func createHealthCheckHandler(garageDB *database.SQLiteGarage) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
+		defer cancel()
+
+		dbStatus := "healthy"
+		if err := garageDB.DiagnoseHealth(ctx); err != nil {
+			dbStatus = "unhealthy"
+			w.WriteHeader(http.StatusServiceUnavailable)
+		} else {
+			w.WriteHeader(http.StatusOK)
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		//nolint:errcheck
+		fmt.Fprintf(w, `{"status":"%s","database":"%s","timestamp":"%s"}`,
+			dbStatus, dbStatus, time.Now().Format(time.RFC3339))
+	}
 }
