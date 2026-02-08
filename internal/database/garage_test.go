@@ -246,13 +246,13 @@ func TestConcurrentDatabaseAccess_MultipleGoroutines(t *testing.T) {
 	completionSignal := make(chan bool)
 	numGoroutines := 15
 
-	for i := 0; i < numGoroutines; i++ {
-		go func(routineID int) {
+	for range numGoroutines {
+		go func() {
 			ctx := context.Background()
 			_, insertErr := garage.underlyingDB.ExecContext(ctx, "INSERT INTO concurrent_test (data) VALUES (?)", "test_data")
 			assert.NoError(t, insertErr)
 			completionSignal <- true
-		}(i)
+		}()
 	}
 
 	// Wait for all goroutines to complete

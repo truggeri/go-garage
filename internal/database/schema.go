@@ -14,15 +14,15 @@ import (
 
 // SchemaEvolver manages database schema changes over time
 type SchemaEvolver struct {
-	migrationFilesDir string
 	garageDB          *sql.DB
+	migrationFilesDir string
 }
 
 // NewSchemaEvolver creates an evolver for managing schema migrations
 func NewSchemaEvolver(migrationsDirectory string, dbConnection *sql.DB) *SchemaEvolver {
 	return &SchemaEvolver{
-		migrationFilesDir: migrationsDirectory,
 		garageDB:          dbConnection,
+		migrationFilesDir: migrationsDirectory,
 	}
 }
 
