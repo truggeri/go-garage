@@ -20,32 +20,14 @@ This guide provides detailed instructions for setting up your development enviro
 ### Required Software
 
 - **Go**: Version 1.24 or later
-  - Download from https://golang.org/dl/
-  - Verify installation: `go version`
-
 - **SQLite3**: For local database
-  - macOS: `brew install sqlite3`
-  - Ubuntu/Debian: `sudo apt-get install sqlite3`
-  - Windows: Download from https://www.sqlite.org/download.html
-
 - **Git**: For version control
-  - Download from https://git-scm.com/downloads
-  - Verify installation: `git --version`
 
 ### Recommended Software
 
 - **Make**: For convenience commands
-  - macOS: `brew install make`
-  - Ubuntu/Debian: `sudo apt-get install build-essential`
-  - Windows: Use WSL or Git Bash
-
 - **Docker & Docker Compose**: For containerized development
-  - Download Docker Desktop from https://www.docker.com/products/docker-desktop
-  - Verify installation: `docker --version && docker compose version`
-
 - **golangci-lint**: For code linting
-  - Install: `go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest`
-  - Verify installation: `golangci-lint --version`
 
 ## Initial Setup
 
@@ -202,9 +184,6 @@ curl http://localhost:8080/health
 
 # Expected response:
 # {"status":"healthy"}
-
-# Using httpie (if installed)
-http GET http://localhost:8080/health
 ```
 
 ## Testing
