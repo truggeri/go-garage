@@ -42,11 +42,11 @@ func TestDuplicateError(t *testing.T) {
 func TestDatabaseError(t *testing.T) {
 	innerErr := errors.New("connection failed")
 	err := NewDatabaseError("query", innerErr)
-	
+
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "query")
 	assert.Contains(t, err.Error(), "connection failed")
-	
+
 	// Test unwrap
 	unwrappedErr := errors.Unwrap(err)
 	assert.Equal(t, innerErr, unwrappedErr)
