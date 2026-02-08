@@ -106,16 +106,19 @@ func createHealthCheckHandler(garageDB *database.SQLiteGarage) http.HandlerFunc 
 		defer cancel()
 
 		dbStatus := "healthy"
+		overallStatus := "healthy"
+		statusCode := http.StatusOK
+		
 		if err := garageDB.DiagnoseHealth(ctx); err != nil {
 			dbStatus = "unhealthy"
-			w.WriteHeader(http.StatusServiceUnavailable)
-		} else {
-			w.WriteHeader(http.StatusOK)
+			overallStatus = "unhealthy"
+			statusCode = http.StatusServiceUnavailable
 		}
 
 		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(statusCode)
 		//nolint:errcheck
 		fmt.Fprintf(w, `{"status":"%s","database":"%s","timestamp":"%s"}`,
-			dbStatus, dbStatus, time.Now().Format(time.RFC3339))
+			overallStatus, dbStatus, time.Now().Format(time.RFC3339))
 	}
 }
