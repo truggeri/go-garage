@@ -16,24 +16,24 @@ import (
 func setupTestGarage(t *testing.T) *database.SQLiteGarage {
 	tempDir := t.TempDir()
 	dbPath := filepath.Join(tempDir, "test.db")
-	
+
 	garage, err := database.InitializeGarage(dbPath, database.StandardWorkerPoolSettings())
 	require.NoError(t, err)
-	
+
 	// Run migrations
 	migrationsPath := "../../migrations"
 	err = database.BootstrapSchema(context.Background(), garage, migrationsPath)
 	require.NoError(t, err)
-	
+
 	return garage
 }
 
 func TestHealthCheckEndpoint(t *testing.T) {
 	garage := setupTestGarage(t)
 	defer garage.Terminate()
-	
+
 	handler := createHealthCheckHandler(garage)
-	
+
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	recorder := httptest.NewRecorder()
 
@@ -53,9 +53,9 @@ func TestHealthCheckEndpoint(t *testing.T) {
 func TestHealthCheckResponseFormat(t *testing.T) {
 	garage := setupTestGarage(t)
 	defer garage.Terminate()
-	
+
 	handler := createHealthCheckHandler(garage)
-	
+
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	recorder := httptest.NewRecorder()
 
@@ -80,9 +80,9 @@ func TestHealthCheckResponseFormat(t *testing.T) {
 func TestHealthCheckUnhealthyDatabase(t *testing.T) {
 	garage := setupTestGarage(t)
 	garage.Terminate() // Close the database to make it unhealthy
-	
+
 	handler := createHealthCheckHandler(garage)
-	
+
 	req := httptest.NewRequest(http.MethodGet, "/health", nil)
 	recorder := httptest.NewRecorder()
 

@@ -32,10 +32,10 @@ func (se *SchemaEvolver) EvolveToLatest() error {
 	if buildErr != nil {
 		return fmt.Errorf("migrator construction failed: %w", buildErr)
 	}
-	
+
 	// Note: Don't defer migrator.Close() as it closes the underlying DB connection
 	// which we don't want since the connection is managed externally
-	
+
 	upErr := migrator.Up()
 	if upErr != nil && !errors.Is(upErr, migrate.ErrNoChange) {
 		return fmt.Errorf("schema evolution failed: %w", upErr)
@@ -117,7 +117,7 @@ func (se *SchemaEvolver) constructMigrator() (*migrate.Migrate, error) {
 	}
 
 	fileSourceURL := fmt.Sprintf("file://%s", absolutePath)
-	
+
 	migrationEngine, engineErr := migrate.NewWithDatabaseInstance(fileSourceURL, "sqlite3", sqliteDriver)
 	if engineErr != nil {
 		return nil, fmt.Errorf("migration engine creation failed: %w", engineErr)
@@ -133,7 +133,7 @@ func BootstrapSchema(ctx context.Context, garage *SQLiteGarage, migrationsFolder
 	}
 
 	evolver := NewSchemaEvolver(migrationsFolder, garage.underlyingDB)
-	
+
 	if evolveErr := evolver.EvolveToLatest(); evolveErr != nil {
 		return fmt.Errorf("schema bootstrap failed: %w", evolveErr)
 	}

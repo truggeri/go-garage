@@ -245,7 +245,7 @@ func TestConcurrentDatabaseAccess_MultipleGoroutines(t *testing.T) {
 	// Spawn multiple goroutines performing writes
 	completionSignal := make(chan bool)
 	numGoroutines := 15
-	
+
 	for i := 0; i < numGoroutines; i++ {
 		go func(routineID int) {
 			ctx := context.Background()

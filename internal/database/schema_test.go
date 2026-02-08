@@ -58,7 +58,7 @@ func TestEvolveToLatest_IdempotentOperation(t *testing.T) {
 	defer garage.Terminate()
 
 	evolver := NewSchemaEvolver(migrationsDir, garage.underlyingDB)
-	
+
 	// First evolution
 	err := evolver.EvolveToLatest()
 	assert.NoError(t, err)
@@ -73,7 +73,7 @@ func TestCurrentSchemaVersion_BeforeMigrations(t *testing.T) {
 	defer garage.Terminate()
 
 	evolver := NewSchemaEvolver(migrationsDir, garage.underlyingDB)
-	
+
 	version, isDirty, err := evolver.CurrentSchemaVersion()
 	assert.NoError(t, err)
 	assert.False(t, isDirty)
@@ -85,7 +85,7 @@ func TestCurrentSchemaVersion_AfterMigrations(t *testing.T) {
 	defer garage.Terminate()
 
 	evolver := NewSchemaEvolver(migrationsDir, garage.underlyingDB)
-	
+
 	err := evolver.EvolveToLatest()
 	require.NoError(t, err)
 
@@ -100,7 +100,7 @@ func TestRollbackAll_RemovesAllTables(t *testing.T) {
 	defer garage.Terminate()
 
 	evolver := NewSchemaEvolver(migrationsDir, garage.underlyingDB)
-	
+
 	// Apply migrations first
 	err := evolver.EvolveToLatest()
 	require.NoError(t, err)
@@ -129,7 +129,7 @@ func TestRollbackOne_RevertsOneMigration(t *testing.T) {
 	defer garage.Terminate()
 
 	evolver := NewSchemaEvolver(migrationsDir, garage.underlyingDB)
-	
+
 	// Apply all migrations
 	err := evolver.EvolveToLatest()
 	require.NoError(t, err)
@@ -151,7 +151,7 @@ func TestEvolveToSpecificVersion_MigratesToTargetVersion(t *testing.T) {
 	defer garage.Terminate()
 
 	evolver := NewSchemaEvolver(migrationsDir, garage.underlyingDB)
-	
+
 	// Migrate to version 2
 	targetVer := uint(2)
 	err := evolver.EvolveToSpecificVersion(targetVer)

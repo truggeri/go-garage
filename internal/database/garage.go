@@ -21,10 +21,10 @@ type SQLiteGarage struct {
 
 // WorkerPoolSettings controls how many concurrent database workers are allowed
 type WorkerPoolSettings struct {
-	MaxActiveWorkers   int
-	MaxIdleWorkers     int
-	WorkerLifespan     time.Duration
-	IdleWorkerTimeout  time.Duration
+	MaxActiveWorkers  int
+	MaxIdleWorkers    int
+	WorkerLifespan    time.Duration
+	IdleWorkerTimeout time.Duration
 }
 
 // StandardWorkerPoolSettings returns typical settings for vehicle database operations
@@ -47,7 +47,7 @@ func InitializeGarage(dbFilePath string, workerSettings WorkerPoolSettings) (*SQ
 	}
 
 	dataSourceName := buildSQLiteDataSource(dbFilePath)
-	
+
 	dbHandle, openErr := sql.Open("sqlite3", dataSourceName)
 	if openErr != nil {
 		return nil, fmt.Errorf("database opening failed at %s: %w", dbFilePath, openErr)

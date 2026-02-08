@@ -108,7 +108,7 @@ func createHealthCheckHandler(garageDB *database.SQLiteGarage) http.HandlerFunc 
 		dbStatus := "healthy"
 		overallStatus := "healthy"
 		statusCode := http.StatusOK
-		
+
 		if err := garageDB.DiagnoseHealth(ctx); err != nil {
 			dbStatus = "unhealthy"
 			overallStatus = "unhealthy"
