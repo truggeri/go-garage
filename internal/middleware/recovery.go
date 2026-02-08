@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"encoding/json"
 	"net/http"
 	"runtime/debug"
 
@@ -21,15 +20,11 @@ func RecoverFromPanic(vehicleLog *applog.VehicleAppLog) func(http.Handler) http.
 						panicErr,
 						string(debug.Stack()),
 					)
-
-					errorPayload := map[string]string{
-						"error":   "Internal server error",
-						"message": "An unexpected error occurred",
-					}
-					jsonPayload, _ := json.Marshal(errorPayload)
+					jsonPayload := []byte(`{"error":"Internal server error","message":"An unexpected error occurred"}`)
 
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusInternalServerError)
+					//nolint:errcheck
 					w.Write(jsonPayload)
 				}
 			}()

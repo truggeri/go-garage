@@ -45,6 +45,7 @@ func TestRecoverFromPanic_NormalRequestPassesThrough(t *testing.T) {
 
 	normalHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
+		//nolint:errcheck
 		w.Write([]byte("success"))
 	})
 
@@ -101,13 +102,13 @@ func TestRecoverFromPanic_ReturnsJSONError(t *testing.T) {
 
 func TestRecoverFromPanic_DifferentPanicTypes(t *testing.T) {
 	tests := []struct {
-		name       string
 		panicValue interface{}
+		name       string
 	}{
-		{"StringPanic", "string panic"},
-		{"IntPanic", 42},
-		{"ErrorPanic", assert.AnError},
-		{"NilPanic", nil},
+		{"string panic", "StringPanic"},
+		{42, "IntPanic"},
+		{assert.AnError, "ErrorPanic"},
+		{nil, "NilPanic"},
 	}
 
 	for _, tt := range tests {
@@ -131,4 +132,3 @@ func TestRecoverFromPanic_DifferentPanicTypes(t *testing.T) {
 		})
 	}
 }
-

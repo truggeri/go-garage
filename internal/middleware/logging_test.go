@@ -74,7 +74,10 @@ func TestRequestLogger_PassesRequestThrough(t *testing.T) {
 
 	responseBody := "test response body"
 	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte(responseBody))
+		_, err := w.Write([]byte(responseBody))
+		if err != nil {
+			t.Errorf("Failed to write response: %v", err)
+		}
 	})
 
 	loggedHandler := RequestLogger(vehicleLog)(testHandler)
@@ -115,4 +118,3 @@ func TestRequestLogger_DifferentHTTPMethods(t *testing.T) {
 		})
 	}
 }
-
