@@ -127,8 +127,16 @@ func (r *SQLiteVehicleRepository) FindByID(ctx context.Context, id string) (*mod
 	if licensePlate.Valid {
 		vehicle.LicensePlate = licensePlate.String
 	}
-	if purchaseDate.Valid {
-		t, _ := time.Parse(time.RFC3339, purchaseDate.String)
+	if purchaseDate.Valid && purchaseDate.String != "" {
+		// SQLite stores dates as strings; try parsing as RFC3339 or date-only format
+		t, parseErr := time.Parse(time.RFC3339, purchaseDate.String)
+		if parseErr != nil {
+			// Try date-only format
+			t, parseErr = time.Parse("2006-01-02", purchaseDate.String)
+			if parseErr != nil {
+				return nil, fmt.Errorf("parse purchase date: %w", parseErr)
+			}
+		}
 		vehicle.PurchaseDate = &t
 	}
 	if purchasePrice.Valid {
@@ -217,8 +225,16 @@ func (r *SQLiteVehicleRepository) FindByVIN(ctx context.Context, vin string) (*m
 	if licensePlate.Valid {
 		vehicle.LicensePlate = licensePlate.String
 	}
-	if purchaseDate.Valid {
-		t, _ := time.Parse(time.RFC3339, purchaseDate.String)
+	if purchaseDate.Valid && purchaseDate.String != "" {
+		// SQLite stores dates as strings; try parsing as RFC3339 or date-only format
+		t, parseErr := time.Parse(time.RFC3339, purchaseDate.String)
+		if parseErr != nil {
+			// Try date-only format
+			t, parseErr = time.Parse("2006-01-02", purchaseDate.String)
+			if parseErr != nil {
+				return nil, fmt.Errorf("parse purchase date: %w", parseErr)
+			}
+		}
 		vehicle.PurchaseDate = &t
 	}
 	if purchasePrice.Valid {
@@ -412,8 +428,16 @@ func (r *SQLiteVehicleRepository) scanVehicles(rows *sql.Rows) ([]*models.Vehicl
 		if licensePlate.Valid {
 			vehicle.LicensePlate = licensePlate.String
 		}
-		if purchaseDate.Valid {
-			t, _ := time.Parse(time.RFC3339, purchaseDate.String)
+		if purchaseDate.Valid && purchaseDate.String != "" {
+			// SQLite stores dates as strings; try parsing as RFC3339 or date-only format
+			t, parseErr := time.Parse(time.RFC3339, purchaseDate.String)
+			if parseErr != nil {
+				// Try date-only format
+				t, parseErr = time.Parse("2006-01-02", purchaseDate.String)
+				if parseErr != nil {
+					return nil, fmt.Errorf("parse purchase date: %w", parseErr)
+				}
+			}
 			vehicle.PurchaseDate = &t
 		}
 		if purchasePrice.Valid {
