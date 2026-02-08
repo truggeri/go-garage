@@ -30,8 +30,9 @@ RUN addgroup -g 1000 appuser && \
 # Create data directory for SQLite database
 RUN mkdir -p /app/data && chown -R appuser:appuser /app
 
-# Copy binary from builder
+# Copy binary and migrations from builder
 COPY --from=builder /build/app /app/app
+COPY --from=builder /build/migrations /app/migrations
 
 # Set working directory
 WORKDIR /app
