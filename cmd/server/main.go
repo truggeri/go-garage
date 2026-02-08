@@ -117,7 +117,6 @@ func createHealthCheckHandler(garageDB *database.SQLiteGarage) http.HandlerFunc 
 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(statusCode)
-		//nolint:errcheck
 		fmt.Fprintf(w, `{"status":"%s","database":"%s","timestamp":"%s"}`,
 			overallStatus, dbStatus, time.Now().Format(time.RFC3339))
 	}

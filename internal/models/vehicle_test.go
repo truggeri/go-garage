@@ -16,8 +16,8 @@ func TestValidateVehicle(t *testing.T) {
 	lowerCurrentMileage := 5000
 
 	tests := []struct {
-		name        string
 		vehicle     *Vehicle
+		name        string
 		expectError bool
 		errorField  string
 	}{

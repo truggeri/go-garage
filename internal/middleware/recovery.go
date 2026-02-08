@@ -24,7 +24,6 @@ func RecoverFromPanic(vehicleLog *applog.VehicleAppLog) func(http.Handler) http.
 
 					w.Header().Set("Content-Type", "application/json")
 					w.WriteHeader(http.StatusInternalServerError)
-					//nolint:errcheck
 					w.Write(jsonPayload)
 				}
 			}()

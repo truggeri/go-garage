@@ -70,8 +70,8 @@ func TestValidatePassword(t *testing.T) {
 
 func TestValidateUser(t *testing.T) {
 	tests := []struct {
-		name        string
 		user        *User
+		name        string
 		expectError bool
 		errorField  string
 	}{

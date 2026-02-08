@@ -63,8 +63,8 @@ func NewDuplicateError(resource, field, value string) *DuplicateError {
 
 // DatabaseError wraps database operation errors with context
 type DatabaseError struct {
-	Operation string
 	Err       error
+	Operation string
 }
 
 func (e *DatabaseError) Error() string {
