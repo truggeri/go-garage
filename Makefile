@@ -1,4 +1,4 @@
-.PHONY: help build test run clean fmt lint vet install-tools
+.PHONY: help build test run clean fmt lint vet install-tools seed db-backup
 
 # Default target when just running 'make'
 help:
@@ -12,6 +12,8 @@ help:
 	@echo "make lint         - Run linting checks"
 	@echo "make vet          - Run go vet analysis"
 	@echo "make install-tools - Install development dependencies"
+	@echo "make seed         - Seed database with sample data"
+	@echo "make db-backup    - Create a timestamped database backup"
 
 # Build the application binary
 build:
@@ -53,3 +55,13 @@ vet:
 install-tools:
 	@echo "Installing development tools..."
 	@go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+
+# Seed the database with sample data
+seed:
+	@echo "Seeding database..."
+	@go run ./cmd/seed
+
+# Create a timestamped backup of the database
+db-backup:
+	@echo "Creating database backup..."
+	@go run ./cmd/dbutil backup

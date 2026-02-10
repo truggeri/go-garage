@@ -34,6 +34,10 @@ go.work.sum
 # Build artifacts
 bin/
 dist/
+/server
+/go-garage
+/seed
+/dbutil
 
 # Development data
 data/
