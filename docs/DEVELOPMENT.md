@@ -296,9 +296,7 @@ golangci-lint run --disable-all --enable=errcheck
 
 The project uses the following linters (configured in `.golangci.yml`):
 
-- **errcheck**: Check for unchecked errors
 - **gosimple**: Simplify code
-- **govet**: Standard Go analyzer
 - **ineffassign**: Detect ineffectual assignments
 - **staticcheck**: Go static analysis
 - **unused**: Find unused code

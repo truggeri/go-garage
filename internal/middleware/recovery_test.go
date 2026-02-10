@@ -45,7 +45,6 @@ func TestRecoverFromPanic_NormalRequestPassesThrough(t *testing.T) {
 
 	normalHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		//nolint:errcheck
 		w.Write([]byte("success"))
 	})
 
