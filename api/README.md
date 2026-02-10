@@ -21,7 +21,6 @@ All endpoints except authentication require a valid JWT token in the `Authorizat
 ## Base URLs
 
 - **Development**: http://localhost:8080
-- **Production**: https://api.go-garage.example.com (update with your actual production URL)
 
 ## Authentication
 
