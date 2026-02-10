@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/repositories"
@@ -28,7 +29,7 @@ type MaintenanceService interface {
 // MaintenanceUpdates contains the fields that can be updated for a maintenance record
 type MaintenanceUpdates struct {
 	ServiceType      *string
-	ServiceDate      *string
+	ServiceDate      *time.Time
 	MileageAtService *int
 	Cost             *float64
 	ServiceProvider  *string
@@ -81,6 +82,9 @@ func (s *DefaultMaintenanceService) UpdateMaintenance(ctx context.Context, id st
 	// Apply updates
 	if updates.ServiceType != nil {
 		record.ServiceType = *updates.ServiceType
+	}
+	if updates.ServiceDate != nil {
+		record.ServiceDate = *updates.ServiceDate
 	}
 	if updates.MileageAtService != nil {
 		record.MileageAtService = updates.MileageAtService

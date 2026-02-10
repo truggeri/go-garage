@@ -241,6 +241,29 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 		assert.Equal(t, 89.99, *updatedRecord.Cost)
 	})
 
+	t.Run("updates service date field", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		existingRecord := &models.MaintenanceRecord{
+			ID:          "record-123",
+			VehicleID:   "vehicle-123",
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		}
+		maintenanceRepo.records[existingRecord.ID] = existingRecord
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+
+		newServiceDate := time.Now().Add(-48 * time.Hour)
+		updates := MaintenanceUpdates{
+			ServiceDate: &newServiceDate,
+		}
+
+		updatedRecord, err := service.UpdateMaintenance(ctx, "record-123", updates)
+		require.NoError(t, err)
+		assert.Equal(t, newServiceDate.Unix(), updatedRecord.ServiceDate.Unix())
+		assert.Equal(t, "Oil Change", updatedRecord.ServiceType) // unchanged
+	})
+
 	t.Run("partial update preserves unchanged fields", func(t *testing.T) {
 		maintenanceRepo := newMockMaintenanceRepository()
 		vehicleRepo := newMockVehicleRepository()
