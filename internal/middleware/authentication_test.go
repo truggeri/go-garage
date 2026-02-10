@@ -114,7 +114,7 @@ func TestAuthenticationGuard(t *testing.T) {
 		guardedHandler.ServeHTTP(rec, req)
 
 		assert.Equal(t, http.StatusUnauthorized, rec.Code)
-		assert.Contains(t, rec.Body.String(), "invalid token type")
+		assert.Contains(t, rec.Body.String(), "access token required")
 	})
 
 	t.Run("accepts lowercase bearer prefix", func(t *testing.T) {

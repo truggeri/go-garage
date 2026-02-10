@@ -85,10 +85,9 @@ func (s *GarageAuthService) Register(ctx context.Context, registration Registrat
 		return nil, err
 	}
 
-	if err := s.userRepo.UpdateLastLogin(ctx, newUser.ID); err != nil {
-		// Log but don't fail registration if we can't update last login
-		_ = err
-	}
+	// UpdateLastLogin failure is non-critical - the user is already registered
+	// and has valid tokens. We intentionally ignore any error here.
+	_ = s.userRepo.UpdateLastLogin(ctx, newUser.ID)
 
 	return &AuthenticationResult{
 		AccessToken:      bundle.AccessToken,
@@ -129,9 +128,9 @@ func (s *GarageAuthService) Authenticate(ctx context.Context, identifier, passwo
 		return nil, err
 	}
 
-	if err := s.userRepo.UpdateLastLogin(ctx, user.ID); err != nil {
-		_ = err
-	}
+	// UpdateLastLogin failure is non-critical - the user is already authenticated
+	// and has valid tokens. We intentionally ignore any error here.
+	_ = s.userRepo.UpdateLastLogin(ctx, user.ID)
 
 	return &AuthenticationResult{
 		AccessToken:      bundle.AccessToken,

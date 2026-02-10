@@ -51,7 +51,7 @@ func AuthenticationGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Ha
 			}
 
 			if verified.TokenKind != auth.AccessTokenKind {
-				writeAuthError(w, "invalid token type for this endpoint")
+				writeAuthError(w, "access token required; refresh tokens cannot be used for API requests")
 				return
 			}
 
