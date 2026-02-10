@@ -51,8 +51,8 @@ func TestGetSampleVehicles(t *testing.T) {
 	vehicles := GetSampleVehicles()
 	users := GetSampleUsers()
 
-	// Verify we have at least 5 vehicles
-	assert.GreaterOrEqual(t, len(vehicles), 5, "Should have at least 5 sample vehicles")
+	// Verify we have at least 6 vehicles
+	assert.GreaterOrEqual(t, len(vehicles), 6, "Should have at least 6 sample vehicles")
 
 	// Create a map of user IDs for validation
 	userIDs := make(map[string]bool)

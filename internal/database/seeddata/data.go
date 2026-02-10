@@ -7,10 +7,8 @@ import (
 )
 
 // GetSampleUsers returns a list of sample users for seeding the database
-// Password hashes are bcrypt hashes for the following passwords:
-// - user1: "password123"
-// - user2: "securepass456"
-// - user3: "mypassword789"
+// Password hashes are bcrypt hashes for "password123"
+// Note: In production, each user should have a unique password
 func GetSampleUsers() []*models.User {
 	now := time.Now()
 	lastLogin := now.Add(-24 * time.Hour)
