@@ -6,78 +6,6 @@ This directory contains the OpenAPI specification for the Go-Garage API.
 
 - `openapi.yaml` - OpenAPI 3.0.3 specification for the entire API
 
-## Viewing the API Documentation
-
-You can view the API documentation in several ways:
-
-### 1. Swagger UI (Online)
-
-Upload the `openapi.yaml` file to [Swagger Editor](https://editor.swagger.io/) to view and interact with the API documentation.
-
-### 2. Redoc (Online)
-
-Upload the `openapi.yaml` file to [Redoc](https://redocly.github.io/redoc/) for a clean, responsive documentation view.
-
-### 3. Local Swagger UI (Docker)
-
-Run Swagger UI locally using Docker:
-
-```bash
-docker run -p 8081:8080 -e SWAGGER_JSON=/api/openapi.yaml -v $(pwd)/api:/api swaggerapi/swagger-ui
-```
-
-Then open http://localhost:8081 in your browser.
-
-### 4. Redocly CLI
-
-Install Redocly CLI and preview the documentation:
-
-```bash
-npm install -g @redocly/cli
-redocly preview-docs api/openapi.yaml
-```
-
-## Validating the Specification
-
-To validate the OpenAPI specification:
-
-```bash
-npx @redocly/cli lint api/openapi.yaml
-```
-
-## Generating Client SDKs
-
-You can generate client SDKs in various languages using the OpenAPI Generator:
-
-### JavaScript/TypeScript
-
-```bash
-npx @openapitools/openapi-generator-cli generate \
-  -i api/openapi.yaml \
-  -g typescript-fetch \
-  -o clients/typescript
-```
-
-### Python
-
-```bash
-npx @openapitools/openapi-generator-cli generate \
-  -i api/openapi.yaml \
-  -g python \
-  -o clients/python
-```
-
-### Go
-
-```bash
-npx @openapitools/openapi-generator-cli generate \
-  -i api/openapi.yaml \
-  -g go \
-  -o clients/go
-```
-
-For more languages and options, visit [OpenAPI Generator](https://openapi-generator.tech/).
-
 ## API Overview
 
 The Go-Garage API provides endpoints for:
@@ -166,13 +94,3 @@ Paginated responses include pagination metadata:
   }
 }
 ```
-
-## Contributing
-
-When making changes to the API specification:
-
-1. Edit the `openapi.yaml` file
-2. Validate the changes: `npx @redocly/cli lint api/openapi.yaml`
-3. Ensure the specification matches the actual API implementation
-4. Update this README if necessary
-5. Commit your changes
