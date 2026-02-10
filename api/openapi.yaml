@@ -1,0 +1,2110 @@
+openapi: 3.0.3
+info:
+  title: Go-Garage API
+  description: |
+    RESTful API for the Go-Garage vehicle management application.
+    
+    This API allows users to manage their vehicles, track maintenance records, 
+    and monitor fuel consumption. All API endpoints require JWT authentication 
+    except for the authentication endpoints themselves.
+    
+    ## Authentication
+    Most endpoints require authentication using JWT tokens. To authenticate:
+    1. Register a new account using `/api/v1/auth/register`
+    2. Login using `/api/v1/auth/login` to receive access and refresh tokens
+    3. Include the access token in the `Authorization` header as `Bearer {token}`
+    4. Refresh the access token using `/api/v1/auth/refresh` when it expires
+    
+    ## Error Responses
+    All error responses follow a consistent format with error codes and messages.
+  version: 1.0.0
+  contact:
+    name: Go-Garage API Support
+    url: https://github.com/truggeri/go-garage
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization endpoints
+  - name: Vehicles
+    description: Vehicle management operations
+  - name: Maintenance
+    description: Maintenance record operations
+  - name: Fuel
+    description: Fuel record operations
+  - name: Users
+    description: User profile operations
+  - name: Health
+    description: Health check endpoint
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check the health status of the API and database
+      operationId: healthCheck
+      tags:
+        - Health
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  database:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: unhealthy
+                  database:
+                    type: string
+                    example: unhealthy
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/v1/auth/register:
+    post:
+      summary: Register a new user
+      description: Create a new user account and receive authentication tokens
+      operationId: register
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/login:
+    post:
+      summary: Login
+      description: Authenticate with username/email and password to receive tokens
+      operationId: login
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/refresh:
+    post:
+      summary: Refresh token
+      description: Refresh the access token using a valid refresh token
+      operationId: refreshToken
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: Token refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/auth/logout:
+    post:
+      summary: Logout
+      description: |
+        Logout from the application. Note: With stateless JWT, logout is handled
+        client-side by deleting tokens. This endpoint acknowledges the logout request.
+      operationId: logout
+      tags:
+        - Authentication
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Logout successful. Please delete your tokens client-side.
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/vehicles:
+    get:
+      summary: List vehicles
+      description: Get a list of all vehicles owned by the authenticated user
+      operationId: listVehicles
+      tags:
+        - Vehicles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: make
+          in: query
+          description: Filter by vehicle make
+          schema:
+            type: string
+        - name: model
+          in: query
+          description: Filter by vehicle model
+          schema:
+            type: string
+        - name: year
+          in: query
+          description: Filter by vehicle year
+          schema:
+            type: integer
+        - name: status
+          in: query
+          description: Filter by vehicle status
+          schema:
+            type: string
+            enum: [active, sold, scrapped]
+        - name: sort
+          in: query
+          description: Sort field and direction (e.g., 'year:asc', 'make:desc')
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of vehicles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Vehicle'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create vehicle
+      description: Create a new vehicle for the authenticated user
+      operationId: createVehicle
+      tags:
+        - Vehicles
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleInput'
+      responses:
+        '201':
+          description: Vehicle created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Vehicle'
+                  message:
+                    type: string
+                    example: Vehicle created successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Vehicle with VIN already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/vehicles/{id}:
+    get:
+      summary: Get vehicle
+      description: Get details of a specific vehicle
+      operationId: getVehicle
+      tags:
+        - Vehicles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vehicle details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Vehicle'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update vehicle
+      description: Update an existing vehicle
+      operationId: updateVehicle
+      tags:
+        - Vehicles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VehicleInput'
+      responses:
+        '200':
+          description: Vehicle updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/Vehicle'
+                  message:
+                    type: string
+                    example: Vehicle updated successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete vehicle
+      description: Delete a vehicle and all associated records (maintenance, fuel)
+      operationId: deleteVehicle
+      tags:
+        - Vehicles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vehicle deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Vehicle deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/vehicles/{id}/stats:
+    get:
+      summary: Get vehicle statistics
+      description: Get statistical information about a vehicle (total maintenance cost, etc.)
+      operationId: getVehicleStats
+      tags:
+        - Vehicles
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Vehicle statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/VehicleStats'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/vehicles/{vehicleId}/maintenance:
+    get:
+      summary: List maintenance records
+      description: Get all maintenance records for a specific vehicle
+      operationId: listMaintenanceRecords
+      tags:
+        - Maintenance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: from_date
+          in: query
+          description: Filter records from this date (ISO 8601)
+          schema:
+            type: string
+            format: date
+        - name: to_date
+          in: query
+          description: Filter records to this date (ISO 8601)
+          schema:
+            type: string
+            format: date
+        - name: sort
+          in: query
+          description: Sort field and direction (e.g., 'service_date:desc')
+          schema:
+            type: string
+            default: service_date:desc
+      responses:
+        '200':
+          description: List of maintenance records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MaintenanceRecord'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create maintenance record
+      description: Create a new maintenance record for a vehicle
+      operationId: createMaintenanceRecord
+      tags:
+        - Maintenance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceRecordInput'
+      responses:
+        '201':
+          description: Maintenance record created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/MaintenanceRecord'
+                  message:
+                    type: string
+                    example: Maintenance record created successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/maintenance/{id}:
+    get:
+      summary: Get maintenance record
+      description: Get details of a specific maintenance record
+      operationId: getMaintenanceRecord
+      tags:
+        - Maintenance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Maintenance record ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Maintenance record details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/MaintenanceRecord'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own the vehicle associated with this record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Maintenance record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update maintenance record
+      description: Update an existing maintenance record
+      operationId: updateMaintenanceRecord
+      tags:
+        - Maintenance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Maintenance record ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MaintenanceRecordInput'
+      responses:
+        '200':
+          description: Maintenance record updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/MaintenanceRecord'
+                  message:
+                    type: string
+                    example: Maintenance record updated successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own the vehicle associated with this record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Maintenance record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete maintenance record
+      description: Delete a maintenance record
+      operationId: deleteMaintenanceRecord
+      tags:
+        - Maintenance
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Maintenance record ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Maintenance record deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Maintenance record deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own the vehicle associated with this record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Maintenance record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/vehicles/{vehicleId}/fuel:
+    get:
+      summary: List fuel records
+      description: Get all fuel records for a specific vehicle
+      operationId: listFuelRecords
+      tags:
+        - Fuel
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: from_date
+          in: query
+          description: Filter records from this date (ISO 8601)
+          schema:
+            type: string
+            format: date
+        - name: to_date
+          in: query
+          description: Filter records to this date (ISO 8601)
+          schema:
+            type: string
+            format: date
+        - name: sort
+          in: query
+          description: Sort field and direction (e.g., 'fill_date:desc')
+          schema:
+            type: string
+            default: fill_date:desc
+      responses:
+        '200':
+          description: List of fuel records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/FuelRecord'
+                  pagination:
+                    $ref: '#/components/schemas/PaginationInfo'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create fuel record
+      description: Create a new fuel record for a vehicle
+      operationId: createFuelRecord
+      tags:
+        - Fuel
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: vehicleId
+          in: path
+          required: true
+          description: Vehicle ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuelRecordInput'
+      responses:
+        '201':
+          description: Fuel record created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FuelRecord'
+                  message:
+                    type: string
+                    example: Fuel record created successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own this vehicle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Vehicle not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/fuel/{id}:
+    get:
+      summary: Get fuel record
+      description: Get details of a specific fuel record
+      operationId: getFuelRecord
+      tags:
+        - Fuel
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Fuel record ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fuel record details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FuelRecord'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own the vehicle associated with this record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Fuel record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update fuel record
+      description: Update an existing fuel record
+      operationId: updateFuelRecord
+      tags:
+        - Fuel
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Fuel record ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FuelRecordInput'
+      responses:
+        '200':
+          description: Fuel record updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/FuelRecord'
+                  message:
+                    type: string
+                    example: Fuel record updated successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own the vehicle associated with this record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Fuel record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete fuel record
+      description: Delete a fuel record
+      operationId: deleteFuelRecord
+      tags:
+        - Fuel
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Fuel record ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Fuel record deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Fuel record deleted successfully
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - user does not own the vehicle associated with this record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Fuel record not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users/me:
+    get:
+      summary: Get current user profile
+      description: Get the profile information of the authenticated user
+      operationId: getUserProfile
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update user profile
+      description: Update the profile information of the authenticated user
+      operationId: updateUserProfile
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileUpdate'
+      responses:
+        '200':
+          description: User profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    $ref: '#/components/schemas/UserProfile'
+                  message:
+                    type: string
+                    example: Profile updated successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username or email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete user account
+      description: Delete the authenticated user's account and all associated data
+      operationId: deleteUserAccount
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  description: Current password for confirmation
+                  example: mypassword123
+      responses:
+        '200':
+          description: User account deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Account deleted successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or invalid password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/users/me/password:
+    put:
+      summary: Change user password
+      description: Change the password for the authenticated user
+      operationId: changePassword
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Password changed successfully
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized or invalid current password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from login or register endpoints
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - email
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: Unique username
+          example: johndoe
+        email:
+          type: string
+          format: email
+          description: Unique email address
+          example: john@example.com
+        password:
+          type: string
+          format: password
+          minLength: 8
+          description: Password (at least 8 characters)
+          example: SecurePass123!
+        first_name:
+          type: string
+          maxLength: 50
+          description: First name (optional)
+          example: John
+        last_name:
+          type: string
+          maxLength: 50
+          description: Last name (optional)
+          example: Doe
+
+    LoginRequest:
+      type: object
+      required:
+        - identifier
+        - password
+      properties:
+        identifier:
+          type: string
+          description: Username or email address
+          example: johndoe
+        password:
+          type: string
+          format: password
+          description: User password
+          example: SecurePass123!
+
+    RefreshRequest:
+      type: object
+      required:
+        - refresh_token
+      properties:
+        refresh_token:
+          type: string
+          description: Valid refresh token
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+    AuthResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Login successful
+        data:
+          type: object
+          properties:
+            access_token:
+              type: string
+              description: JWT access token
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            refresh_token:
+              type: string
+              description: JWT refresh token
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+            access_expires_at:
+              type: integer
+              format: int64
+              description: Unix timestamp when access token expires
+              example: 1709243400
+            refresh_expires_at:
+              type: integer
+              format: int64
+              description: Unix timestamp when refresh token expires
+              example: 1709847000
+            account_id:
+              type: string
+              description: User account ID
+              example: 550e8400-e29b-41d4-a716-446655440000
+            account_name:
+              type: string
+              description: Username
+              example: johndoe
+
+    VehicleInput:
+      type: object
+      required:
+        - vin
+        - make
+        - model
+        - year
+      properties:
+        vin:
+          type: string
+          minLength: 17
+          maxLength: 17
+          description: Vehicle Identification Number (17 characters)
+          example: 1HGBH41JXMN109186
+        make:
+          type: string
+          maxLength: 50
+          description: Vehicle manufacturer
+          example: Honda
+        model:
+          type: string
+          maxLength: 50
+          description: Vehicle model
+          example: Accord
+        year:
+          type: integer
+          minimum: 1900
+          maximum: 2100
+          description: Model year
+          example: 2020
+        color:
+          type: string
+          maxLength: 30
+          description: Vehicle color
+          example: Silver
+        license_plate:
+          type: string
+          maxLength: 20
+          description: License plate number
+          example: ABC-1234
+        purchase_date:
+          type: string
+          format: date
+          description: Date of purchase
+          example: "2020-03-15"
+        purchase_price:
+          type: number
+          format: float
+          minimum: 0
+          description: Purchase price in USD
+          example: 25000.00
+        purchase_mileage:
+          type: integer
+          minimum: 0
+          description: Mileage at purchase
+          example: 15000
+        current_mileage:
+          type: integer
+          minimum: 0
+          description: Current mileage
+          example: 45000
+        status:
+          type: string
+          enum: [active, sold, scrapped]
+          default: active
+          description: Vehicle status
+        notes:
+          type: string
+          maxLength: 1000
+          description: Additional notes
+          example: Purchased from local dealer
+
+    Vehicle:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique vehicle ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        user_id:
+          type: string
+          description: Owner's user ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        vin:
+          type: string
+          description: Vehicle Identification Number
+          example: 1HGBH41JXMN109186
+        make:
+          type: string
+          description: Vehicle manufacturer
+          example: Honda
+        model:
+          type: string
+          description: Vehicle model
+          example: Accord
+        year:
+          type: integer
+          description: Model year
+          example: 2020
+        color:
+          type: string
+          description: Vehicle color
+          example: Silver
+        license_plate:
+          type: string
+          description: License plate number
+          example: ABC-1234
+        purchase_date:
+          type: string
+          format: date
+          nullable: true
+          description: Date of purchase
+          example: "2020-03-15"
+        purchase_price:
+          type: number
+          format: float
+          nullable: true
+          description: Purchase price in USD
+          example: 25000.00
+        purchase_mileage:
+          type: integer
+          nullable: true
+          description: Mileage at purchase
+          example: 15000
+        current_mileage:
+          type: integer
+          nullable: true
+          description: Current mileage
+          example: 45000
+        status:
+          type: string
+          enum: [active, sold, scrapped]
+          description: Vehicle status
+          example: active
+        notes:
+          type: string
+          description: Additional notes
+          example: Purchased from local dealer
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2020-03-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2024-01-15T14:22:00Z"
+
+    VehicleStats:
+      type: object
+      properties:
+        vehicle_id:
+          type: string
+          description: Vehicle ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        total_maintenance_cost:
+          type: number
+          format: float
+          description: Total cost of all maintenance
+          example: 2450.50
+        maintenance_count:
+          type: integer
+          description: Number of maintenance records
+          example: 12
+        total_fuel_cost:
+          type: number
+          format: float
+          description: Total fuel cost
+          example: 3200.75
+        fuel_fill_count:
+          type: integer
+          description: Number of fuel records
+          example: 48
+        average_fuel_price:
+          type: number
+          format: float
+          description: Average price per fill-up
+          example: 66.68
+        last_maintenance_date:
+          type: string
+          format: date
+          nullable: true
+          description: Date of last maintenance
+          example: "2024-01-10"
+        last_fuel_date:
+          type: string
+          format: date
+          nullable: true
+          description: Date of last fuel fill-up
+          example: "2024-02-05"
+
+    MaintenanceRecordInput:
+      type: object
+      required:
+        - service_type
+        - service_date
+      properties:
+        service_type:
+          type: string
+          maxLength: 100
+          description: Type of service performed
+          example: Oil Change
+        service_date:
+          type: string
+          format: date
+          description: Date of service
+          example: "2024-01-15"
+        mileage_at_service:
+          type: integer
+          minimum: 0
+          description: Vehicle mileage at time of service
+          example: 45000
+        cost:
+          type: number
+          format: float
+          minimum: 0
+          description: Cost of service in USD
+          example: 75.00
+        service_provider:
+          type: string
+          maxLength: 100
+          description: Name of service provider
+          example: Quick Lube Auto
+        notes:
+          type: string
+          maxLength: 1000
+          description: Additional notes
+          example: Used synthetic oil
+
+    MaintenanceRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique maintenance record ID
+          example: 650e8400-e29b-41d4-a716-446655440000
+        vehicle_id:
+          type: string
+          description: Associated vehicle ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        service_type:
+          type: string
+          description: Type of service performed
+          example: Oil Change
+        service_date:
+          type: string
+          format: date
+          description: Date of service
+          example: "2024-01-15"
+        mileage_at_service:
+          type: integer
+          nullable: true
+          description: Vehicle mileage at time of service
+          example: 45000
+        cost:
+          type: number
+          format: float
+          nullable: true
+          description: Cost of service in USD
+          example: 75.00
+        service_provider:
+          type: string
+          description: Name of service provider
+          example: Quick Lube Auto
+        notes:
+          type: string
+          description: Additional notes
+          example: Used synthetic oil
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2024-01-15T10:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2024-01-15T10:30:00Z"
+
+    FuelRecordInput:
+      type: object
+      required:
+        - fill_date
+        - mileage
+      properties:
+        fill_date:
+          type: string
+          format: date-time
+          description: Date and time of fill-up
+          example: "2024-02-05T14:30:00Z"
+        mileage:
+          type: integer
+          minimum: 0
+          description: Vehicle mileage at fill-up
+          example: 47250
+        price:
+          type: number
+          format: float
+          minimum: 0
+          description: Total price paid in USD
+          example: 65.50
+        volume:
+          type: number
+          format: float
+          minimum: 0
+          description: Fuel volume in gallons
+          example: 15.5
+        city_driving_percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Percentage of city driving (0-100)
+          example: 60
+        octane_rating:
+          type: integer
+          description: Octane rating (87, 89, 91, 93, etc.)
+          example: 87
+        location:
+          type: string
+          maxLength: 200
+          description: Location of fill-up
+          example: Shell Station, Main St
+        brand:
+          type: string
+          maxLength: 50
+          description: Fuel brand
+          example: Shell
+        notes:
+          type: string
+          maxLength: 1000
+          description: Additional notes
+          example: Premium fuel for highway trip
+
+    FuelRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique fuel record ID
+          example: 750e8400-e29b-41d4-a716-446655440000
+        vehicle_id:
+          type: string
+          description: Associated vehicle ID
+          example: 550e8400-e29b-41d4-a716-446655440000
+        fill_date:
+          type: string
+          format: date-time
+          description: Date and time of fill-up
+          example: "2024-02-05T14:30:00Z"
+        mileage:
+          type: integer
+          description: Vehicle mileage at fill-up
+          example: 47250
+        price:
+          type: number
+          format: float
+          nullable: true
+          description: Total price paid in USD
+          example: 65.50
+        volume:
+          type: number
+          format: float
+          nullable: true
+          description: Fuel volume in gallons
+          example: 15.5
+        city_driving_percentage:
+          type: integer
+          nullable: true
+          description: Percentage of city driving (0-100)
+          example: 60
+        octane_rating:
+          type: integer
+          nullable: true
+          description: Octane rating
+          example: 87
+        location:
+          type: string
+          description: Location of fill-up
+          example: Shell Station, Main St
+        brand:
+          type: string
+          description: Fuel brand
+          example: Shell
+        notes:
+          type: string
+          description: Additional notes
+          example: Premium fuel for highway trip
+        created_at:
+          type: string
+          format: date-time
+          description: Creation timestamp
+          example: "2024-02-05T14:30:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2024-02-05T14:30:00Z"
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          description: User ID
+          example: 123e4567-e89b-12d3-a456-426614174000
+        username:
+          type: string
+          description: Username
+          example: johndoe
+        email:
+          type: string
+          format: email
+          description: Email address
+          example: john@example.com
+        first_name:
+          type: string
+          description: First name
+          example: John
+        last_name:
+          type: string
+          description: Last name
+          example: Doe
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2020-01-15T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+          example: "2024-01-15T14:22:00Z"
+        last_login_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Last login timestamp
+          example: "2024-02-10T09:15:00Z"
+
+    UserProfileUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          description: New username
+          example: johndoe2024
+        email:
+          type: string
+          format: email
+          description: New email address
+          example: john.doe@example.com
+        first_name:
+          type: string
+          maxLength: 50
+          description: New first name
+          example: John
+        last_name:
+          type: string
+          maxLength: 50
+          description: New last name
+          example: Doe
+
+    PasswordChange:
+      type: object
+      required:
+        - current_password
+        - new_password
+      properties:
+        current_password:
+          type: string
+          format: password
+          description: Current password
+          example: OldPass123!
+        new_password:
+          type: string
+          format: password
+          minLength: 8
+          description: New password (at least 8 characters)
+          example: NewSecurePass456!
+
+    PaginationInfo:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          description: Items per page
+          example: 20
+        total:
+          type: integer
+          description: Total number of items
+          example: 100
+        total_pages:
+          type: integer
+          description: Total number of pages
+          example: 5
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Error code
+              example: VALIDATION_ERROR
+            message:
+              type: string
+              description: Error message
+              example: Invalid input
+            details:
+              type: array
+              items:
+                type: object
+                properties:
+                  field:
+                    type: string
+                    description: Field name that caused the error
+                    example: email
+                  message:
+                    type: string
+                    description: Field-specific error message
+                    example: Invalid email format

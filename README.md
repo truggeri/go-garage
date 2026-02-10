@@ -110,6 +110,7 @@ go-garage/
 │   ├── services/        # Business logic
 │   └── middleware/      # HTTP middleware
 ├── pkg/                 # Public, reusable packages
+├── api/                 # API specification (OpenAPI)
 ├── web/                 # Frontend assets
 │   ├── static/          # CSS, JS, images
 │   └── templates/       # HTML templates
@@ -189,12 +190,52 @@ docker compose down
 
 ## API Endpoints
 
+The Go-Garage API provides comprehensive endpoints for vehicle management. For complete API documentation, see the [OpenAPI specification](api/openapi.yaml).
+
+### Quick Reference
+
+**Authentication**
+- `POST /api/v1/auth/register` - Register a new user
+- `POST /api/v1/auth/login` - Login and receive JWT tokens
+- `POST /api/v1/auth/refresh` - Refresh access token
+- `POST /api/v1/auth/logout` - Logout
+
+**Vehicles**
+- `GET /api/v1/vehicles` - List all user's vehicles
+- `POST /api/v1/vehicles` - Create a new vehicle
+- `GET /api/v1/vehicles/{id}` - Get vehicle details
+- `PUT /api/v1/vehicles/{id}` - Update vehicle
+- `DELETE /api/v1/vehicles/{id}` - Delete vehicle
+- `GET /api/v1/vehicles/{id}/stats` - Get vehicle statistics
+
+**Maintenance Records**
+- `GET /api/v1/vehicles/{vehicleId}/maintenance` - List maintenance records
+- `POST /api/v1/vehicles/{vehicleId}/maintenance` - Create maintenance record
+- `GET /api/v1/maintenance/{id}` - Get maintenance record
+- `PUT /api/v1/maintenance/{id}` - Update maintenance record
+- `DELETE /api/v1/maintenance/{id}` - Delete maintenance record
+
+**Fuel Records**
+- `GET /api/v1/vehicles/{vehicleId}/fuel` - List fuel records
+- `POST /api/v1/vehicles/{vehicleId}/fuel` - Create fuel record
+- `GET /api/v1/fuel/{id}` - Get fuel record
+- `PUT /api/v1/fuel/{id}` - Update fuel record
+- `DELETE /api/v1/fuel/{id}` - Delete fuel record
+
+**User Profile**
+- `GET /api/v1/users/me` - Get current user profile
+- `PUT /api/v1/users/me` - Update user profile
+- `DELETE /api/v1/users/me` - Delete user account
+- `PUT /api/v1/users/me/password` - Change password
+
+**Health**
 - `GET /health` - Health check endpoint
 
-*(More endpoints will be added as the application develops)*
+For detailed request/response schemas, authentication requirements, and examples, refer to the [API documentation](api/README.md).
 
 ## Documentation
 
+- [API Specification](api/README.md) - Complete OpenAPI specification and API documentation
 - [Development Setup Guide](docs/DEVELOPMENT.md) - Comprehensive guide for setting up your development environment
 - [Docker Setup Guide](docs/DOCKER.md) - Docker installation and usage instructions
 - [Logging Documentation](docs/LOGGING.md) - Logging configuration and best practices
