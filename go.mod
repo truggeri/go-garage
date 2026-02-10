@@ -9,6 +9,7 @@ require (
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/stretchr/testify v1.10.0
+	golang.org/x/crypto v0.48.0
 )
 
 require (
