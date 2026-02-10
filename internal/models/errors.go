@@ -1,6 +1,9 @@
 package models
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 // NotFoundError indicates a requested resource was not found
 type NotFoundError struct {
@@ -81,4 +84,19 @@ func NewDatabaseError(operation string, err error) *DatabaseError {
 		Operation: operation,
 		Err:       err,
 	}
+}
+
+// IsNotFoundError checks if an error is a NotFoundError and assigns it to target if so
+func IsNotFoundError(err error, target **NotFoundError) bool {
+	return errors.As(err, target)
+}
+
+// IsValidationError checks if an error is a ValidationError and assigns it to target if so
+func IsValidationError(err error, target **ValidationError) bool {
+	return errors.As(err, target)
+}
+
+// IsDuplicateError checks if an error is a DuplicateError and assigns it to target if so
+func IsDuplicateError(err error, target **DuplicateError) bool {
+	return errors.As(err, target)
 }
