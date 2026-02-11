@@ -384,9 +384,12 @@ func buildListPayload(recs []*models.Vehicle, pg, sz, total int) map[string]inte
 	for i, v := range recs {
 		items[i] = vehicleToResponseMap(v)
 	}
-	tp := total / sz
-	if total%sz != 0 {
-		tp++
+	tp := 0
+	if total > 0 && sz > 0 {
+		tp = total / sz
+		if total%sz != 0 {
+			tp++
+		}
 	}
 	return map[string]interface{}{
 		"success": true, "data": items,
