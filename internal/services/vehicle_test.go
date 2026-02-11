@@ -106,6 +106,13 @@ func (m *mockVehicleRepository) List(ctx context.Context, filters repositories.V
 	return result, nil
 }
 
+func (m *mockVehicleRepository) Count(ctx context.Context, filters repositories.VehicleFilters) (int, error) {
+	if m.listResult != nil {
+		return len(m.listResult), nil
+	}
+	return len(m.vehicles), nil
+}
+
 func TestVehicleService_CreateVehicle(t *testing.T) {
 	ctx := context.Background()
 

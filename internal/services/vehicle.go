@@ -24,8 +24,14 @@ type VehicleService interface {
 	// ArchiveVehicle archives a vehicle (sets status to sold or scrapped)
 	ArchiveVehicle(ctx context.Context, id string, status models.VehicleStatus) (*models.Vehicle, error)
 
+	// DeleteVehicle removes a vehicle from the system
+	DeleteVehicle(ctx context.Context, id string) error
+
 	// ListVehicles retrieves vehicles with optional filters and pagination
 	ListVehicles(ctx context.Context, filters repositories.VehicleFilters, pagination repositories.PaginationParams) ([]*models.Vehicle, error)
+
+	// CountVehicles returns the total number of vehicles matching the filters
+	CountVehicles(ctx context.Context, filters repositories.VehicleFilters) (int, error)
 
 	// VerifyOwnership verifies that a vehicle belongs to a specific user
 	VerifyOwnership(ctx context.Context, vehicleID, userID string) error
@@ -137,6 +143,16 @@ func (s *DefaultVehicleService) ArchiveVehicle(ctx context.Context, id string, s
 // ListVehicles retrieves vehicles with optional filters and pagination
 func (s *DefaultVehicleService) ListVehicles(ctx context.Context, filters repositories.VehicleFilters, pagination repositories.PaginationParams) ([]*models.Vehicle, error) {
 	return s.repo.List(ctx, filters, pagination)
+}
+
+// CountVehicles returns the total number of vehicles matching the filters
+func (s *DefaultVehicleService) CountVehicles(ctx context.Context, filters repositories.VehicleFilters) (int, error) {
+	return s.repo.Count(ctx, filters)
+}
+
+// DeleteVehicle removes a vehicle from the system
+func (s *DefaultVehicleService) DeleteVehicle(ctx context.Context, id string) error {
+	return s.repo.Delete(ctx, id)
 }
 
 // VerifyOwnership verifies that a vehicle belongs to a specific user
