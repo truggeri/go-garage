@@ -8,6 +8,7 @@ import (
 
 // VehicleFilters contains optional filters for listing vehicles
 type VehicleFilters struct {
+	UserID *string
 	Status *models.VehicleStatus
 	Make   *string
 	Model  *string
@@ -42,4 +43,7 @@ type VehicleRepository interface {
 
 	// List retrieves vehicles with optional filters and pagination
 	List(ctx context.Context, filters VehicleFilters, pagination PaginationParams) ([]*models.Vehicle, error)
+
+	// Count returns the total number of vehicles matching the filters
+	Count(ctx context.Context, filters VehicleFilters) (int, error)
 }

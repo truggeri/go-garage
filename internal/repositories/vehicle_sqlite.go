@@ -346,6 +346,11 @@ func (r *SQLiteVehicleRepository) List(ctx context.Context, filters VehicleFilte
 	`
 	args := []interface{}{}
 
+	if filters.UserID != nil {
+		query += " AND user_id = ?"
+		args = append(args, *filters.UserID)
+	}
+
 	if filters.Status != nil {
 		query += " AND status = ?"
 		args = append(args, *filters.Status)
@@ -463,4 +468,43 @@ func (r *SQLiteVehicleRepository) scanVehicles(rows *sql.Rows) ([]*models.Vehicl
 	}
 
 	return vehicles, nil
+}
+
+// Count returns the total number of vehicles matching the filters
+func (r *SQLiteVehicleRepository) Count(ctx context.Context, filters VehicleFilters) (int, error) {
+	query := `SELECT COUNT(*) FROM vehicles WHERE 1=1`
+	args := []interface{}{}
+
+	if filters.UserID != nil {
+		query += " AND user_id = ?"
+		args = append(args, *filters.UserID)
+	}
+
+	if filters.Status != nil {
+		query += " AND status = ?"
+		args = append(args, *filters.Status)
+	}
+
+	if filters.Make != nil {
+		query += " AND make = ?"
+		args = append(args, *filters.Make)
+	}
+
+	if filters.Model != nil {
+		query += " AND model = ?"
+		args = append(args, *filters.Model)
+	}
+
+	if filters.Year != nil {
+		query += " AND year = ?"
+		args = append(args, *filters.Year)
+	}
+
+	var count int
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(&count)
+	if err != nil {
+		return 0, models.NewDatabaseError("count vehicles", err)
+	}
+
+	return count, nil
 }
