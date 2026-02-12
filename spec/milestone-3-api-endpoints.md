@@ -1,9 +1,11 @@
 # Milestone 3: RESTful API Endpoints
 
 ## Objective
+
 Implement a complete RESTful API for managing vehicles and maintenance records, with proper authentication, authorization, and error handling.
 
 ## Prerequisites
+
 - Milestone 1: Project Setup and Core Infrastructure
 - Milestone 2: Vehicle Data Model and Database Layer
 
@@ -12,8 +14,9 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 ### 1. Service Layer Implementation
 
 #### Vehicle Service
+
 - [ ] Create VehicleService interface
-- [ ] Implement CreateVehicle(ctx, vehicle) 
+- [ ] Implement CreateVehicle(ctx, vehicle)
 - [ ] Implement GetVehicle(ctx, id)
 - [ ] Implement GetUserVehicles(ctx, userID)
 - [ ] Implement UpdateVehicle(ctx, id, updates)
@@ -22,6 +25,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement ownership verification
 
 #### Maintenance Service
+
 - [ ] Create MaintenanceService interface
 - [ ] Implement CreateMaintenance(ctx, record)
 - [ ] Implement GetMaintenance(ctx, id)
@@ -30,6 +34,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement DeleteMaintenance(ctx, id)
 
 #### User Service
+
 - [ ] Create UserService interface
 - [ ] Implement CreateUser(ctx, user)
 - [ ] Implement GetUser(ctx, id)
@@ -39,6 +44,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 ### 2. Authentication & Authorization
 
 #### JWT Implementation
+
 - [ ] Create JWT token generation
 - [ ] Create JWT token validation
 - [ ] Implement token refresh mechanism
@@ -46,6 +52,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Store claims (user ID, username, roles)
 
 #### Middleware
+
 - [ ] Create authentication middleware
 - [ ] Validate JWT tokens
 - [ ] Extract user context from token
@@ -55,6 +62,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement role-based access control (if needed)
 
 #### Authentication Endpoints
+
 - [ ] POST /api/v1/auth/register - User registration
 - [ ] POST /api/v1/auth/login - User login (returns JWT)
 - [ ] POST /api/v1/auth/refresh - Refresh JWT token
@@ -142,6 +150,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 ### 6. Request/Response Handling
 
 #### Request Parsing
+
 - [ ] Implement JSON request body parsing
 - [ ] Validate content-type headers
 - [ ] Implement request size limits
@@ -149,7 +158,9 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Implement request validation middleware
 
 #### Response Formatting
+
 - [ ] Standardize JSON response format
+
 ```json
 {
   "success": true,
@@ -158,8 +169,10 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
   "errors": []
 }
 ```
+
 - [ ] Set appropriate HTTP status codes
 - [ ] Implement pagination metadata
+
 ```json
 {
   "data": [...],
@@ -173,6 +186,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 ```
 
 ### 7. Error Handling
+
 - [ ] Create standardized error responses
 - [ ] Map internal errors to HTTP status codes
 - [ ] Implement error logging
@@ -180,6 +194,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 - [ ] Return validation errors with field details
 
 Error response format:
+
 ```json
 {
   "success": false,
@@ -194,6 +209,7 @@ Error response format:
 ```
 
 ### 8. API Middleware Stack
+
 - [ ] Request logging
 - [ ] CORS headers
 - [ ] Request ID generation
@@ -202,6 +218,7 @@ Error response format:
 - [ ] Security headers (X-Content-Type-Options, etc.)
 
 ### 9. Input Validation
+
 - [ ] Validate all input fields
 - [ ] Implement custom validators
 - [ ] Validate ID formats (UUID/integer)
@@ -211,12 +228,14 @@ Error response format:
 ### 10. API Testing
 
 #### Unit Tests
+
 - [ ] Test all service methods
 - [ ] Test authentication logic
 - [ ] Test authorization logic
 - [ ] Mock repositories
 
 #### Integration Tests
+
 - [ ] Test all API endpoints
 - [ ] Test authentication flows
 - [ ] Test authorization (access control)
@@ -225,6 +244,7 @@ Error response format:
 - [ ] Test filtering and sorting
 
 #### API Documentation
+
 - [ ] Create OpenAPI specification
 - [ ] Document all endpoints
 - [ ] Document request/response schemas
@@ -252,6 +272,7 @@ Error response format:
 - [ ] API documentation is complete and accurate
 
 ## Dependencies
+
 - Milestone 1: Project Setup and Core Infrastructure
 - Milestone 2: Vehicle Data Model and Database Layer
 
@@ -266,6 +287,7 @@ Error response format:
 | Authorization bugs | High | Thorough testing, code review, consistent patterns |
 
 ## Notes
+
 - Follow RESTful conventions
 - Use standard HTTP status codes appropriately
 - Keep endpoints simple and focused

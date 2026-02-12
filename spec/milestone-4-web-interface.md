@@ -1,9 +1,11 @@
 # Milestone 4: Web Interface and Frontend
 
 ## Objective
+
 Build a user-friendly web interface for the Go-Garage application, allowing users to manage their vehicles and maintenance records through a browser.
 
 ## Prerequisites
+
 - Milestone 1: Project Setup and Core Infrastructure
 - Milestone 2: Vehicle Data Model and Database Layer
 - Milestone 3: RESTful API Endpoints
@@ -11,6 +13,7 @@ Build a user-friendly web interface for the Go-Garage application, allowing user
 ## Goals
 
 ### 1. Template System Setup
+
 - [ ] Configure Go html/template package
 - [ ] Setup template directory structure
 - [ ] Create base/layout templates
@@ -19,6 +22,7 @@ Build a user-friendly web interface for the Go-Garage application, allowing user
 - [ ] Setup template caching for production
 
 Directory structure:
+
 ```
 web/templates/
 ├── layouts/
@@ -42,6 +46,7 @@ web/templates/
 ```
 
 ### 2. Static Assets Setup
+
 - [ ] Configure static file serving
 - [ ] Choose CSS framework (Bootstrap/Tailwind)
 - [ ] Setup CSS organization
@@ -50,6 +55,7 @@ web/templates/
 - [ ] Setup favicon and app icons
 
 Directory structure:
+
 ```
 web/static/
 ├── css/
@@ -65,6 +71,7 @@ web/static/
 ### 3. Authentication Pages
 
 #### Registration Page
+
 - [ ] Create registration form
 - [ ] Client-side validation
 - [ ] Password strength indicator
@@ -73,6 +80,7 @@ web/static/
 - [ ] Success redirect to login
 
 #### Login Page
+
 - [ ] Create login form
 - [ ] Username/email + password fields
 - [ ] "Remember me" option
@@ -81,6 +89,7 @@ web/static/
 - [ ] Success redirect to dashboard
 
 #### Password Reset (Optional)
+
 - [ ] Request reset form (email input)
 - [ ] Reset token generation
 - [ ] Reset password form
@@ -89,6 +98,7 @@ web/static/
 ### 4. Dashboard
 
 #### Main Dashboard
+
 - [ ] Welcome message with user name
 - [ ] Vehicle count summary
 - [ ] Recent maintenance activities
@@ -98,6 +108,7 @@ web/static/
 ### 5. Vehicle Management Pages
 
 #### Vehicle List Page
+
 - [ ] Display all user vehicles in cards/table
 - [ ] Show key info (make, model, year, status)
 - [ ] Search/filter functionality
@@ -107,6 +118,7 @@ web/static/
 - [ ] Actions per vehicle (view, edit, delete)
 
 #### Add Vehicle Page
+
 - [ ] Create vehicle form with all fields
 - [ ] VIN input with validation
 - [ ] Make, model, year dropdowns/inputs
@@ -117,6 +129,7 @@ web/static/
 - [ ] Submit and cancel buttons
 
 #### Vehicle Detail Page
+
 - [ ] Display all vehicle information
 - [ ] Show formatted data (currency, dates)
 - [ ] Edit and delete buttons
@@ -126,6 +139,7 @@ web/static/
 - [ ] Quick add maintenance button
 
 #### Edit Vehicle Page
+
 - [ ] Pre-populated form with current data
 - [ ] Same fields as add page
 - [ ] Update validation
@@ -135,6 +149,7 @@ web/static/
 ### 6. Maintenance Management Pages
 
 #### Maintenance List Page
+
 - [ ] Display all maintenance records
 - [ ] Filter by vehicle
 - [ ] Filter by date range
@@ -145,6 +160,7 @@ web/static/
 - [ ] Actions per record (view, edit, delete)
 
 #### Add Maintenance Page
+
 - [ ] Select vehicle dropdown
 - [ ] Service type dropdown/input
 - [ ] Service date picker
@@ -156,6 +172,7 @@ web/static/
 - [ ] Submit and cancel buttons
 
 #### Maintenance Detail Page
+
 - [ ] Display all maintenance info
 - [ ] Show associated vehicle info
 - [ ] Formatted dates and currency
@@ -163,6 +180,7 @@ web/static/
 - [ ] Link back to vehicle
 
 #### Edit Maintenance Page
+
 - [ ] Pre-populated form
 - [ ] Same fields as add page
 - [ ] Update validation
@@ -171,6 +189,7 @@ web/static/
 ### 7. User Profile Pages
 
 #### View Profile
+
 - [ ] Display user information
 - [ ] Username, email, name
 - [ ] Account creation date
@@ -179,6 +198,7 @@ web/static/
 - [ ] Edit profile button
 
 #### Edit Profile
+
 - [ ] Update username
 - [ ] Update email
 - [ ] Update first/last name
@@ -186,6 +206,7 @@ web/static/
 - [ ] Save and cancel buttons
 
 #### Change Password
+
 - [ ] Current password input
 - [ ] New password input
 - [ ] Confirm new password input
@@ -196,6 +217,7 @@ web/static/
 ### 8. Navigation and UI Components
 
 #### Navigation Bar
+
 - [ ] Logo/brand name
 - [ ] Links to main sections (Dashboard, Vehicles, Maintenance)
 - [ ] User dropdown menu
@@ -205,6 +227,7 @@ web/static/
 - [ ] Responsive mobile menu
 
 #### Flash Messages
+
 - [ ] Success messages (green)
 - [ ] Error messages (red)
 - [ ] Warning messages (yellow)
@@ -213,6 +236,7 @@ web/static/
 - [ ] Close button
 
 #### Confirmation Dialogs
+
 - [ ] Delete confirmations
 - [ ] Unsaved changes warnings
 - [ ] Modal implementation
@@ -220,6 +244,7 @@ web/static/
 ### 9. Forms and Validation
 
 #### Client-Side Validation
+
 - [ ] Required field validation
 - [ ] Email format validation
 - [ ] Number range validation
@@ -228,12 +253,14 @@ web/static/
 - [ ] Error message display
 
 #### Server-Side Integration
+
 - [ ] Handle validation errors from API
 - [ ] Display field-specific errors
 - [ ] Maintain form state on error
 - [ ] CSRF protection
 
 ### 10. Responsive Design
+
 - [ ] Mobile-first approach
 - [ ] Responsive navigation
 - [ ] Responsive tables/cards
@@ -242,6 +269,7 @@ web/static/
 - [ ] Optimize for tablets
 
 ### 11. Accessibility
+
 - [ ] Semantic HTML
 - [ ] ARIA labels where needed
 - [ ] Keyboard navigation support
@@ -253,16 +281,19 @@ web/static/
 ### 12. User Experience
 
 #### Loading States
+
 - [ ] Loading spinners for async operations
 - [ ] Disabled buttons during submission
 - [ ] Progress indicators
 
 #### Empty States
+
 - [ ] "No vehicles yet" message with CTA
 - [ ] "No maintenance records" message
 - [ ] Helpful guidance for new users
 
 #### Error Pages
+
 - [ ] 404 Not Found page
 - [ ] 500 Server Error page
 - [ ] 403 Forbidden page
@@ -271,6 +302,7 @@ web/static/
 ### 13. Frontend JavaScript
 
 #### Core Functionality
+
 - [ ] Form validation
 - [ ] AJAX requests for dynamic updates
 - [ ] Modal dialogs
@@ -281,6 +313,7 @@ web/static/
 ### 14. Testing
 
 #### Manual Testing
+
 - [ ] Test all user flows
 - [ ] Test form submissions
 - [ ] Test validations
@@ -288,6 +321,7 @@ web/static/
 - [ ] Mobile device testing
 
 ### 15. Documentation
+
 - [ ] UI component documentation
 - [ ] Template usage guide
 - [ ] CSS class documentation
@@ -318,6 +352,7 @@ web/static/
 - [ ] UI is intuitive and user-friendly
 
 ## Dependencies
+
 - Milestone 1: Project Setup and Core Infrastructure
 - Milestone 2: Vehicle Data Model and Database Layer
 - Milestone 3: RESTful API Endpoints
@@ -333,6 +368,7 @@ web/static/
 | Security vulnerabilities (XSS) | High | Proper template escaping, CSP headers, security review |
 
 ## Notes
+
 - Keep UI simple and clean
 - Prioritize usability over fancy features
 - Use progressive enhancement

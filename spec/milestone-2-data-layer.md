@@ -1,14 +1,17 @@
 # Milestone 2: Vehicle Data Model and Database Layer
 
 ## Objective
+
 Implement the core data models and database layer for vehicle management, including database schema, repositories, and basic CRUD operations.
 
 ## Prerequisites
+
 - Milestone 1 completed (project setup and infrastructure)
 
 ## Goals
 
 ### 1. Database Setup
+
 - [x] Configure database connection with connection pooling (PR #24)
 - [x] Implement health check for database connectivity (PR #24)
 - [x] Setup database migrations system (PR #24)
@@ -17,7 +20,9 @@ Implement the core data models and database layer for vehicle management, includ
 ### 2. Data Models
 
 #### Vehicle Model
+
 Define the Vehicle struct with the following fields:
+
 - [x] ID (UUID) (PR #26)
 - [x] User ID (foreign key) (PR #26)
 - [x] VIN (Vehicle Identification Number) (PR #26)
@@ -36,7 +41,9 @@ Define the Vehicle struct with the following fields:
 - [x] Updated at timestamp (PR #26)
 
 #### Maintenance Record Model
+
 Define the MaintenanceRecord struct:
+
 - [x] ID (PR #26)
 - [x] Vehicle ID (foreign key) (PR #26)
 - [x] Service type (oil change, tire rotation, inspection, etc.) (PR #26)
@@ -49,7 +56,9 @@ Define the MaintenanceRecord struct:
 - [x] Updated at timestamp (PR #26)
 
 #### User Model
+
 Define the User struct:
+
 - [x] ID (PR #26)
 - [x] Username (unique) (PR #26)
 - [x] Email (unique) (PR #26)
@@ -61,6 +70,7 @@ Define the User struct:
 - [x] Last login timestamp (PR #26)
 
 ### 3. Database Schema
+
 - [x] Create users table migration (PR #24)
 - [x] Create vehicles table migration (PR #24)
 - [x] Create maintenance_records table migration (PR #24)
@@ -69,7 +79,9 @@ Define the User struct:
 - [x] Add unique constraints where needed (PR #24)
 
 ### 4. Repository Interface Design
+
 Create repository interfaces for:
+
 - [x] VehicleRepository interface (PR #26)
   - Create(vehicle)
   - FindByID(id)
@@ -96,6 +108,7 @@ Create repository interfaces for:
   - Delete(id)
 
 ### 5. Repository Implementation
+
 - [x] Implement SQLite repository for vehicles (PR #26)
 - [x] Implement SQLite repository for maintenance records (PR #26)
 - [x] Implement SQLite repository for users (PR #26)
@@ -104,6 +117,7 @@ Create repository interfaces for:
 - [x] Add context support for cancellation (PR #26)
 
 ### 6. Data Validation
+
 - [x] Implement validation for Vehicle model (PR #26)
   - VIN format validation (17 characters)
   - Year range validation (1900-present)
@@ -121,6 +135,7 @@ Create repository interfaces for:
   - Password strength requirements
 
 ### 7. Error Handling
+
 - [x] Define custom error types (NotFoundError, ValidationError, etc.) (PR #26)
 - [x] Implement error wrapping with context (PR #26)
 - [x] Create error helper functions (PR #26)
@@ -129,12 +144,14 @@ Create repository interfaces for:
 ### 8. Testing
 
 #### Unit Tests
+
 - [x] Test all repository methods (PR #26)
 - [x] Test data validation functions (PR #26)
 - [x] Test error handling paths (PR #26)
 - [x] Mock database for unit tests (PR #26 - uses test utilities)
 
 #### Integration Tests
+
 - [x] Test with test database (PR #26)
 - [x] Test CRUD operations end-to-end (PR #26)
 - [ ] Test concurrent access scenarios
@@ -142,12 +159,14 @@ Create repository interfaces for:
 - [x] Test database constraints (unique, foreign keys) (PR #26)
 
 ### 9. Database Utilities
+
 - [ ] Create database seeding script for development
 - [ ] Create sample data for testing
 - [ ] Implement database backup helper
 - [ ] Create migration rollback procedures
 
 ### 10. Documentation
+
 - [x] Document database schema with ERD (PR #29)
 - [x] Document repository interfaces (PR #29)
 - [x] Document validation rules (PR #29)
@@ -175,6 +194,7 @@ Create repository interfaces for:
 - [x] All validation rules work as expected (PR #26)
 
 ## Dependencies
+
 - Milestone 1: Project Setup and Core Infrastructure
 
 ## Risks and Mitigations
@@ -188,6 +208,7 @@ Create repository interfaces for:
 | Schema changes during development | Low | Use versioned migrations, maintain backward compatibility |
 
 ## Notes
+
 - Use database/sql standard library for maximum flexibility
 - Keep repository implementations simple and focused
 - Consider using GORM if ORM features are needed later

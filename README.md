@@ -16,7 +16,7 @@ A vehicle management application written in Go that helps users track and manage
 
 ### Using Docker (Recommended)
 
-```bash
+```shell
 # Start the application
 docker compose up -d
 
@@ -27,7 +27,7 @@ docker compose logs -f
 docker compose down
 ```
 
-The application will be available at http://localhost:8080
+The application will be available at <http://localhost:8080>
 
 ### Local Development
 
@@ -40,30 +40,35 @@ The application will be available at http://localhost:8080
 #### Setup
 
 1. Clone the repository:
-   ```bash
+
+   ```shell
    git clone https://github.com/truggeri/go-garage.git
    cd go-garage
    ```
 
 2. Copy the example environment file:
-   ```bash
+
+   ```shell
    cp .env.example .env
    ```
 
 3. Install dependencies:
-   ```bash
+
+   ```shell
    go mod download
    ```
 
 4. Build the application:
-   ```bash
+
+   ```shell
    make build
    # or
    go build -o bin/go-garage ./cmd/server
    ```
 
 5. Run the application:
-   ```bash
+
+   ```shell
    make run
    # or
    ./bin/go-garage
@@ -74,7 +79,7 @@ The application will be available at http://localhost:8080
 Configuration is managed through environment variables. See `.env.example` for available options.
 
 | Variable | Default | Description |
-|----------|---------|-------------|
+| ---------- | --------- | ------------- |
 | `ENVIRONMENT` | `development` | Application environment (development/production) |
 | `APP_PORT` | `8080` | Port the server listens on |
 | `SERVER_HOST` | `0.0.0.0` | Host the server binds to |
@@ -87,7 +92,7 @@ Configuration is managed through environment variables. See `.env.example` for a
 
 ### Available Make Commands
 
-```bash
+```shell
 make build    # Build the application
 make test     # Run tests with coverage
 make run      # Run the application
@@ -99,7 +104,7 @@ make vet      # Run go vet
 
 ### Project Structure
 
-```
+```text
 go-garage/
 ├── cmd/server/          # Main application entry point
 ├── internal/            # Private application code
@@ -122,7 +127,7 @@ go-garage/
 
 ### Running Tests
 
-```bash
+```shell
 # Run all tests
 make test
 
@@ -135,7 +140,7 @@ go test -cover ./...
 
 ### Code Quality
 
-```bash
+```shell
 # Format code
 make fmt
 
@@ -171,13 +176,13 @@ For detailed Docker setup and usage instructions, see [docs/DOCKER.md](docs/DOCK
 
 ### Building Docker Image
 
-```bash
+```shell
 docker build -t go-garage .
 ```
 
 ### Running with Docker Compose
 
-```bash
+```shell
 # Start services
 docker compose up -d
 
@@ -190,17 +195,19 @@ docker compose down
 
 ## API Endpoints
 
-The Go-Garage API provides comprehensive endpoints for vehicle management. For complete API documentation, see the [OpenAPI specification](api/openapi.yaml).
+The Go-Garage API provides comprehensive endpoints for vehicle management. For complete API documentation, see the [OpenAPI specification](spec/openapi.yaml).
 
 ### Quick Reference
 
-**Authentication**
+#### Authentication
+
 - `POST /api/v1/auth/register` - Register a new user
 - `POST /api/v1/auth/login` - Login and receive JWT tokens
 - `POST /api/v1/auth/refresh` - Refresh access token
 - `POST /api/v1/auth/logout` - Logout
 
-**Vehicles**
+#### Vehicles
+
 - `GET /api/v1/vehicles` - List all user's vehicles
 - `POST /api/v1/vehicles` - Create a new vehicle
 - `GET /api/v1/vehicles/{id}` - Get vehicle details
@@ -208,34 +215,38 @@ The Go-Garage API provides comprehensive endpoints for vehicle management. For c
 - `DELETE /api/v1/vehicles/{id}` - Delete vehicle
 - `GET /api/v1/vehicles/{id}/stats` - Get vehicle statistics
 
-**Maintenance Records**
+#### Maintenance Records
+
 - `GET /api/v1/vehicles/{vehicleId}/maintenance` - List maintenance records
 - `POST /api/v1/vehicles/{vehicleId}/maintenance` - Create maintenance record
 - `GET /api/v1/maintenance/{id}` - Get maintenance record
 - `PUT /api/v1/maintenance/{id}` - Update maintenance record
 - `DELETE /api/v1/maintenance/{id}` - Delete maintenance record
 
-**Fuel Records**
+#### Fuel Records
+
 - `GET /api/v1/vehicles/{vehicleId}/fuel` - List fuel records
 - `POST /api/v1/vehicles/{vehicleId}/fuel` - Create fuel record
 - `GET /api/v1/fuel/{id}` - Get fuel record
 - `PUT /api/v1/fuel/{id}` - Update fuel record
 - `DELETE /api/v1/fuel/{id}` - Delete fuel record
 
-**User Profile**
+#### User Profile
+
 - `GET /api/v1/users/me` - Get current user profile
 - `PUT /api/v1/users/me` - Update user profile
 - `DELETE /api/v1/users/me` - Delete user account
 - `PUT /api/v1/users/me/password` - Change password
 
-**Health**
+#### Health
+
 - `GET /health` - Health check endpoint
 
-For detailed request/response schemas, authentication requirements, and examples, refer to the [API documentation](api/README.md).
+For detailed request/response schemas, authentication requirements, and examples, refer to the [API documentation](spec/openapi.yaml).
 
 ## Documentation
 
-- [API Specification](api/README.md) - Complete OpenAPI specification and API documentation
+- [API Specification](spec/openapi.yaml) - Complete OpenAPI specification
 - [Development Setup Guide](docs/DEVELOPMENT.md) - Comprehensive guide for setting up your development environment
 - [Docker Setup Guide](docs/DOCKER.md) - Docker installation and usage instructions
 - [Logging Documentation](docs/LOGGING.md) - Logging configuration and best practices
@@ -259,6 +270,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Acknowledgments
 
 Built with:
+
 - [gorilla/mux](https://github.com/gorilla/mux) - HTTP router
 - [mattn/go-sqlite3](https://github.com/mattn/go-sqlite3) - SQLite driver
 - [golang-migrate](https://github.com/golang-migrate/migrate) - Database migrations
