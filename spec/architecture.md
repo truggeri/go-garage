@@ -104,7 +104,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 
 ## API Design
 
-See [restful-api.md](./restful-api.md) for detailed API endpoint documentation.
+See [the open api spec](./openapi.yaml) for detailed API endpoint documentation.
 
 ## Security Considerations
 
