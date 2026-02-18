@@ -15,7 +15,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 
 ### High-Level Components
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │                     Web Browser                         │
 └─────────────────────┬───────────────────────────────────┘
@@ -55,6 +55,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 ## Technology Stack
 
 ### Backend
+
 - **Language**: Go (1.24+)
 - **Web Framework**: Standard library `net/http` with gorilla/mux for routing
 - **Database**: SQLite
@@ -63,11 +64,13 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 - **Configuration**: Environment variables and config files
 
 ### Frontend
+
 - **Template Engine**: Go html/template
 - **CSS Framework**: To be determined
 - **JavaScript**: [htmx](https://htmx.org)
 
 ### Infrastructure
+
 - **Containerization**: Docker
 - **Deployment**: Docker Compose
 - **CI/CD**: GitHub Actions
@@ -75,18 +78,21 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 ## Core Domain Models
 
 ### Vehicle
+
 - Identification (VIN, make, model, year)
 - Owner information
 - Purchase details
 - Current status
 
 ### Maintenance Record
+
 - Service date and type
 - Mileage at service
 - Cost and provider
 - Notes and attachments
 
 ### Fuel Record
+
 - Date and time
 - Mileage at fill up
 - Price
@@ -98,13 +104,14 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 - Notes and attachments
 
 ### User
+
 - Authentication credentials
 - Profile information
 - Owned vehicles
 
 ## API Design
 
-See [restful-api.md](./restful-api.md) for detailed API endpoint documentation.
+See [the open api spec](./openapi.yaml) for detailed API endpoint documentation.
 
 ## Security Considerations
 

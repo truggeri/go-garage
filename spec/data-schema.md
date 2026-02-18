@@ -11,6 +11,7 @@ This document defines the database schema for the Go-Garage application. The app
 Stores user account information and authentication credentials.
 
 **Fields:**
+
 - id (primary key)
 - username (unique)
 - email (unique)
@@ -22,6 +23,7 @@ Stores user account information and authentication credentials.
 Stores vehicle information for each user.
 
 **Fields:**
+
 - id (primary key)
 - user_id (foreign key to Users)
 - vin (unique, Vehicle Identification Number)
@@ -35,6 +37,7 @@ Stores vehicle information for each user.
 Stores maintenance and service records for each vehicle.
 
 **Fields:**
+
 - id (primary key)
 - vehicle_id (foreign key to Vehicles)
 - service_type
@@ -50,6 +53,7 @@ Stores maintenance and service records for each vehicle.
 Stores fuel fill-up records for each vehicle.
 
 **Fields:**
+
 - id (primary key)
 - vehicle_id (foreign key to Vehicles)
 - fill_date (date and time of fill-up)
