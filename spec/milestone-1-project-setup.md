@@ -1,22 +1,27 @@
 # Milestone 1: Project Setup and Core Infrastructure
 
 ## Objective
+
 Establish the foundational project structure, development environment, and core infrastructure components needed to build the Go-Garage application.
 
 ## Goals
 
 ### 1. Project Initialization ✅
+
 - [x] Create GitHub repository
 - [x] Initialize Go module (`go mod init`)
 
 ### 2. Development Environment ✅
+
 - [x] Create Makefile for common tasks (build, test, run, clean)
 - [x] Setup development Docker container
 - [x] Configure VSCode/GoLand settings
 - [x] Setup pre-commit hooks (gofmt, golint)
 
 ### 3. Project Structure ✅
+
 Create the following directory structure:
+
 ```
 go-garage/
 ├── cmd/
@@ -38,7 +43,9 @@ go-garage/
 ```
 
 ### 4. Core Dependencies ✅
+
 Install and configure:
+
 - [x] gorilla/mux - HTTP router and URL matcher
 - [x] godotenv - Environment variable management
 - [x] golang-migrate - Database migration tool
@@ -46,12 +53,14 @@ Install and configure:
 - [x] testify - Testing toolkit
 
 ### 5. Configuration Management ✅
+
 - [x] Create config package to load environment variables
 - [x] Support for .env files in development
 - [x] Configuration struct with validation
 - [x] Default values for all config options
 
 Configuration items to include:
+
 - Server port and host
 - Database connection string
 - Log level and format
@@ -59,6 +68,7 @@ Configuration items to include:
 - Environment name (dev, prod)
 
 ### 6. Basic HTTP Server ✅
+
 - [x] Implement main.go in cmd/server/
 - [x] Setup gorilla/mux router
 - [x] Create health check endpoint (`/health`)
@@ -67,18 +77,21 @@ Configuration items to include:
 - [x] Add panic recovery middleware
 
 ### 7. Logging ✅
+
 - [x] Implement structured logging (using log/slog or logrus)
 - [x] Configure log levels (debug, info, warn, error)
 - [x] Add request/response logging
 - [x] Log rotation configuration
 
 ### 8. Docker Setup ✅
+
 - [x] Create Dockerfile for the application
 - [x] Create docker-compose.yml for local development
 - [x] Volume configuration for persistence
 - [x] Network configuration
 
 ### 9. CI/CD Pipeline ✅
+
 - [x] Create GitHub Actions workflow
 - [x] Run tests on pull requests
 - [x] Run linters (golangci-lint)
@@ -86,6 +99,7 @@ Configuration items to include:
 - [x] Code coverage reporting
 
 ### 10. Documentation ✅
+
 - [x] Update README with setup instructions
 - [x] Document environment variables
 - [x] Add contributing guidelines
@@ -111,6 +125,7 @@ Configuration items to include:
 - [x] Development documentation is complete and accurate
 
 ## Dependencies
+
 None
 
 ## Risks and Mitigations
@@ -122,6 +137,7 @@ None
 | CI/CD configuration issues | Medium | Test locally with act or similar tools before committing |
 
 ## Notes
+
 - Focus on simplicity and maintainability
 - Follow Go best practices and idioms
 - Keep the initial setup minimal but extensible
