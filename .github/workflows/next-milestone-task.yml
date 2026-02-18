@@ -1,0 +1,23 @@
+name: Trigger Next Milestone Task
+
+on:
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  trigger-next-task:
+    if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'copilot-milestone')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create issue for next task
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: 'Implement next milestone task',
+              body: 'Implement the next task as outlined in `spec/project-plan.md`. Be sure to use the `pr-linting-formatting` skill.',
+              labels: ['copilot-milestone', 'copilot']
+            });
