@@ -9,6 +9,8 @@ jobs:
   trigger-next-task:
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'copilot-milestone')
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
     steps:
       - name: Create issue for next task
         uses: actions/github-script@v7
