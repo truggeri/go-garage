@@ -41,38 +41,38 @@ Milestone 3, Maintenance API Endpoints
 - [x] Middleware
 - [x] Authentication Endpoints
 - [x] Vehicle API Endpoints
-- [] Maintenance API Endpoints
-- [] User API Endpoints
+- [ ] Maintenance API Endpoints
+- [ ] User API Endpoints
 
 ### Milestone 4: Web Interface
 
-- [] Template System Setup
-- [] Static Assets Setup
-- [] Registration Page
-- [] Login Page
-- [] Main Dashboard
-- [] Vehicle List Page
-- [] Add Vehicle Page
-- [] Vehicle Detail Page
-- [] Edit Vehicle Page
-- [] Maintenance List Page
-- [] Add Maintenance Page
-- [] Maintenance Detail Page
-- [] Edit Maintenance Page
-- [] View Profile
-- [] Edit Profile
-- [] Change Password
-- [] Navigation Bar
-- [] Flash Messages
-- [] Client-Side Validation
-- [] Server-Side Integration
-- [] Responsive Design
-- [] Accessibility
-- [] Loading States
-- [] Empty States
-- [] Error Pages
-- [] Documentation
+- [ ] Template System Setup
+- [ ] Static Assets Setup
+- [ ] Registration Page
+- [ ] Login Page
+- [ ] Main Dashboard
+- [ ] Vehicle List Page
+- [ ] Add Vehicle Page
+- [ ] Vehicle Detail Page
+- [ ] Edit Vehicle Page
+- [ ] Maintenance List Page
+- [ ] Add Maintenance Page
+- [ ] Maintenance Detail Page
+- [ ] Edit Maintenance Page
+- [ ] View Profile
+- [ ] Edit Profile
+- [ ] Change Password
+- [ ] Navigation Bar
+- [ ] Flash Messages
+- [ ] Client-Side Validation
+- [ ] Server-Side Integration
+- [ ] Responsive Design
+- [ ] Accessibility
+- [ ] Loading States
+- [ ] Empty States
+- [ ] Error Pages
+- [ ] Documentation
 
 ### Milestone 5: Testing Deployment
 
-- [] Security Tests
+- [ ] Security Tests

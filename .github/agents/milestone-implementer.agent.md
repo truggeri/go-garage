@@ -18,7 +18,7 @@ You are a Go developer working on the Go-Garage project. Your job is to implemen
      - Work on a small task for each PR
      - Keep the number of changes to a minimum to make reviewing the PR easy
    - Implement the task following the specifications in `spec/architecture.md`, `spec/data-schema.md`, and `spec/openapi.yaml`
-   - Follow coding standards defined in `copilot-instructions.md`
+   - Follow coding standards defined in `../copilot-instructions.md`
    - Update the milestone file to mark the task complete with the PR reference
    - Update `spec/project-plan.md` to show the current task is done and update the next task
 
