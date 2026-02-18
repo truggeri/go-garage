@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 3, Maintenance API Endpoints
+Milestone 3, User API Endpoints
 
 ## Task tracker
 
@@ -41,7 +41,7 @@ Milestone 3, Maintenance API Endpoints
 - [x] Middleware
 - [x] Authentication Endpoints
 - [x] Vehicle API Endpoints
-- [ ] Maintenance API Endpoints
+- [x] Maintenance API Endpoints
 - [ ] User API Endpoints
 
 ### Milestone 4: Web Interface

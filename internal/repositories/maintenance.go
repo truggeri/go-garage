@@ -8,6 +8,7 @@ import (
 
 // MaintenanceFilters contains optional filters for listing maintenance records
 type MaintenanceFilters struct {
+	VehicleID   *string
 	ServiceType *string
 }
 
@@ -30,4 +31,7 @@ type MaintenanceRepository interface {
 
 	// List retrieves maintenance records with optional filters and pagination
 	List(ctx context.Context, filters MaintenanceFilters, pagination PaginationParams) ([]*models.MaintenanceRecord, error)
+
+	// Count returns the total number of maintenance records matching the filters
+	Count(ctx context.Context, filters MaintenanceFilters) (int, error)
 }

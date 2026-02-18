@@ -19,6 +19,12 @@ type MaintenanceService interface {
 	// GetVehicleMaintenance retrieves all maintenance records for a specific vehicle
 	GetVehicleMaintenance(ctx context.Context, vehicleID string) ([]*models.MaintenanceRecord, error)
 
+	// ListMaintenance retrieves maintenance records with optional filters and pagination
+	ListMaintenance(ctx context.Context, filters repositories.MaintenanceFilters, pagination repositories.PaginationParams) ([]*models.MaintenanceRecord, error)
+
+	// CountMaintenance returns the total number of maintenance records matching the filters
+	CountMaintenance(ctx context.Context, filters repositories.MaintenanceFilters) (int, error)
+
 	// UpdateMaintenance updates a maintenance record's information
 	UpdateMaintenance(ctx context.Context, id string, updates MaintenanceUpdates) (*models.MaintenanceRecord, error)
 
@@ -69,6 +75,16 @@ func (s *DefaultMaintenanceService) GetMaintenance(ctx context.Context, id strin
 // GetVehicleMaintenance retrieves all maintenance records for a specific vehicle
 func (s *DefaultMaintenanceService) GetVehicleMaintenance(ctx context.Context, vehicleID string) ([]*models.MaintenanceRecord, error) {
 	return s.repo.FindByVehicleID(ctx, vehicleID)
+}
+
+// ListMaintenance retrieves maintenance records with optional filters and pagination
+func (s *DefaultMaintenanceService) ListMaintenance(ctx context.Context, filters repositories.MaintenanceFilters, pagination repositories.PaginationParams) ([]*models.MaintenanceRecord, error) {
+	return s.repo.List(ctx, filters, pagination)
+}
+
+// CountMaintenance returns the total number of maintenance records matching the filters
+func (s *DefaultMaintenanceService) CountMaintenance(ctx context.Context, filters repositories.MaintenanceFilters) (int, error) {
+	return s.repo.Count(ctx, filters)
 }
 
 // UpdateMaintenance updates a maintenance record's information

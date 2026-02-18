@@ -216,6 +216,11 @@ func (r *SQLiteMaintenanceRepository) List(ctx context.Context, filters Maintena
 	`
 	args := []interface{}{}
 
+	if filters.VehicleID != nil {
+		query += " AND vehicle_id = ?"
+		args = append(args, *filters.VehicleID)
+	}
+
 	if filters.ServiceType != nil {
 		query += " AND service_type = ?"
 		args = append(args, *filters.ServiceType)
@@ -241,6 +246,30 @@ func (r *SQLiteMaintenanceRepository) List(ctx context.Context, filters Maintena
 	defer rows.Close()
 
 	return r.scanMaintenanceRecords(rows)
+}
+
+// Count returns the total number of maintenance records matching the filters
+func (r *SQLiteMaintenanceRepository) Count(ctx context.Context, filters MaintenanceFilters) (int, error) {
+	query := `SELECT COUNT(*) FROM maintenance_records WHERE 1=1`
+	args := []interface{}{}
+
+	if filters.VehicleID != nil {
+		query += " AND vehicle_id = ?"
+		args = append(args, *filters.VehicleID)
+	}
+
+	if filters.ServiceType != nil {
+		query += " AND service_type = ?"
+		args = append(args, *filters.ServiceType)
+	}
+
+	var count int
+	err := r.db.QueryRowContext(ctx, query, args...).Scan(&count)
+	if err != nil {
+		return 0, models.NewDatabaseError("count maintenance records", err)
+	}
+
+	return count, nil
 }
 
 // scanMaintenanceRecords is a helper method to scan multiple maintenance record rows

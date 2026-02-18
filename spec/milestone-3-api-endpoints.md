@@ -102,27 +102,27 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 
 ### 4. Maintenance API Endpoints
 
-- [ ] GET /api/v1/vehicles/{vehicleId}/maintenance
+- [x] GET /api/v1/vehicles/{vehicleId}/maintenance
   - List maintenance records for a vehicle
   - Support pagination
   - Support date range filtering
   - Support sorting by date
 
-- [ ] POST /api/v1/vehicles/{vehicleId}/maintenance
+- [x] POST /api/v1/vehicles/{vehicleId}/maintenance
   - Create maintenance record
   - Verify vehicle ownership
   - Validate input
 
-- [ ] GET /api/v1/maintenance/{id}
+- [x] GET /api/v1/maintenance/{id}
   - Get specific maintenance record
   - Verify ownership through vehicle
 
-- [ ] PUT /api/v1/maintenance/{id}
+- [x] PUT /api/v1/maintenance/{id}
   - Update maintenance record
   - Verify ownership
   - Validate updates
 
-- [ ] DELETE /api/v1/maintenance/{id}
+- [x] DELETE /api/v1/maintenance/{id}
   - Delete maintenance record
   - Verify ownership
 

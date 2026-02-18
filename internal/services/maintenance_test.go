@@ -95,6 +95,13 @@ func (m *mockMaintenanceRepository) List(ctx context.Context, filters repositori
 	return result, nil
 }
 
+func (m *mockMaintenanceRepository) Count(ctx context.Context, filters repositories.MaintenanceFilters) (int, error) {
+	if m.listResult != nil {
+		return len(m.listResult), nil
+	}
+	return len(m.records), nil
+}
+
 func TestMaintenanceService_CreateMaintenance(t *testing.T) {
 	ctx := context.Background()
 
