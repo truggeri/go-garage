@@ -9,8 +9,9 @@ Go-Garage is a Go-based web application designed to help users manage their vehi
 ## Specification Documents
 
 ### Architecture
+
 - **[architecture.md](./architecture.md)** - Complete system architecture, technology stack, and design decisions
-- **[restful-api.md](./restful-api.md)** - RESTful API endpoint specifications
+- **[openapi.yaml](./openapi.yaml)** - API specifications in OpenAPI format
 - **[data-schema.md](./data-schema.md)** - Database schema and table definitions
 
 ### Milestones
@@ -52,7 +53,7 @@ See individual milestone documents for detailed task lists and acceptance criter
 
 ## Project Workflow
 
-```
+```text
 Milestone 1 → Milestone 2 → Milestone 3 → Milestone 4 → Milestone 5
                     ↓            ↓            ↓            ↓
                  Testing     Testing      Testing    Final Testing

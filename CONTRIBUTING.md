@@ -26,34 +26,40 @@ Before you begin, ensure you have the following installed:
 1. **Fork the repository** on GitHub
 
 2. **Clone your fork**:
-   ```bash
+
+   ```shell
    git clone https://github.com/YOUR_USERNAME/go-garage.git
    cd go-garage
    ```
 
 3. **Add the upstream repository**:
-   ```bash
+
+   ```shell
    git remote add upstream https://github.com/truggeri/go-garage.git
    ```
 
 4. **Install dependencies**:
-   ```bash
+
+   ```shell
    go mod download
    ```
 
 5. **Set up pre-commit hooks**:
-   ```bash
+
+   ```shell
    cp .githooks/pre-commit .git/hooks/pre-commit
    chmod +x .git/hooks/pre-commit
    ```
 
 6. **Copy the environment file**:
-   ```bash
+
+   ```shell
    cp .env.example .env
    ```
 
 7. **Install development tools** (optional):
-   ```bash
+
+   ```shell
    make install-tools
    ```
 
@@ -63,11 +69,12 @@ Before you begin, ensure you have the following installed:
 
 Always create a new branch for your work:
 
-```bash
+```shell
 git checkout -b feature/your-feature-name
 ```
 
 Branch naming conventions:
+
 - `feature/` - New features
 - `fix/` - Bug fixes
 - `docs/` - Documentation changes
@@ -79,23 +86,27 @@ Branch naming conventions:
 1. **Write code** following the [coding standards](#coding-standards)
 
 2. **Format your code**:
-   ```bash
+
+   ```shell
    make fmt
    ```
 
 3. **Run tests**:
-   ```bash
+
+   ```shell
    make test
    ```
 
 4. **Run linters**:
-   ```bash
+
+   ```shell
    make lint
    make vet
    ```
 
 5. **Build the application**:
-   ```bash
+
+   ```shell
    make build
    ```
 
@@ -103,7 +114,7 @@ Branch naming conventions:
 
 Test your changes by running the application:
 
-```bash
+```shell
 # Run directly
 make run
 
@@ -138,7 +149,7 @@ docker compose up --build
 - Never ignore errors (avoid `_` for error returns)
 - Return errors as the last return value
 
-### Testing
+### Tests
 
 - Write tests for all new code
 - Aim for minimum 80% code coverage
@@ -147,6 +158,7 @@ docker compose up --build
 - Use meaningful test names: `TestFunctionName_Scenario_ExpectedBehavior`
 
 Example test structure:
+
 ```go
 func TestVehicleService_Create_ValidInput_Success(t *testing.T) {
     // Arrange
@@ -182,7 +194,7 @@ func TestVehicleService_Create_ValidInput_Success(t *testing.T) {
 
 Write clear, descriptive commit messages:
 
-```
+```text
 Short summary (50 chars or less)
 
 More detailed explanation if needed (wrap at 72 chars).
@@ -193,12 +205,14 @@ Fixes #123
 ```
 
 **Good commit messages**:
+
 - `Add vehicle creation endpoint`
 - `Fix panic in maintenance record handler`
 - `Refactor database connection management`
 - `Update README with Docker instructions`
 
 **Bad commit messages**:
+
 - `fix bug`
 - `update`
 - `wip`
@@ -215,13 +229,15 @@ Fixes #123
 ### Before Submitting
 
 1. **Sync with upstream**:
-   ```bash
+
+   ```shell
    git fetch upstream
    git rebase upstream/main
    ```
 
 2. **Run all checks**:
-   ```bash
+
+   ```shell
    make fmt
    make vet
    make lint
@@ -229,7 +245,8 @@ Fixes #123
    ```
 
 3. **Ensure build succeeds**:
-   ```bash
+
+   ```shell
    make build
    ```
 
@@ -242,7 +259,8 @@ Fixes #123
 ### Submitting a Pull Request
 
 1. **Push your branch**:
-   ```bash
+
+   ```shell
    git push origin feature/your-feature-name
    ```
 
@@ -253,6 +271,7 @@ Fixes #123
    - Screenshots for UI changes (if applicable)
 
 3. **PR Description Template**:
+
    ```markdown
    ## Description
    Brief description of the changes
@@ -288,7 +307,7 @@ Fixes #123
 
 ### Running Tests
 
-```bash
+```shell
 # Run all tests
 make test
 
@@ -318,6 +337,7 @@ go test -run TestFunctionName ./path/to/package
 ### Bug Reports
 
 Include:
+
 - Clear, descriptive title
 - Steps to reproduce
 - Expected behavior
@@ -328,6 +348,7 @@ Include:
 ### Feature Requests
 
 Include:
+
 - Clear description of the feature
 - Use case and motivation
 - Proposed implementation (if you have ideas)
@@ -346,6 +367,7 @@ By contributing to Go-Garage, you agree that your contributions will be licensed
 ## Recognition
 
 Contributors will be recognized in:
+
 - Release notes for significant contributions
 - The project's contributor list
 
