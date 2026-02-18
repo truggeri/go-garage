@@ -333,7 +333,7 @@ Ensure the application is production-ready through comprehensive testing, comple
 ## Risks and Mitigations
 
 | Risk | Impact | Mitigation |
-|------|--------|------------|
+| ------ | -------- | ------------ |
 | Security vulnerabilities | Critical | Security audit, penetration testing, continuous monitoring |
 | Data loss | Critical | Multiple backups, tested recovery procedures |
 | Incomplete documentation | Medium | Allocate sufficient time, review documentation |

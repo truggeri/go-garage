@@ -23,7 +23,7 @@ Build a user-friendly web interface for the Go-Garage application, allowing user
 
 Directory structure:
 
-```
+```text
 web/templates/
 ├── layouts/
 │   ├── base.html
@@ -56,7 +56,7 @@ web/templates/
 
 Directory structure:
 
-```
+```text
 web/static/
 ├── css/
 │   ├── main.css
