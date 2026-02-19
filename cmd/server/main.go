@@ -91,7 +91,7 @@ func main() {
 
 	// Setup router and routes
 	router := mux.NewRouter()
-	
+
 	// Health check endpoint (no auth required)
 	router.HandleFunc("/health", createHealthCheckHandler(garageDB)).Methods("GET")
 

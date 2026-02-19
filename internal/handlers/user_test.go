@@ -16,12 +16,12 @@ import (
 )
 
 type stubUserSvc struct {
-	getResult    *models.User
-	getErr       error
-	updateResult *models.User
-	updateErr    error
+	getResult     *models.User
+	getErr        error
+	updateResult  *models.User
+	updateErr     error
 	changePassErr error
-	deleteErr    error
+	deleteErr     error
 }
 
 func (s *stubUserSvc) CreateUser(_ context.Context, _ *models.User, _ string) error {
@@ -71,7 +71,7 @@ func TestUserHandler_GetMe(t *testing.T) {
 		var resp map[string]interface{}
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.True(t, resp["success"].(bool))
-		
+
 		data := resp["data"].(map[string]interface{})
 		assert.Equal(t, "user-123", data["id"])
 		assert.Equal(t, "johndoe", data["username"])
@@ -126,9 +126,9 @@ func TestUserHandler_UpdateMe(t *testing.T) {
 		h := MakeUserAPIHandler(stub)
 
 		body := map[string]interface{}{
-			"username":   "johndoe2024",
-			"email":      "john.new@example.com",
-			"last_name":  "Smith",
+			"username":  "johndoe2024",
+			"email":     "john.new@example.com",
+			"last_name": "Smith",
 		}
 		jsonBody, _ := json.Marshal(body)
 
@@ -143,7 +143,7 @@ func TestUserHandler_UpdateMe(t *testing.T) {
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.True(t, resp["success"].(bool))
 		assert.Equal(t, "Profile updated successfully", resp["message"])
-		
+
 		data := resp["data"].(map[string]interface{})
 		assert.Equal(t, "johndoe2024", data["username"])
 		assert.Equal(t, "john.new@example.com", data["email"])

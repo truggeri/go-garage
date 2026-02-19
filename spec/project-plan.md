@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 3, User API Endpoints
+Milestone 4, Template System Setup
 
 ## Task tracker
 
@@ -32,7 +32,7 @@ Milestone 3, User API Endpoints
 - [x] Add database migrations system
 - [x] Write unit tests for repositories
 
-### Milestone 3: API Endpoints
+### Milestone 3: API Endpoints ✅
 
 - [x] Vehicle Service
 - [x] Maintenance Service
@@ -42,7 +42,7 @@ Milestone 3, User API Endpoints
 - [x] Authentication Endpoints
 - [x] Vehicle API Endpoints
 - [x] Maintenance API Endpoints
-- [ ] User API Endpoints
+- [x] User API Endpoints
 
 ### Milestone 4: Web Interface
 

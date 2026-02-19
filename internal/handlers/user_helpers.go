@@ -19,26 +19,26 @@ func buildUserProfilePayload(user *models.User, message ...string) map[string]in
 			"updated_at": user.UpdatedAt,
 		},
 	}
-	
+
 	// Add last_login_at if it exists
 	if user.LastLoginAt != nil {
 		payload["data"].(map[string]interface{})["last_login_at"] = user.LastLoginAt
 	} else {
 		payload["data"].(map[string]interface{})["last_login_at"] = nil
 	}
-	
+
 	// Add optional message
 	if len(message) > 0 && message[0] != "" {
 		payload["message"] = message[0]
 	}
-	
+
 	return payload
 }
 
 // extractUserUpdates extracts user update fields from the input data map
 func extractUserUpdates(d map[string]interface{}) services.UserUpdates {
 	var u services.UserUpdates
-	
+
 	if v, ok := d["username"].(string); ok && v != "" {
 		u.Username = &v
 	}
@@ -51,6 +51,6 @@ func extractUserUpdates(d map[string]interface{}) services.UserUpdates {
 	if v, ok := d["last_name"].(string); ok && v != "" {
 		u.LastName = &v
 	}
-	
+
 	return u
 }
