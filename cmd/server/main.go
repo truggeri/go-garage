@@ -10,9 +10,13 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/truggeri/go-garage/internal/auth"
 	"github.com/truggeri/go-garage/internal/config"
 	"github.com/truggeri/go-garage/internal/database"
+	"github.com/truggeri/go-garage/internal/handlers"
 	"github.com/truggeri/go-garage/internal/middleware"
+	"github.com/truggeri/go-garage/internal/repositories"
+	"github.com/truggeri/go-garage/internal/services"
 	"github.com/truggeri/go-garage/pkg/applog"
 )
 
@@ -58,7 +62,73 @@ func main() {
 	}
 	vehicleLog.RecordInfo("Database migrations completed successfully")
 
+	// Initialize repositories
+	db := garageDB.RawSQLConnection()
+	userRepo := repositories.NewSQLiteUserRepository(db)
+	vehicleRepo := repositories.NewSQLiteVehicleRepository(db)
+	maintenanceRepo := repositories.NewSQLiteMaintenanceRepository(db)
+
+	// Initialize services
+	userSvc := services.NewUserService(userRepo)
+	vehicleSvc := services.NewVehicleService(vehicleRepo)
+	maintenanceSvc := services.NewMaintenanceService(maintenanceRepo, vehicleRepo)
+
+	// Initialize JWT token manager
+	tokenMgr, tokenErr := auth.BuildTokenManager(cfg.JWT.Secret, auth.StandardTokenDurations())
+	if tokenErr != nil {
+		vehicleLog.RecordError("Failed to initialize token manager", "error", tokenErr.Error())
+		os.Exit(1)
+	}
+
+	// Initialize authentication service
+	authSvc := services.BuildAuthService(userRepo, tokenMgr)
+
+	// Initialize handlers
+	authHandler := handlers.BuildAuthHandler(authSvc)
+	vehicleHandler := handlers.MakeVehicleAPIHandler(vehicleSvc)
+	maintenanceHandler := handlers.MakeMaintenanceAPIHandler(maintenanceSvc, vehicleSvc)
+	userHandler := handlers.MakeUserAPIHandler(userSvc)
+
+	// Setup router and routes
 	router := mux.NewRouter()
+	
+	// Health check endpoint (no auth required)
+	router.HandleFunc("/health", createHealthCheckHandler(garageDB)).Methods("GET")
+
+	// API v1 routes
+	apiV1 := router.PathPrefix("/api/v1").Subrouter()
+
+	// Auth routes (no auth required)
+	apiV1.HandleFunc("/auth/register", authHandler.HandleRegister).Methods("POST")
+	apiV1.HandleFunc("/auth/login", authHandler.HandleLogin).Methods("POST")
+	apiV1.HandleFunc("/auth/refresh", authHandler.HandleRefresh).Methods("POST")
+	apiV1.HandleFunc("/auth/logout", authHandler.HandleLogout).Methods("POST")
+
+	// Protected routes (require authentication)
+	protected := apiV1.NewRoute().Subrouter()
+	protected.Use(middleware.AuthenticationGuard(tokenMgr))
+
+	// Vehicle routes
+	protected.HandleFunc("/vehicles", vehicleHandler.ListAll).Methods("GET")
+	protected.HandleFunc("/vehicles", vehicleHandler.CreateOne).Methods("POST")
+	protected.HandleFunc("/vehicles/{id}", vehicleHandler.GetOne).Methods("GET")
+	protected.HandleFunc("/vehicles/{id}", vehicleHandler.ReplaceOne).Methods("PUT")
+	protected.HandleFunc("/vehicles/{id}", vehicleHandler.RemoveOne).Methods("DELETE")
+	protected.HandleFunc("/vehicles/{id}/stats", vehicleHandler.GetStats).Methods("GET")
+
+	// Maintenance routes
+	protected.HandleFunc("/vehicles/{vehicleId}/maintenance", maintenanceHandler.ListAll).Methods("GET")
+	protected.HandleFunc("/vehicles/{vehicleId}/maintenance", maintenanceHandler.CreateOne).Methods("POST")
+	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.GetOne).Methods("GET")
+	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.ReplaceOne).Methods("PUT")
+	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.RemoveOne).Methods("DELETE")
+
+	// User routes
+	protected.HandleFunc("/users/me", userHandler.GetMe).Methods("GET")
+	protected.HandleFunc("/users/me", userHandler.UpdateMe).Methods("PUT")
+	protected.HandleFunc("/users/me", userHandler.DeleteMe).Methods("DELETE")
+	protected.HandleFunc("/users/me/password", userHandler.ChangePassword).Methods("PUT")
+
 	router.HandleFunc("/health", createHealthCheckHandler(garageDB)).Methods("GET")
 
 	handler := middleware.RequestLogger(vehicleLog)(router)

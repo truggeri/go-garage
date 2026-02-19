@@ -350,3 +350,66 @@ func TestVerifyPassword(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestUserService_DeleteUser(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("deletes user with correct password", func(t *testing.T) {
+		repo := newMockUserRepository()
+		service := NewUserService(repo)
+
+		// Create a user with a known password
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("MyPass123"), bcrypt.DefaultCost)
+		existingUser := &models.User{
+			ID:           "user-123",
+			Username:     "testuser",
+			Email:        "test@example.com",
+			PasswordHash: string(hashedPassword),
+		}
+		repo.users[existingUser.ID] = existingUser
+
+		// Delete with correct password
+		err := service.DeleteUser(ctx, "user-123", "MyPass123")
+		require.NoError(t, err)
+
+		// Verify user is deleted
+		_, exists := repo.users["user-123"]
+		assert.False(t, exists)
+	})
+
+	t.Run("returns validation error for incorrect password", func(t *testing.T) {
+		repo := newMockUserRepository()
+		service := NewUserService(repo)
+
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("MyPass123"), bcrypt.DefaultCost)
+		existingUser := &models.User{
+			ID:           "user-123",
+			Username:     "testuser",
+			Email:        "test@example.com",
+			PasswordHash: string(hashedPassword),
+		}
+		repo.users[existingUser.ID] = existingUser
+
+		err := service.DeleteUser(ctx, "user-123", "WrongPass")
+		assert.Error(t, err)
+
+		var validationErr *models.ValidationError
+		assert.ErrorAs(t, err, &validationErr)
+		assert.Equal(t, "password", validationErr.Field)
+
+		// Verify user still exists
+		_, exists := repo.users["user-123"]
+		assert.True(t, exists)
+	})
+
+	t.Run("returns not found for non-existent user", func(t *testing.T) {
+		repo := newMockUserRepository()
+		service := NewUserService(repo)
+
+		err := service.DeleteUser(ctx, "non-existent", "MyPass123")
+		assert.Error(t, err)
+
+		var notFoundErr *models.NotFoundError
+		assert.ErrorAs(t, err, &notFoundErr)
+	})
+}

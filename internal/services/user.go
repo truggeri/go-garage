@@ -21,6 +21,9 @@ type UserService interface {
 
 	// ChangePassword updates a user's password
 	ChangePassword(ctx context.Context, id string, currentPassword, newPassword string) error
+
+	// DeleteUser deletes a user account after verifying password
+	DeleteUser(ctx context.Context, id string, password string) error
 }
 
 // UserUpdates contains the fields that can be updated for a user
@@ -121,6 +124,23 @@ func (s *DefaultUserService) ChangePassword(ctx context.Context, id string, curr
 
 	// Update the user
 	return s.repo.Update(ctx, user)
+}
+
+// DeleteUser deletes a user account after verifying password
+func (s *DefaultUserService) DeleteUser(ctx context.Context, id string, password string) error {
+	// Get the user to verify password
+	user, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	// Verify password
+	if verifyErr := verifyPassword(user.PasswordHash, password); verifyErr != nil {
+		return models.NewValidationError("password", "password is incorrect")
+	}
+
+	// Delete the user (cascades to vehicles and maintenance)
+	return s.repo.Delete(ctx, id)
 }
 
 // hashPassword hashes a password using bcrypt
