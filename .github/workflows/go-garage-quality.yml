@@ -2,12 +2,12 @@ name: Go-Garage Quality Assurance
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 env:
-  GO_VERSION_SPEC: '1.24.x'
+  GO_VERSION_SPEC: "1.24.x"
   VEHICLE_APP_NAME: go-garage
 
 jobs:
@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-    
+
     steps:
       - name: Checkout go-garage repository
         uses: actions/checkout@v4
@@ -120,15 +120,32 @@ jobs:
             -e DB_PATH=/app/data/test.db \
             -p 8080:8080 \
             go-garage:ci-validation
-          
+
           sleep 5
-          
-          response=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health)
-          if [ "$response" != "200" ]; then
-            echo "Health check failed with status: $response"
-            docker logs garage-test-instance
+
+          # Wait up to 60s for /health to respond with HTTP 200
+          for i in $(seq 1 10); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health || true)
+            if [ "$code" = "200" ]; then
+              echo "Health check OK"
+              break
+            fi
+            echo "Waiting for health... attempt $i (code=$code)"
+            sleep 2
+          done
+
+          # Final check + diagnostics
+          code=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/health || true)
+          if [ "$code" != "200" ]; then
+            echo "Health check failed (code=$code)"
+            echo "--- docker ps ---"
+            docker ps -a
+            echo "--- container logs ---"
+            docker logs garage-test-instance || true
+            echo "--- inspect ---"
+            docker inspect garage-test-instance || true
             exit 1
           fi
-          
+
           docker stop garage-test-instance
           docker rm garage-test-instance
