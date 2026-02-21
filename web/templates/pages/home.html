@@ -1,0 +1,16 @@
+{{define "title"}}Go-Garage - Vehicle Management{{end}}
+
+{{define "content"}}
+<div class="hero">
+    <h1>Welcome to Go-Garage</h1>
+    <p>Track and manage your vehicles, maintenance records, and fuel consumption — all in one place.</p>
+    <div class="hero-actions">
+        {{if .IsAuthenticated}}
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
+        {{else}}
+        <a href="/register" class="btn btn-primary">Get Started</a>
+        <a href="/login" class="btn btn-secondary">Login</a>
+        {{end}}
+    </div>
+</div>
+{{end}}

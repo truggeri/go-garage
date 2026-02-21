@@ -1,0 +1,29 @@
+{{define "navigation"}}
+<nav class="navbar" role="navigation" aria-label="main navigation">
+    <div class="container navbar-content">
+        <a href="/" class="navbar-brand">Go-Garage</a>
+        <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">
+            <span class="navbar-toggle-icon"></span>
+        </button>
+        <div class="navbar-menu">
+            {{if .IsAuthenticated}}
+            <div class="navbar-links">
+                <a href="/dashboard" class="navbar-link">Dashboard</a>
+                <a href="/vehicles" class="navbar-link">Vehicles</a>
+                <a href="/maintenance" class="navbar-link">Maintenance</a>
+            </div>
+            <div class="navbar-user">
+                <span class="navbar-username">{{.UserName}}</span>
+                <a href="/profile" class="navbar-link">Profile</a>
+                <a href="/logout" class="navbar-link">Logout</a>
+            </div>
+            {{else}}
+            <div class="navbar-links">
+                <a href="/login" class="navbar-link">Login</a>
+                <a href="/register" class="navbar-link">Register</a>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</nav>
+{{end}}
