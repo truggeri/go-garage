@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"strings"
 	"time"
+	"unicode"
 )
 
 // buildFuncMap returns a FuncMap containing all helper functions available in templates.
@@ -16,7 +17,7 @@ func buildFuncMap() template.FuncMap {
 		"formatMileage":  formatMileage,
 		"toUpper":        strings.ToUpper,
 		"toLower":        strings.ToLower,
-		"toTitle":        strings.Title, //nolint:staticcheck
+		"toTitle":        titleCase,
 		"currentYear":    currentYear,
 		"seq":            seq,
 		"add":            add,
@@ -120,4 +121,17 @@ func sub(a, b int) int {
 // Use with caution – only for trusted content.
 func safeHTML(s string) template.HTML {
 	return template.HTML(s) //nolint:gosec
+}
+
+// titleCase capitalises the first letter of each word in s.
+func titleCase(s string) string {
+	prev := ' '
+	return strings.Map(func(r rune) rune {
+		if unicode.IsSpace(prev) {
+			prev = r
+			return unicode.ToTitle(r)
+		}
+		prev = r
+		return r
+	}, s)
 }
