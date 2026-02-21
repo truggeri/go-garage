@@ -105,8 +105,7 @@ func (c *Config) Validate() error {
 		return fmt.Errorf("invalid environment: %s (must be one of: development, production)", c.Env)
 	}
 
-	// JWT secret is required in production
-	if c.Env == "production" && c.JWT.Secret == "" {
+	if c.JWT.Secret == "" {
 		return fmt.Errorf("JWT_SECRET is required in production environment")
 	}
 

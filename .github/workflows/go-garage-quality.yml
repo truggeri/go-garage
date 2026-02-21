@@ -118,6 +118,7 @@ jobs:
             -e APP_PORT=8080 \
             -e ENVIRONMENT=development \
             -e DB_PATH=/app/data/test.db \
+            -e JWT_SECRET=b6d7d32d7b1b94437fb4365ae04896ad83014dd303932732f019c438cc2e98c9 \
             -p 8080:8080 \
             go-garage:ci-validation
 

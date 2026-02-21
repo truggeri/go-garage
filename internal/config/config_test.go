@@ -12,6 +12,9 @@ func TestLoad_WithDefaults(t *testing.T) {
 	// Clear any environment variables that might interfere
 	os.Clearenv()
 
+	// Set required env
+	t.Setenv("JWT_SECRET", "test-required-secret-key")
+
 	config, err := Load()
 
 	require.NoError(t, err, "Load should not return an error with valid defaults")
@@ -23,7 +26,7 @@ func TestLoad_WithDefaults(t *testing.T) {
 	assert.Equal(t, "./data/go-garage.db", config.Database.Path)
 	assert.Equal(t, "info", config.Logging.Level)
 	assert.Equal(t, "json", config.Logging.Format)
-	assert.Equal(t, "", config.JWT.Secret)
+	assert.Equal(t, "test-required-secret-key", config.JWT.Secret)
 	assert.Equal(t, "development", config.Env)
 }
 

@@ -128,21 +128,21 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 
 ### 5. User API Endpoints
 
-- [ ] GET /api/v1/users/me
+- [x] GET /api/v1/users/me
   - Get current user profile
   - Return user info without password
 
-- [ ] PUT /api/v1/users/me
+- [x] PUT /api/v1/users/me
   - Update current user profile
   - Allow username, email, name updates
   - Re-authenticate for sensitive changes
 
-- [ ] PUT /api/v1/users/me/password
+- [x] PUT /api/v1/users/me/password
   - Change user password
   - Require current password
   - Validate new password strength
 
-- [ ] DELETE /api/v1/users/me
+- [x] DELETE /api/v1/users/me
   - Delete user account
   - Require password confirmation
   - Cascade delete vehicles and maintenance
