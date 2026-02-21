@@ -39,16 +39,6 @@ func (e *Engine) LoadTemplates() error {
 	e.mu.Lock()
 	defer e.mu.Unlock()
 
-	layoutFiles, err := filepath.Glob(filepath.Join(e.templatesDir, "layouts", "*.html"))
-	if err != nil {
-		return fmt.Errorf("loading layout templates: %w", err)
-	}
-
-	partialFiles, err := filepath.Glob(filepath.Join(e.templatesDir, "partials", "*.html"))
-	if err != nil {
-		return fmt.Errorf("loading partial templates: %w", err)
-	}
-
 	errorFiles, err := filepath.Glob(filepath.Join(e.templatesDir, "errors", "*.html"))
 	if err != nil {
 		return fmt.Errorf("loading error templates: %w", err)
@@ -59,8 +49,6 @@ func (e *Engine) LoadTemplates() error {
 		return fmt.Errorf("finding page templates: %w", err)
 	}
 
-	sharedFiles := append(layoutFiles, partialFiles...)
-
 	// Parse each page template together with shared templates
 	for _, page := range pageFiles {
 		name, err := filepath.Rel(filepath.Join(e.templatesDir, "pages"), page)
@@ -68,13 +56,9 @@ func (e *Engine) LoadTemplates() error {
 			return fmt.Errorf("computing relative path for %s: %w", page, err)
 		}
 
-		files := make([]string, 0, len(sharedFiles)+1)
-		files = append(files, sharedFiles...)
-		files = append(files, page)
-
-		tmpl, err := template.New(filepath.Base(page)).Funcs(e.funcMap).ParseFiles(files...)
+		tmpl, err := e.parseTemplate(name)
 		if err != nil {
-			return fmt.Errorf("parsing page template %s: %w", name, err)
+			return err
 		}
 		e.cache[name] = tmpl
 	}
@@ -83,13 +67,9 @@ func (e *Engine) LoadTemplates() error {
 	for _, errPage := range errorFiles {
 		name := "errors/" + filepath.Base(errPage)
 
-		files := make([]string, 0, len(sharedFiles)+1)
-		files = append(files, sharedFiles...)
-		files = append(files, errPage)
-
-		tmpl, err := template.New(filepath.Base(errPage)).Funcs(e.funcMap).ParseFiles(files...)
+		tmpl, err := e.parseTemplate(name)
 		if err != nil {
-			return fmt.Errorf("parsing error template %s: %w", name, err)
+			return err
 		}
 		e.cache[name] = tmpl
 	}
