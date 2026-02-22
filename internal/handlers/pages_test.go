@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/truggeri/go-garage/internal/models"
@@ -185,10 +186,12 @@ func TestPageHandler_LoginSubmit(t *testing.T) {
 	t.Run("redirects on successful login", func(t *testing.T) {
 		mockSvc := &mockAuthService{
 			authenticateResult: &services.AuthenticationResult{
-				AccessToken:  "access-token",
-				RefreshToken: "refresh-token",
-				AccountID:    "user-1",
-				AccountName:  "testuser",
+				AccessToken:      "access-token",
+				RefreshToken:     "refresh-token",
+				AccessExpiresAt:  time.Now().Add(15 * time.Minute).Unix(),
+				RefreshExpiresAt: time.Now().Add(7 * 24 * time.Hour).Unix(),
+				AccountID:        "user-1",
+				AccountName:      "testuser",
 			},
 		}
 		handler := newTestPageHandler(t, mockSvc)
@@ -219,9 +222,11 @@ func TestPageHandler_LoginSubmit(t *testing.T) {
 		assert.NotNil(t, accessCookie)
 		assert.Equal(t, "access-token", accessCookie.Value)
 		assert.True(t, accessCookie.HttpOnly)
+		assert.Greater(t, accessCookie.MaxAge, 0)
 		assert.NotNil(t, refreshCookie)
 		assert.Equal(t, "refresh-token", refreshCookie.Value)
 		assert.True(t, refreshCookie.HttpOnly)
+		assert.Greater(t, refreshCookie.MaxAge, 0)
 	})
 
 	t.Run("shows errors for missing fields", func(t *testing.T) {

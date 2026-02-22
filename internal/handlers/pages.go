@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/services"
@@ -218,10 +219,14 @@ func (h *PageHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	accessMaxAge := int(time.Until(time.Unix(result.AccessExpiresAt, 0)).Seconds())
+	refreshMaxAge := int(time.Until(time.Unix(result.RefreshExpiresAt, 0)).Seconds())
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "access_token",
 		Value:    result.AccessToken,
 		Path:     "/",
+		MaxAge:   accessMaxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Secure:   r.TLS != nil,
@@ -230,6 +235,7 @@ func (h *PageHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		Name:     "refresh_token",
 		Value:    result.RefreshToken,
 		Path:     "/",
+		MaxAge:   refreshMaxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Secure:   r.TLS != nil,
