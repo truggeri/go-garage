@@ -24,6 +24,8 @@ func NewPageHandler(engine *templateengine.Engine, authService services.Authenti
 
 // registerPageData holds the data passed to the registration template.
 type registerPageData struct {
+	// Flash holds optional flash messages rendered by the flash-messages partial template.
+	Flash     interface{}
 	Errors    map[string]string
 	Username  string
 	Email     string

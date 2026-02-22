@@ -4,13 +4,10 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/services"
 	"github.com/truggeri/go-garage/internal/templateengine"
@@ -18,38 +15,8 @@ import (
 
 func newTestPageHandler(t *testing.T, authSvc services.AuthenticationService) *PageHandler {
 	t.Helper()
-	dir := createTestPageTemplates(t)
-	engine := templateengine.NewEngine(dir, true)
+	engine := templateengine.NewEngine("../../web/templates", true)
 	return NewPageHandler(engine, authSvc)
-}
-
-// createTestPageTemplates sets up a temporary template directory with minimal templates.
-func createTestPageTemplates(t *testing.T) string {
-	t.Helper()
-
-	dir := t.TempDir()
-
-	for _, d := range []string{"layouts", "partials", "pages", "errors"} {
-		require.NoError(t, os.MkdirAll(filepath.Join(dir, d), 0o755))
-	}
-
-	files := map[string]string{
-		"layouts/base.html":            `{{define "base"}}<!DOCTYPE html><html><head><title>{{block "title" .}}Go-Garage{{end}}</title></head><body>{{template "flash-messages" .}}{{block "content" .}}{{end}}</body></html>{{end}}`,
-		"layouts/auth.html":            `{{define "auth"}}<!DOCTYPE html><html><head><title>{{block "title" .}}Go-Garage{{end}}</title></head><body class="auth-page">{{template "flash-messages" .}}{{block "content" .}}{{end}}</body></html>{{end}}`,
-		"partials/flash-messages.html": `{{define "flash-messages"}}{{end}}`,
-		"partials/navigation.html":     `{{define "navigation"}}{{end}}`,
-		"partials/header.html":         `{{define "header"}}{{end}}`,
-		"partials/footer.html":         `{{define "footer"}}{{end}}`,
-		"pages/home.html":              `{{define "title"}}Home{{end}}{{define "content"}}<h1>Welcome</h1>{{end}}`,
-		"pages/register.html":          `{{define "title"}}Register{{end}}{{define "content"}}<form method="POST" action="/register">{{if .Errors.username}}<p class="form-error">{{.Errors.username}}</p>{{end}}<input name="username" value="{{.Username}}"><input name="email" value="{{.Email}}"><button type="submit">Register</button></form>{{end}}`,
-		"errors/404.html":              `{{define "title"}}Not Found{{end}}{{define "content"}}<h1>404</h1>{{end}}`,
-	}
-
-	for name, content := range files {
-		require.NoError(t, os.WriteFile(filepath.Join(dir, name), []byte(content), 0o644))
-	}
-
-	return dir
 }
 
 func TestPageHandler_Home(t *testing.T) {
@@ -61,7 +28,7 @@ func TestPageHandler_Home(t *testing.T) {
 	handler.Home(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.Contains(t, rec.Body.String(), "Welcome")
+	assert.Contains(t, rec.Body.String(), "Welcome to Go-Garage")
 }
 
 func TestPageHandler_RegisterForm(t *testing.T) {
@@ -74,7 +41,7 @@ func TestPageHandler_RegisterForm(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 	body := rec.Body.String()
-	assert.Contains(t, body, "Register")
+	assert.Contains(t, body, "Create an Account")
 	assert.Contains(t, body, `method="POST"`)
 	assert.Contains(t, body, `action="/register"`)
 }
