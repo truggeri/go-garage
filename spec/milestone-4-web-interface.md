@@ -53,6 +53,7 @@ web/templates/
 - [x] Configure JavaScript files
 - [x] Optimize asset loading (minification, bundling)
 - [x] Setup favicon and app icons
+- [x] Implement dark mode support (PR #42)
 
 Directory structure:
 
