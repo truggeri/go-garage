@@ -1,0 +1,12 @@
+{{define "flash-messages"}}
+{{if .Flash}}
+<div class="flash-messages" role="alert">
+    {{range .Flash}}
+    <div class="flash flash-{{.Type}}">
+        <span class="flash-text">{{.Message}}</span>
+        <button class="flash-close" aria-label="Close">&times;</button>
+    </div>
+    {{end}}
+</div>
+{{end}}
+{{end}}

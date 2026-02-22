@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Template System Setup
+Milestone 4, Static Assets Setup
 
 ## Task tracker
 
@@ -46,7 +46,7 @@ Milestone 4, Template System Setup
 
 ### Milestone 4: Web Interface
 
-- [ ] Template System Setup
+- [x] Template System Setup
 - [ ] Static Assets Setup
 - [ ] Registration Page
 - [ ] Login Page
