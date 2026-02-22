@@ -17,6 +17,7 @@ import (
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/repositories"
 	"github.com/truggeri/go-garage/internal/services"
+	"github.com/truggeri/go-garage/internal/templateengine"
 	"github.com/truggeri/go-garage/pkg/applog"
 )
 
@@ -89,6 +90,16 @@ func main() {
 	maintenanceHandler := handlers.MakeMaintenanceAPIHandler(maintenanceSvc, vehicleSvc)
 	userHandler := handlers.MakeUserAPIHandler(userSvc)
 
+	// Initialize template engine
+	tmplEngine := templateengine.NewEngine("./web/templates", cfg.IsDevelopment())
+	if !cfg.IsDevelopment() {
+		if err := tmplEngine.LoadTemplates(); err != nil {
+			vehicleLog.RecordError("Failed to load templates", "error", err.Error())
+			os.Exit(1)
+		}
+	}
+	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc)
+
 	// Setup router and routes
 	router := mux.NewRouter()
 
@@ -99,6 +110,11 @@ func main() {
 
 	// Health check endpoint (no auth required)
 	router.HandleFunc("/health", createHealthCheckHandler(garageDB)).Methods("GET")
+
+	// Web page routes
+	router.HandleFunc("/", pageHandler.Home).Methods("GET")
+	router.HandleFunc("/register", pageHandler.RegisterForm).Methods("GET")
+	router.HandleFunc("/register", pageHandler.RegisterSubmit).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

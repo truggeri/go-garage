@@ -1,0 +1,89 @@
+{{define "title"}}Register - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="auth-card card">
+    <div class="card-header">
+        <h2 class="card-title">Create an Account</h2>
+        <p class="text-muted">Start managing your vehicles today.</p>
+    </div>
+
+    {{if .Errors.general}}
+    <div class="flash flash-error" role="alert">
+        <span class="flash-text">{{.Errors.general}}</span>
+    </div>
+    {{end}}
+
+    <form method="POST" action="/register" novalidate>
+        <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <input class="form-input{{if .Errors.username}} is-invalid{{end}}"
+                   type="text" id="username" name="username"
+                   value="{{.Username}}"
+                   required autocomplete="username"
+                   aria-describedby="username-error">
+            {{if .Errors.username}}
+            <p class="form-error" id="username-error">{{.Errors.username}}</p>
+            {{end}}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-input{{if .Errors.email}} is-invalid{{end}}"
+                   type="email" id="email" name="email"
+                   value="{{.Email}}"
+                   required autocomplete="email"
+                   aria-describedby="email-error">
+            {{if .Errors.email}}
+            <p class="form-error" id="email-error">{{.Errors.email}}</p>
+            {{end}}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="first_name">First Name</label>
+            <input class="form-input"
+                   type="text" id="first_name" name="first_name"
+                   value="{{.FirstName}}"
+                   autocomplete="given-name">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="last_name">Last Name</label>
+            <input class="form-input"
+                   type="text" id="last_name" name="last_name"
+                   value="{{.LastName}}"
+                   autocomplete="family-name">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input class="form-input{{if .Errors.password}} is-invalid{{end}}"
+                   type="password" id="password" name="password"
+                   required autocomplete="new-password"
+                   aria-describedby="password-error password-hint">
+            <p class="form-hint" id="password-hint">Must be at least 8 characters with uppercase, lowercase, and a number.</p>
+            {{if .Errors.password}}
+            <p class="form-error" id="password-error">{{.Errors.password}}</p>
+            {{end}}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="confirm_password">Confirm Password</label>
+            <input class="form-input{{if .Errors.confirm_password}} is-invalid{{end}}"
+                   type="password" id="confirm_password" name="confirm_password"
+                   required autocomplete="new-password"
+                   aria-describedby="confirm-password-error">
+            {{if .Errors.confirm_password}}
+            <p class="form-error" id="confirm-password-error">{{.Errors.confirm_password}}</p>
+            {{end}}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-block">Create Account</button>
+        </div>
+    </form>
+
+    <p class="auth-footer text-center mt-md">
+        Already have an account? <a href="/login">Log in</a>
+    </p>
+</div>
+{{end}}
