@@ -1,0 +1,49 @@
+{{define "title"}}Login - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="auth-card card">
+    <div class="card-header">
+        <h2 class="card-title">Welcome Back</h2>
+        <p class="text-muted">Sign in to your account.</p>
+    </div>
+
+    {{if .Errors.general}}
+    <div class="flash flash-error" role="alert">
+        <span class="flash-text">{{.Errors.general}}</span>
+    </div>
+    {{end}}
+
+    <form method="POST" action="/login" novalidate>
+        <div class="form-group">
+            <label class="form-label" for="identifier">Email or Username</label>
+            <input class="form-input{{if .Errors.identifier}} is-invalid{{end}}"
+                   type="text" id="identifier" name="identifier"
+                   value="{{.Identifier}}"
+                   required autocomplete="username"
+                   aria-describedby="identifier-error">
+            {{if .Errors.identifier}}
+            <p class="form-error" id="identifier-error">{{.Errors.identifier}}</p>
+            {{end}}
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <input class="form-input{{if .Errors.password}} is-invalid{{end}}"
+                   type="password" id="password" name="password"
+                   required autocomplete="current-password"
+                   aria-describedby="password-error">
+            {{if .Errors.password}}
+            <p class="form-error" id="password-error">{{.Errors.password}}</p>
+            {{end}}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-block">Log In</button>
+        </div>
+    </form>
+
+    <p class="auth-footer text-center mt-md">
+        Don't have an account? <a href="/register">Sign up</a>
+    </p>
+</div>
+{{end}}
