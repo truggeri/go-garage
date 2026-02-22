@@ -1,0 +1,52 @@
+name: JS Minification
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  minify-js:
+    name: Minify JavaScript
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Install minifier
+        run: go install github.com/tdewolff/minify/v2/cmd/minify@latest
+
+      - name: Run minifier
+        run: minify --type=js web/static/js/main.js -o /tmp/main-minified.js
+
+      - name: Check if minified output has changed
+        id: check
+        run: |
+          if [ ! -f web/static/js/main-minified.js ] || ! diff -q /tmp/main-minified.js web/static/js/main-minified.js > /dev/null 2>&1; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update minified file
+        if: steps.check.outputs.changed == 'true'
+        run: cp /tmp/main-minified.js web/static/js/main-minified.js
+
+      - name: Commit and push changes
+        if: steps.check.outputs.changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add web/static/js/main-minified.js
+          git commit -m "Adding minified javascript"
+          git push

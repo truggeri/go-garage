@@ -28,3 +28,4 @@ jobs:
       - name: Install tools
         run: |
           go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+          go install github.com/tdewolff/minify/v2/cmd/minify@latest
