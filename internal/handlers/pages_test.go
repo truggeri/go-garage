@@ -34,8 +34,8 @@ func createTestPageTemplates(t *testing.T) string {
 	}
 
 	files := map[string]string{
-		"layouts/base.html": `{{define "base"}}<!DOCTYPE html><html><head><title>{{block "title" .}}Go-Garage{{end}}</title></head><body>{{template "flash-messages" .}}{{block "content" .}}{{end}}</body></html>{{end}}`,
-		"layouts/auth.html": `{{define "auth"}}<!DOCTYPE html><html><head><title>{{block "title" .}}Go-Garage{{end}}</title></head><body class="auth-page">{{template "flash-messages" .}}{{block "content" .}}{{end}}</body></html>{{end}}`,
+		"layouts/base.html":            `{{define "base"}}<!DOCTYPE html><html><head><title>{{block "title" .}}Go-Garage{{end}}</title></head><body>{{template "flash-messages" .}}{{block "content" .}}{{end}}</body></html>{{end}}`,
+		"layouts/auth.html":            `{{define "auth"}}<!DOCTYPE html><html><head><title>{{block "title" .}}Go-Garage{{end}}</title></head><body class="auth-page">{{template "flash-messages" .}}{{block "content" .}}{{end}}</body></html>{{end}}`,
 		"partials/flash-messages.html": `{{define "flash-messages"}}{{end}}`,
 		"partials/navigation.html":     `{{define "navigation"}}{{end}}`,
 		"partials/header.html":         `{{define "header"}}{{end}}`,

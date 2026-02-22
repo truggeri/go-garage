@@ -24,10 +24,11 @@ func NewPageHandler(engine *templateengine.Engine, authService services.Authenti
 
 // registerPageData holds the data passed to the registration template.
 type registerPageData struct {
-	Errors   map[string]string
-	Username string
-	Email    string
-	Name     string
+	Errors    map[string]string
+	Username  string
+	Email     string
+	FirstName string
+	LastName  string
 }
 
 // Home serves the home page.
@@ -82,10 +83,11 @@ func (h *PageHandler) RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 	if len(errors) > 0 {
 		w.WriteHeader(http.StatusBadRequest)
 		data := registerPageData{
-			Errors:   errors,
-			Username: username,
-			Email:    email,
-			Name:     firstName,
+			Errors:    errors,
+			Username:  username,
+			Email:     email,
+			FirstName: firstName,
+			LastName:  lastName,
 		}
 		if renderErr := h.engine.Render(w, "register.html", "auth", data); renderErr != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -119,10 +121,11 @@ func (h *PageHandler) RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 
 		w.WriteHeader(http.StatusBadRequest)
 		data := registerPageData{
-			Errors:   errors,
-			Username: username,
-			Email:    email,
-			Name:     firstName,
+			Errors:    errors,
+			Username:  username,
+			Email:     email,
+			FirstName: firstName,
+			LastName:  lastName,
 		}
 		if renderErr := h.engine.Render(w, "register.html", "auth", data); renderErr != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
