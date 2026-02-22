@@ -115,6 +115,8 @@ func main() {
 	router.HandleFunc("/", pageHandler.Home).Methods("GET")
 	router.HandleFunc("/register", pageHandler.RegisterForm).Methods("GET")
 	router.HandleFunc("/register", pageHandler.RegisterSubmit).Methods("POST")
+	router.HandleFunc("/login", pageHandler.LoginForm).Methods("GET")
+	router.HandleFunc("/login", pageHandler.LoginSubmit).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

@@ -82,12 +82,12 @@ web/static/
 
 #### Login Page
 
-- [ ] Create login form
-- [ ] Username/email + password fields
+- [x] Create login form
+- [x] Username/email + password fields
 - [ ] "Remember me" option
 - [ ] "Forgot password" link
-- [ ] Error messages
-- [ ] Success redirect to dashboard
+- [x] Error messages
+- [x] Success redirect to dashboard
 
 #### Password Reset (Optional)
 

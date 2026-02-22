@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Login Page
+Milestone 4, Main Dashboard
 
 ## Task tracker
 
@@ -49,7 +49,7 @@ Milestone 4, Login Page
 - [x] Template System Setup
 - [x] Static Assets Setup
 - [x] Registration Page
-- [ ] Login Page
+- [x] Login Page
 - [ ] Main Dashboard
 - [ ] Vehicle List Page
 - [ ] Add Vehicle Page
