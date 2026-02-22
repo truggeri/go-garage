@@ -101,3 +101,4 @@ When completing a task:
 - [ ] Linting and formatting pass (`make fmt`, `make lint`, `make vet`)
 - [ ] Relevant spec document updated with completion status
 - [ ] PR description references the spec/milestone being addressed
+- [ ] If changes were made to templates, css or javascript, include a screenshot showing the changes
