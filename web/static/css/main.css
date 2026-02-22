@@ -416,10 +416,21 @@ p {
     margin-top: var(--spacing-xs);
 }
 
+.form-hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+    margin-top: var(--spacing-xs);
+}
+
 .form-actions {
     display: flex;
     gap: var(--spacing-sm);
     margin-top: var(--spacing-lg);
+}
+
+.btn-block {
+    display: block;
+    width: 100%;
 }
 
 /* ========================================
@@ -499,6 +510,16 @@ p {
     font-weight: 700;
     color: var(--color-primary);
     text-decoration: none;
+}
+
+.auth-card {
+    background-color: var(--color-white);
+    padding: var(--spacing-xl);
+}
+
+.auth-footer {
+    margin-top: var(--spacing-lg);
+    font-size: var(--font-size-sm);
 }
 
 /* ========================================

@@ -72,12 +72,12 @@ web/static/
 
 #### Registration Page
 
-- [ ] Create registration form
-- [ ] Client-side validation
+- [x] Create registration form
+- [x] Client-side validation
 - [ ] Password strength indicator
 - [ ] Terms of service acceptance
-- [ ] Error display
-- [ ] Success redirect to login
+- [x] Error display
+- [x] Success redirect to login
 
 #### Login Page
 
