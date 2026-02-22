@@ -92,6 +92,11 @@ func main() {
 	// Setup router and routes
 	router := mux.NewRouter()
 
+	// Static file serving
+	staticDir := "./web/static/"
+	staticFileServer := http.StripPrefix("/static/", http.FileServer(http.Dir(staticDir)))
+	router.PathPrefix("/static/").Handler(staticFileServer)
+
 	// Health check endpoint (no auth required)
 	router.HandleFunc("/health", createHealthCheckHandler(garageDB)).Methods("GET")
 
