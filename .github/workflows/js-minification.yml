@@ -18,11 +18,16 @@ jobs:
           ref: ${{ github.head_ref }}
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install terser
-        run: npm install -g terser
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+
+      - name: Install minifier
+        run: go install github.com/tdewolff/minify/v2/cmd/minify@latest
 
       - name: Run minifier
-        run: terser web/static/js/main.js --compress --mangle -o /tmp/main-minified.js
+        run: minify --type=js web/static/js/main.js -o /tmp/main-minified.js
 
       - name: Check if minified output has changed
         id: check
