@@ -80,6 +80,23 @@ func TestFormatMileage(t *testing.T) {
 	}
 }
 
+func TestFormatMileagePtr(t *testing.T) {
+	miles := 45230
+	tests := []struct {
+		name     string
+		input    *int
+		expected string
+	}{
+		{"nil", nil, "—"},
+		{"with value", &miles, "45,230 mi"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.expected, formatMileagePtr(tt.input))
+		})
+	}
+}
+
 func TestCurrentYear(t *testing.T) {
 	expected := fmt.Sprintf("%d", time.Now().Year())
 	assert.Equal(t, expected, currentYear())
@@ -126,7 +143,8 @@ func TestBuildFuncMap(t *testing.T) {
 	fm := buildFuncMap()
 
 	expectedKeys := []string{
-		"formatDate", "formatDateTime", "formatCurrency", "formatMileage",
+		"formatDate", "formatDateTime", "formatCurrency", "formatCurrencyPtr",
+		"formatMileage", "formatMileagePtr",
 		"toUpper", "toLower", "toTitle", "currentYear",
 		"seq", "add", "sub", "safeHTML",
 	}

@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Vehicle List Page
+Milestone 4, Add Vehicle Page
 
 ## Task tracker
 
@@ -51,7 +51,7 @@ Milestone 4, Vehicle List Page
 - [x] Registration Page
 - [x] Login Page
 - [x] Main Dashboard
-- [ ] Vehicle List Page
+- [x] Vehicle List Page
 - [ ] Add Vehicle Page
 - [ ] Vehicle Detail Page
 - [ ] Edit Vehicle Page

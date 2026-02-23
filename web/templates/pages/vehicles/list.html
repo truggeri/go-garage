@@ -1,0 +1,75 @@
+{{define "title"}}Vehicles - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>My Vehicles</h1>
+    <a href="/vehicles/new" class="btn btn-primary">Add Vehicle</a>
+</div>
+
+<div class="filter-bar">
+    <form method="GET" action="/vehicles" class="filter-form">
+        <div class="filter-group">
+            <label for="filter-make" class="filter-label">Make</label>
+            <input type="text" id="filter-make" name="make" value="{{.FilterMake}}" placeholder="Filter by make" class="form-input filter-input">
+        </div>
+        <div class="filter-group">
+            <label for="filter-status" class="filter-label">Status</label>
+            <select id="filter-status" name="status" class="form-input filter-input">
+                <option value="">All</option>
+                <option value="active"{{if eq .FilterStatus "active"}} selected{{end}}>Active</option>
+                <option value="sold"{{if eq .FilterStatus "sold"}} selected{{end}}>Sold</option>
+                <option value="scrapped"{{if eq .FilterStatus "scrapped"}} selected{{end}}>Scrapped</option>
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">Filter</button>
+        {{if or .FilterMake .FilterStatus}}
+        <a href="/vehicles" class="btn btn-secondary">Clear</a>
+        {{end}}
+    </form>
+</div>
+
+{{if .Vehicles}}
+<div class="vehicle-grid">
+    {{range .Vehicles}}
+    <div class="vehicle-card card">
+        <div class="vehicle-card-header">
+            <h3 class="vehicle-card-title">{{.Year}} {{.Make}} {{.Model}}</h3>
+            <span class="vehicle-status vehicle-status-{{.Status}}">{{toTitle (toLower (print .Status))}}</span>
+        </div>
+        <div class="vehicle-card-body">
+            {{if .Color}}<p class="vehicle-detail"><span class="vehicle-detail-label">Color:</span> {{.Color}}</p>{{end}}
+            {{if .LicensePlate}}<p class="vehicle-detail"><span class="vehicle-detail-label">License Plate:</span> {{.LicensePlate}}</p>{{end}}
+            {{if .CurrentMileage}}<p class="vehicle-detail"><span class="vehicle-detail-label">Mileage:</span> {{formatMileagePtr .CurrentMileage}}</p>{{end}}
+        </div>
+        <div class="vehicle-card-actions">
+            <a href="/vehicles/{{.ID}}" class="btn btn-secondary btn-sm">View</a>
+            <a href="/vehicles/{{.ID}}/edit" class="btn btn-secondary btn-sm">Edit</a>
+        </div>
+    </div>
+    {{end}}
+</div>
+
+{{if gt .TotalPages 1}}
+<nav class="pagination" aria-label="Vehicle list pagination">
+    {{if gt .Page 1}}
+    <a href="/vehicles?page={{sub .Page 1}}{{if .FilterMake}}&make={{.FilterMake}}{{end}}{{if .FilterStatus}}&status={{.FilterStatus}}{{end}}" class="btn btn-secondary btn-sm">&laquo; Previous</a>
+    {{end}}
+    <span class="pagination-info">Page {{.Page}} of {{.TotalPages}}</span>
+    {{if lt .Page .TotalPages}}
+    <a href="/vehicles?page={{add .Page 1}}{{if .FilterMake}}&make={{.FilterMake}}{{end}}{{if .FilterStatus}}&status={{.FilterStatus}}{{end}}" class="btn btn-secondary btn-sm">Next &raquo;</a>
+    {{end}}
+</nav>
+{{end}}
+
+{{else}}
+<div class="empty-state">
+    <h2>No vehicles found</h2>
+    {{if or .FilterMake .FilterStatus}}
+    <p class="text-muted">No vehicles match your current filters. <a href="/vehicles">Clear filters</a> to see all vehicles.</p>
+    {{else}}
+    <p class="text-muted">You haven&#39;t added any vehicles yet.</p>
+    <a href="/vehicles/new" class="btn btn-primary">Add Your First Vehicle</a>
+    {{end}}
+</div>
+{{end}}
+{{end}}

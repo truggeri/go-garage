@@ -16,6 +16,7 @@ func buildFuncMap() template.FuncMap {
 		"formatCurrency":    formatCurrency,
 		"formatCurrencyPtr": formatCurrencyPtr,
 		"formatMileage":     formatMileage,
+		"formatMileagePtr":  formatMileagePtr,
 		"toUpper":           strings.ToUpper,
 		"toLower":           strings.ToLower,
 		"toTitle":           titleCase,
@@ -82,6 +83,14 @@ func formatCurrencyPtr(amount *float64) string {
 		return "—"
 	}
 	return formatCurrency(*amount)
+}
+
+// formatMileagePtr formats a *int mileage with commas (e.g. "45,230 mi"). Returns "—" if nil.
+func formatMileagePtr(miles *int) string {
+	if miles == nil {
+		return "—"
+	}
+	return formatMileage(*miles)
 }
 
 // formatMileage formats an integer mileage with commas (e.g. "45,230 mi").

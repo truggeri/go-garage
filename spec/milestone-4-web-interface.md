@@ -114,13 +114,13 @@ web/static/
 
 #### Vehicle List Page
 
-- [ ] Display all user vehicles in cards/table
-- [ ] Show key info (make, model, year, status)
-- [ ] Search/filter functionality
+- [x] Display all user vehicles in cards/table
+- [x] Show key info (make, model, year, status)
+- [x] Search/filter functionality
 - [ ] Sort options (by year, make, model)
-- [ ] Pagination controls
-- [ ] "Add New Vehicle" button
-- [ ] Actions per vehicle (view, edit, delete)
+- [x] Pagination controls
+- [x] "Add New Vehicle" button
+- [x] Actions per vehicle (view, edit, delete)
 
 #### Add Vehicle Page
 
