@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/truggeri/go-garage/internal/auth"
+	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 )
 
@@ -35,17 +35,13 @@ type dashboardMaintenanceRow struct {
 	Cost        *float64
 }
 
-// pageAccount holds basic account information extracted from a validated JWT cookie.
-type pageAccount struct {
-	ID   string
-	Name string
-}
-
 // Dashboard serves the main dashboard page (GET /dashboard).
+// It expects the CookieAuthGuard middleware to have already validated the session
+// and stored the account in the request context.
 func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
-	account, ok := h.authenticatedAccount(r)
+	account, ok := middleware.GetAccountFromContext(r.Context())
 	if !ok {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -111,29 +107,6 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	if err := h.engine.Render(w, "dashboard.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-}
-
-// authenticatedAccount extracts and validates the account from the access_token cookie.
-// Returns nil and false if the user is not authenticated.
-func (h *PageHandler) authenticatedAccount(r *http.Request) (*pageAccount, bool) {
-	if h.tokenManager == nil {
-		return nil, false
-	}
-	cookie, err := r.Cookie("access_token")
-	if err != nil {
-		return nil, false
-	}
-	verified, err := h.tokenManager.ValidateToken(cookie.Value)
-	if err != nil {
-		return nil, false
-	}
-	if verified.TokenKind != auth.AccessTokenKind {
-		return nil, false
-	}
-	return &pageAccount{
-		ID:   verified.AccountID,
-		Name: verified.AccountName,
-	}, true
 }
 
 // vehicleName returns a short human-readable name for a vehicle.

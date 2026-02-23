@@ -66,6 +66,40 @@ func AuthenticationGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Ha
 	}
 }
 
+// CookieAuthGuard creates middleware that validates JWT tokens from the access_token cookie.
+// On failure it redirects to the login page rather than returning a JSON error response.
+// It is intended for browser-facing web page routes.
+func CookieAuthGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			cookie, err := r.Cookie("access_token")
+			if err != nil {
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+
+			verified, err := tokenMgr.ValidateToken(cookie.Value)
+			if err != nil {
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+
+			if verified.TokenKind != auth.AccessTokenKind {
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+
+			acctInfo := &AccountInfo{
+				ID:   verified.AccountID,
+				Name: verified.AccountName,
+			}
+
+			enrichedCtx := context.WithValue(r.Context(), AccountContextKey, acctInfo)
+			next.ServeHTTP(w, r.WithContext(enrichedCtx))
+		})
+	}
+}
+
 // writeAuthError writes a JSON error response for authentication failures
 func writeAuthError(w http.ResponseWriter, message string) {
 	w.Header().Set("Content-Type", "application/json")

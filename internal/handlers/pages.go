@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/truggeri/go-garage/internal/auth"
 	"github.com/truggeri/go-garage/internal/services"
 	"github.com/truggeri/go-garage/internal/templateengine"
 )
@@ -10,7 +9,6 @@ import (
 type PageHandler struct {
 	engine             *templateengine.Engine
 	authService        services.AuthenticationService
-	tokenManager       *auth.TokenManager
 	vehicleService     services.VehicleService
 	maintenanceService services.MaintenanceService
 }
@@ -19,14 +17,12 @@ type PageHandler struct {
 func NewPageHandler(
 	engine *templateengine.Engine,
 	authService services.AuthenticationService,
-	tokenMgr *auth.TokenManager,
 	vehicleSvc services.VehicleService,
 	maintenanceSvc services.MaintenanceService,
 ) *PageHandler {
 	return &PageHandler{
 		engine:             engine,
 		authService:        authService,
-		tokenManager:       tokenMgr,
 		vehicleService:     vehicleSvc,
 		maintenanceService: maintenanceSvc,
 	}

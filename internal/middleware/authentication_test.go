@@ -142,3 +142,88 @@ func TestGetAccountFromContext(t *testing.T) {
 		assert.Nil(t, acct)
 	})
 }
+
+func TestCookieAuthGuard(t *testing.T) {
+	tokenMgr := setupTokenManager(t)
+
+	payload := auth.TokenPayload{
+		AccountID:   "user-test-123",
+		AccountName: "testuser",
+	}
+	bundle, err := tokenMgr.GenerateTokenBundle(payload)
+	require.NoError(t, err)
+
+	t.Run("allows request with valid access token cookie", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			acct, ok := GetAccountFromContext(r.Context())
+			if ok {
+				capturedAcctInfo = acct
+			}
+			w.WriteHeader(http.StatusOK)
+		})
+
+		guardedHandler := CookieAuthGuard(tokenMgr)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: bundle.AccessToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, capturedAcctInfo)
+		assert.Equal(t, "user-test-123", capturedAcctInfo.ID)
+		assert.Equal(t, "testuser", capturedAcctInfo.Name)
+	})
+
+	t.Run("redirects to login when no cookie present", func(t *testing.T) {
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		guardedHandler := CookieAuthGuard(tokenMgr)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusSeeOther, rec.Code)
+		assert.Equal(t, "/login", rec.Header().Get("Location"))
+	})
+
+	t.Run("redirects to login when cookie has invalid token", func(t *testing.T) {
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		guardedHandler := CookieAuthGuard(tokenMgr)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: "invalid.token.here"})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusSeeOther, rec.Code)
+		assert.Equal(t, "/login", rec.Header().Get("Location"))
+	})
+
+	t.Run("redirects to login when refresh token is used instead of access token", func(t *testing.T) {
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		guardedHandler := CookieAuthGuard(tokenMgr)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: bundle.RefreshToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusSeeOther, rec.Code)
+		assert.Equal(t, "/login", rec.Header().Get("Location"))
+	})
+}

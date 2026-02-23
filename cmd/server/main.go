@@ -98,7 +98,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, tokenMgr, vehicleSvc, maintenanceSvc)
+	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc)
 
 	// Setup router and routes
 	router := mux.NewRouter()
@@ -111,13 +111,17 @@ func main() {
 	// Health check endpoint (no auth required)
 	router.HandleFunc("/health", createHealthCheckHandler(garageDB)).Methods("GET")
 
-	// Web page routes
+	// Web page routes (public)
 	router.HandleFunc("/", pageHandler.Home).Methods("GET")
 	router.HandleFunc("/register", pageHandler.RegisterForm).Methods("GET")
 	router.HandleFunc("/register", pageHandler.RegisterSubmit).Methods("POST")
 	router.HandleFunc("/login", pageHandler.LoginForm).Methods("GET")
 	router.HandleFunc("/login", pageHandler.LoginSubmit).Methods("POST")
-	router.HandleFunc("/dashboard", pageHandler.Dashboard).Methods("GET")
+
+	// Web page routes (require cookie authentication)
+	protectedPages := router.NewRoute().Subrouter()
+	protectedPages.Use(middleware.CookieAuthGuard(tokenMgr))
+	protectedPages.HandleFunc("/dashboard", pageHandler.Dashboard).Methods("GET")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()
