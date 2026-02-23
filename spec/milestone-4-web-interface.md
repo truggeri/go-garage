@@ -71,6 +71,10 @@ web/static/
 
 ### 3. Authentication Pages
 
+#### Page Handler Organization
+
+- [x] Refactor pages handler into separate files per handler (PR #47)
+
 #### Registration Page
 
 - [x] Create registration form
