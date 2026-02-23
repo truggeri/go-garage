@@ -3,6 +3,8 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -142,5 +144,184 @@ func TestPageHandler_VehicleList(t *testing.T) {
 		handler.VehicleList(rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("shows success flash when added=true", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{
+			countResult: 1,
+			listResult: []*models.Vehicle{
+				{ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
+			},
+		}
+		handler := newTestVehicleListPageHandler(t, vehicleStub)
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles?added=true", nil)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleList(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Vehicle added successfully")
+	})
+}
+
+func TestPageHandler_VehicleNew(t *testing.T) {
+	t.Run("renders add vehicle form for authenticated user", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/new", nil)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleNew(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Add Vehicle")
+		assert.Contains(t, body, `action="/vehicles/new"`)
+	})
+
+	t.Run("returns 500 when account missing from context", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/new", nil)
+		rec := httptest.NewRecorder()
+
+		handler.VehicleNew(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
+}
+
+func TestPageHandler_VehicleCreate(t *testing.T) {
+	validForm := func() url.Values {
+		form := url.Values{}
+		form.Set("make", "Toyota")
+		form.Set("model", "Camry")
+		form.Set("year", "2021")
+		return form
+	}
+
+	t.Run("redirects to vehicles list on success", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		req := httptest.NewRequest(http.MethodPost, "/vehicles/new", strings.NewReader(validForm().Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleCreate(rec, req)
+
+		assert.Equal(t, http.StatusSeeOther, rec.Code)
+		assert.Equal(t, "/vehicles?added=true", rec.Header().Get("Location"))
+	})
+
+	t.Run("returns 400 when required fields missing", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		form := url.Values{}
+		req := httptest.NewRequest(http.MethodPost, "/vehicles/new", strings.NewReader(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleCreate(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Make is required")
+		assert.Contains(t, body, "Model is required")
+		assert.Contains(t, body, "Year is required")
+	})
+
+	t.Run("returns 400 for invalid year", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		form := url.Values{}
+		form.Set("make", "Toyota")
+		form.Set("model", "Camry")
+		form.Set("year", "abc")
+		req := httptest.NewRequest(http.MethodPost, "/vehicles/new", strings.NewReader(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleCreate(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Year must be a valid year")
+	})
+
+	t.Run("repopulates form fields on validation error", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		form := url.Values{}
+		form.Set("make", "Honda")
+		form.Set("model", "")
+		form.Set("year", "2022")
+		req := httptest.NewRequest(http.MethodPost, "/vehicles/new", strings.NewReader(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleCreate(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Honda")
+	})
+
+	t.Run("returns 500 when account missing from context", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		req := httptest.NewRequest(http.MethodPost, "/vehicles/new", strings.NewReader(validForm().Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleCreate(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
+
+	t.Run("returns 500 when service fails", func(t *testing.T) {
+		stub := &stubVehicleSvc{
+			createErr: models.NewDatabaseError("create vehicle", assert.AnError),
+		}
+		handler := newTestVehicleListPageHandler(t, stub)
+
+		req := httptest.NewRequest(http.MethodPost, "/vehicles/new", strings.NewReader(validForm().Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleCreate(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
+
+	t.Run("accepts optional fields", func(t *testing.T) {
+		handler := newTestVehicleListPageHandler(t, &stubVehicleSvc{})
+
+		form := validForm()
+		form.Set("vin", "1HGBH41JXMN109186")
+		form.Set("color", "Blue")
+		form.Set("license_plate", "ABC-1234")
+		form.Set("purchase_date", "2021-06-15")
+		form.Set("purchase_price", "25000.00")
+		form.Set("purchase_mileage", "5")
+		form.Set("current_mileage", "12000")
+		form.Set("notes", "Great car")
+
+		req := httptest.NewRequest(http.MethodPost, "/vehicles/new", strings.NewReader(form.Encode()))
+		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleCreate(rec, req)
+
+		assert.Equal(t, http.StatusSeeOther, rec.Code)
 	})
 }
