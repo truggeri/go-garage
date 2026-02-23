@@ -123,6 +123,8 @@ func main() {
 	protectedPages.Use(middleware.CookieAuthGuard(tokenMgr))
 	protectedPages.HandleFunc("/dashboard", pageHandler.Dashboard).Methods("GET")
 	protectedPages.HandleFunc("/vehicles", pageHandler.VehicleList).Methods("GET")
+	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleNew).Methods("GET")
+	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleCreate).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

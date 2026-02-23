@@ -124,14 +124,14 @@ web/static/
 
 #### Add Vehicle Page
 
-- [ ] Create vehicle form with all fields
-- [ ] VIN input with validation
-- [ ] Make, model, year dropdowns/inputs
-- [ ] Purchase information fields
-- [ ] Current mileage input
-- [ ] Notes textarea
-- [ ] Form validation
-- [ ] Submit and cancel buttons
+- [x] Create vehicle form with all fields (PR #TBD)
+- [x] VIN input with validation (PR #TBD)
+- [x] Make, model, year dropdowns/inputs (PR #TBD)
+- [x] Purchase information fields (PR #TBD)
+- [x] Current mileage input (PR #TBD)
+- [x] Notes textarea (PR #TBD)
+- [x] Form validation (PR #TBD)
+- [x] Submit and cancel buttons (PR #TBD)
 
 #### Vehicle Detail Page
 
