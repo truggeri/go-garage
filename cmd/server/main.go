@@ -122,6 +122,7 @@ func main() {
 	protectedPages := router.NewRoute().Subrouter()
 	protectedPages.Use(middleware.CookieAuthGuard(tokenMgr))
 	protectedPages.HandleFunc("/dashboard", pageHandler.Dashboard).Methods("GET")
+	protectedPages.HandleFunc("/vehicles", pageHandler.VehicleList).Methods("GET")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

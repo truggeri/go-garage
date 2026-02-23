@@ -650,6 +650,156 @@ html[data-theme="dark"] .theme-toggle-moon { display: none; }
 }
 
 /* ========================================
+   Page Header
+   ======================================== */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-xl);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.page-header h1 {
+    margin: 0;
+}
+
+/* ========================================
+   Filter Bar
+   ======================================== */
+.filter-bar {
+    margin-bottom: var(--spacing-xl);
+}
+
+.filter-form {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--spacing-md);
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.filter-label {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-gray-700);
+}
+
+.filter-input {
+    min-width: 160px;
+}
+
+/* ========================================
+   Vehicle Cards
+   ======================================== */
+.vehicle-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.vehicle-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.vehicle-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: var(--spacing-md);
+    gap: var(--spacing-sm);
+}
+
+.vehicle-card-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin: 0;
+}
+
+.vehicle-status {
+    font-size: var(--font-size-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border-radius: var(--border-radius);
+    white-space: nowrap;
+}
+
+.vehicle-status-active {
+    background-color: #dcfce7;
+    color: #166534;
+}
+
+.vehicle-status-sold {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.vehicle-status-scrapped {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.vehicle-card-body {
+    flex: 1;
+    margin-bottom: var(--spacing-md);
+}
+
+.vehicle-detail {
+    margin: 0 0 var(--spacing-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-600);
+}
+
+.vehicle-detail-label {
+    font-weight: 600;
+    color: var(--color-gray-700);
+}
+
+.vehicle-card-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-gray-200);
+}
+
+/* ========================================
+   Pagination
+   ======================================== */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.pagination-info {
+    font-size: var(--font-size-sm);
+    color: var(--color-gray-500);
+}
+
+/* ========================================
+   Empty State
+   ======================================== */
+.empty-state {
+    text-align: center;
+    padding: var(--spacing-2xl);
+    color: var(--color-gray-500);
+}
+
+.empty-state h2 {
+    margin-bottom: var(--spacing-md);
+    color: var(--color-gray-700);
+}
+
+/* ========================================
    Utility Classes
    ======================================== */
 .text-center { text-align: center; }
