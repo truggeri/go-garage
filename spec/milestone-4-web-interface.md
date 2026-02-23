@@ -104,11 +104,11 @@ web/static/
 
 #### Main Dashboard
 
-- [ ] Welcome message with user name
-- [ ] Vehicle count summary
-- [ ] Recent maintenance activities
-- [ ] Quick action buttons (Add Vehicle, Add Maintenance)
-- [ ] Statistics widgets (total vehicles, total spent, etc.)
+- [x] Welcome message with user name (PR #55)
+- [x] Vehicle count summary (PR #55)
+- [x] Recent maintenance activities (PR #55)
+- [x] Quick action buttons (Add Vehicle, Add Maintenance) (PR #55)
+- [x] Statistics widgets (total vehicles, total spent, etc.) (PR #55)
 
 ### 5. Vehicle Management Pages
 

@@ -11,18 +11,19 @@ import (
 // buildFuncMap returns a FuncMap containing all helper functions available in templates.
 func buildFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"formatDate":     formatDate,
-		"formatDateTime": formatDateTime,
-		"formatCurrency": formatCurrency,
-		"formatMileage":  formatMileage,
-		"toUpper":        strings.ToUpper,
-		"toLower":        strings.ToLower,
-		"toTitle":        titleCase,
-		"currentYear":    currentYear,
-		"seq":            seq,
-		"add":            add,
-		"sub":            sub,
-		"safeHTML":       safeHTML,
+		"formatDate":        formatDate,
+		"formatDateTime":    formatDateTime,
+		"formatCurrency":    formatCurrency,
+		"formatCurrencyPtr": formatCurrencyPtr,
+		"formatMileage":     formatMileage,
+		"toUpper":           strings.ToUpper,
+		"toLower":           strings.ToLower,
+		"toTitle":           titleCase,
+		"currentYear":       currentYear,
+		"seq":               seq,
+		"add":               add,
+		"sub":               sub,
+		"safeHTML":          safeHTML,
 	}
 }
 
@@ -73,6 +74,14 @@ func formatCurrency(amount float64) string {
 		return fmt.Sprintf("-$%s.%02d", wholeStr, cents)
 	}
 	return fmt.Sprintf("$%s.%02d", wholeStr, cents)
+}
+
+// formatCurrencyPtr formats a *float64 as USD currency. Returns "—" if nil.
+func formatCurrencyPtr(amount *float64) string {
+	if amount == nil {
+		return "—"
+	}
+	return formatCurrency(*amount)
 }
 
 // formatMileage formats an integer mileage with commas (e.g. "45,230 mi").

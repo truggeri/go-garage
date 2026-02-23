@@ -7,15 +7,24 @@ import (
 
 // PageHandler serves HTML pages for the web interface.
 type PageHandler struct {
-	engine      *templateengine.Engine
-	authService services.AuthenticationService
+	engine             *templateengine.Engine
+	authService        services.AuthenticationService
+	vehicleService     services.VehicleService
+	maintenanceService services.MaintenanceService
 }
 
-// NewPageHandler creates a new PageHandler with the given template engine and auth service.
-func NewPageHandler(engine *templateengine.Engine, authService services.AuthenticationService) *PageHandler {
+// NewPageHandler creates a new PageHandler with the given template engine and services.
+func NewPageHandler(
+	engine *templateengine.Engine,
+	authService services.AuthenticationService,
+	vehicleSvc services.VehicleService,
+	maintenanceSvc services.MaintenanceService,
+) *PageHandler {
 	return &PageHandler{
-		engine:      engine,
-		authService: authService,
+		engine:             engine,
+		authService:        authService,
+		vehicleService:     vehicleSvc,
+		maintenanceService: maintenanceSvc,
 	}
 }
 
