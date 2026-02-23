@@ -98,7 +98,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc)
+	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, tokenMgr, vehicleSvc, maintenanceSvc)
 
 	// Setup router and routes
 	router := mux.NewRouter()
@@ -117,6 +117,7 @@ func main() {
 	router.HandleFunc("/register", pageHandler.RegisterSubmit).Methods("POST")
 	router.HandleFunc("/login", pageHandler.LoginForm).Methods("GET")
 	router.HandleFunc("/login", pageHandler.LoginSubmit).Methods("POST")
+	router.HandleFunc("/dashboard", pageHandler.Dashboard).Methods("GET")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()
