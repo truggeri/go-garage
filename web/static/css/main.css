@@ -769,11 +769,6 @@ html[data-theme="dark"] .theme-toggle-moon { display: none; }
     border-top: 1px solid var(--color-gray-200);
 }
 
-.btn-sm {
-    padding: var(--spacing-xs) var(--spacing-sm);
-    font-size: var(--font-size-sm);
-}
-
 /* ========================================
    Pagination
    ======================================== */

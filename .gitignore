@@ -41,3 +41,4 @@ dist/
 
 # Development data
 data/
+.env
