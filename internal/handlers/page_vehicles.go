@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/middleware"
@@ -184,14 +185,15 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	currentMileageStr := r.FormValue("current_mileage")
 	notes := r.FormValue("notes")
 
-	validationResult := validateVehicleNewForm(vehicleMake, model, yearStr, purchaseDateStr, purchasePriceStr, purchaseMileageStr, currentMileageStr)
+	parseResult := parseVehicleNewForm(yearStr, purchaseDateStr, purchasePriceStr, purchaseMileageStr, currentMileageStr)
+	formErrors := parseResult.Errors
 
 	renderForm := func(status int) {
 		w.WriteHeader(status)
 		data := vehicleNewPageData{
 			IsAuthenticated: true,
 			UserName:        account.Name,
-			Errors:          validationResult.Errors,
+			Errors:          formErrors,
 			Make:            vehicleMake,
 			Model:           model,
 			Year:            yearStr,
@@ -209,7 +211,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 		_ = h.engine.Render(w, "vehicles/new.html", "base", data)
 	}
 
-	if len(validationResult.Errors) > 0 {
+	if len(formErrors) > 0 {
 		renderForm(http.StatusBadRequest)
 		return
 	}
@@ -219,19 +221,33 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 		VIN:             strings.ToUpper(strings.TrimSpace(vin)),
 		Make:            strings.TrimSpace(vehicleMake),
 		Model:           strings.TrimSpace(model),
-		Year:            validationResult.Year,
+		Year:            parseResult.Year,
 		Color:           color,
 		LicensePlate:    licensePlate,
-		PurchaseDate:    validationResult.PurchaseDate,
-		PurchasePrice:   validationResult.PurchasePrice,
-		PurchaseMileage: validationResult.PurchaseMileage,
-		CurrentMileage:  validationResult.CurrentMileage,
+		PurchaseDate:    parseResult.PurchaseDate,
+		PurchasePrice:   parseResult.PurchasePrice,
+		PurchaseMileage: parseResult.PurchaseMileage,
+		CurrentMileage:  parseResult.CurrentMileage,
 		Notes:           notes,
 		Status:          models.VehicleStatusActive,
 	}
 
+	if validationErrs := models.ValidateVehicleAll(vehicle); len(validationErrs) > 0 {
+		// Filter to only user-facing form field errors
+		formErrors = make(map[string]string)
+		for field, msg := range validationErrs {
+			if field != "user_id" && field != "status" {
+				formErrors[field] = msg
+			}
+		}
+		if len(formErrors) > 0 {
+			renderForm(http.StatusBadRequest)
+			return
+		}
+	}
+
 	if err := h.vehicleService.CreateVehicle(r.Context(), vehicle); err != nil {
-		validationResult.Errors["general"] = "Failed to add vehicle. Please try again."
+		formErrors = map[string]string{"general": "Failed to add vehicle. Please try again."}
 		renderForm(http.StatusInternalServerError)
 		return
 	}

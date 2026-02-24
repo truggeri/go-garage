@@ -213,6 +213,7 @@ func TestPageHandler_VehicleCreate(t *testing.T) {
 		form.Set("make", "Toyota")
 		form.Set("model", "Camry")
 		form.Set("year", "2021")
+		form.Set("vin", "1HGBH41JXMN109186")
 		return form
 	}
 
@@ -243,9 +244,9 @@ func TestPageHandler_VehicleCreate(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		body := rec.Body.String()
-		assert.Contains(t, body, "Make is required")
-		assert.Contains(t, body, "Model is required")
-		assert.Contains(t, body, "Year is required")
+		assert.Contains(t, body, "make is required")
+		assert.Contains(t, body, "model is required")
+		assert.Contains(t, body, "year is required")
 	})
 
 	t.Run("returns 400 for invalid year", func(t *testing.T) {
@@ -264,7 +265,7 @@ func TestPageHandler_VehicleCreate(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		body := rec.Body.String()
-		assert.Contains(t, body, "Year must be a valid year")
+		assert.Contains(t, body, "Year must be a valid")
 	})
 
 	t.Run("repopulates form fields on validation error", func(t *testing.T) {

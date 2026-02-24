@@ -268,6 +268,65 @@ func TestValidateVehicle(t *testing.T) {
 	}
 }
 
+func TestValidateVehicleAll(t *testing.T) {
+	t.Run("returns empty map for valid vehicle", func(t *testing.T) {
+		v := &Vehicle{
+			UserID: "user123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Civic",
+			Year:   2020,
+			Status: VehicleStatusActive,
+		}
+		errs := ValidateVehicleAll(v)
+		assert.Empty(t, errs)
+	})
+
+	t.Run("returns all errors for completely invalid vehicle", func(t *testing.T) {
+		v := &Vehicle{}
+		errs := ValidateVehicleAll(v)
+		assert.Contains(t, errs, "user_id")
+		assert.Contains(t, errs, "vin")
+		assert.Contains(t, errs, "make")
+		assert.Contains(t, errs, "model")
+		assert.Contains(t, errs, "year")
+		assert.Contains(t, errs, "status")
+	})
+
+	t.Run("returns multiple field errors simultaneously", func(t *testing.T) {
+		v := &Vehicle{
+			UserID: "user123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "",
+			Model:  "",
+			Year:   2020,
+			Status: VehicleStatusActive,
+		}
+		errs := ValidateVehicleAll(v)
+		assert.Len(t, errs, 2)
+		assert.Contains(t, errs, "make")
+		assert.Contains(t, errs, "model")
+	})
+
+	t.Run("returns numeric validation errors", func(t *testing.T) {
+		negPrice := -100.0
+		negMileage := -50
+		v := &Vehicle{
+			UserID:          "user123",
+			VIN:             "1HGBH41JXMN109186",
+			Make:            "Honda",
+			Model:           "Civic",
+			Year:            2020,
+			Status:          VehicleStatusActive,
+			PurchasePrice:   &negPrice,
+			PurchaseMileage: &negMileage,
+		}
+		errs := ValidateVehicleAll(v)
+		assert.Contains(t, errs, "purchase_price")
+		assert.Contains(t, errs, "purchase_mileage")
+	})
+}
+
 func TestValidateMaintenanceRecord(t *testing.T) {
 	cost := 150.0
 	negativeCost := -50.0
