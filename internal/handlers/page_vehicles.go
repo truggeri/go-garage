@@ -352,6 +352,12 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		Stats:             stats,
 	}
 
+	if r.URL.Query().Get("updated") == "true" {
+		data.Flash = []flashMessage{
+			{Type: "success", Message: "Vehicle updated successfully."},
+		}
+	}
+
 	if err := h.engine.Render(w, "vehicles/detail.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}

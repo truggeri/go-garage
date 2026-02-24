@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/repositories"
@@ -39,14 +40,17 @@ type VehicleService interface {
 
 // VehicleUpdates contains the fields that can be updated for a vehicle
 type VehicleUpdates struct {
-	VIN            *string
-	Make           *string
-	Model          *string
-	Year           *int
-	Color          *string
-	LicensePlate   *string
-	CurrentMileage *int
-	Notes          *string
+	VIN             *string
+	Make            *string
+	Model           *string
+	Year            *int
+	Color           *string
+	LicensePlate    *string
+	PurchaseDate    **time.Time
+	PurchasePrice   **float64
+	PurchaseMileage **int
+	CurrentMileage  *int
+	Notes           *string
 }
 
 // DefaultVehicleService implements VehicleService using a VehicleRepository
@@ -100,6 +104,15 @@ func (s *DefaultVehicleService) UpdateVehicle(ctx context.Context, id string, up
 	}
 	if updates.LicensePlate != nil {
 		vehicle.LicensePlate = *updates.LicensePlate
+	}
+	if updates.PurchaseDate != nil {
+		vehicle.PurchaseDate = *updates.PurchaseDate
+	}
+	if updates.PurchasePrice != nil {
+		vehicle.PurchasePrice = *updates.PurchasePrice
+	}
+	if updates.PurchaseMileage != nil {
+		vehicle.PurchaseMileage = *updates.PurchaseMileage
 	}
 	if updates.CurrentMileage != nil {
 		vehicle.CurrentMileage = updates.CurrentMileage
