@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
@@ -181,70 +180,14 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	currentMileageStr := r.FormValue("current_mileage")
 	notes := r.FormValue("notes")
 
-	formErrors := make(map[string]string)
-
-	if strings.TrimSpace(vehicleMake) == "" {
-		formErrors["make"] = "Make is required"
-	}
-	if strings.TrimSpace(model) == "" {
-		formErrors["model"] = "Model is required"
-	}
-
-	year := 0
-	if yearStr == "" {
-		formErrors["year"] = "Year is required"
-	} else if y, err := strconv.Atoi(yearStr); err != nil || y < 1900 || y > 2100 {
-		formErrors["year"] = "Year must be a valid year (1900-2100)"
-	} else {
-		year = y
-	}
-
-	var purchaseDate *time.Time
-	if purchaseDateStr != "" {
-		t, err := time.Parse("2006-01-02", purchaseDateStr)
-		if err != nil {
-			formErrors["purchase_date"] = "Invalid date format"
-		} else {
-			purchaseDate = &t
-		}
-	}
-
-	var purchasePrice *float64
-	if purchasePriceStr != "" {
-		p, err := strconv.ParseFloat(purchasePriceStr, 64)
-		if err != nil || p < 0 {
-			formErrors["purchase_price"] = "Purchase price must be a non-negative number"
-		} else {
-			purchasePrice = &p
-		}
-	}
-
-	var purchaseMileage *int
-	if purchaseMileageStr != "" {
-		m, err := strconv.Atoi(purchaseMileageStr)
-		if err != nil || m < 0 {
-			formErrors["purchase_mileage"] = "Mileage at purchase must be a non-negative number"
-		} else {
-			purchaseMileage = &m
-		}
-	}
-
-	var currentMileage *int
-	if currentMileageStr != "" {
-		m, err := strconv.Atoi(currentMileageStr)
-		if err != nil || m < 0 {
-			formErrors["current_mileage"] = "Current mileage must be a non-negative number"
-		} else {
-			currentMileage = &m
-		}
-	}
+	validationResult := validateVehicleNewForm(vehicleMake, model, yearStr, purchaseDateStr, purchasePriceStr, purchaseMileageStr, currentMileageStr)
 
 	renderForm := func(status int) {
 		w.WriteHeader(status)
 		data := vehicleNewPageData{
 			IsAuthenticated: true,
 			UserName:        account.Name,
-			Errors:          formErrors,
+			Errors:          validationResult.Errors,
 			Make:            vehicleMake,
 			Model:           model,
 			Year:            yearStr,
@@ -262,7 +205,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 		_ = h.engine.Render(w, "vehicles/new.html", "base", data)
 	}
 
-	if len(formErrors) > 0 {
+	if len(validationResult.Errors) > 0 {
 		renderForm(http.StatusBadRequest)
 		return
 	}
@@ -272,19 +215,19 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 		VIN:             strings.ToUpper(strings.TrimSpace(vin)),
 		Make:            strings.TrimSpace(vehicleMake),
 		Model:           strings.TrimSpace(model),
-		Year:            year,
+		Year:            validationResult.Year,
 		Color:           color,
 		LicensePlate:    licensePlate,
-		PurchaseDate:    purchaseDate,
-		PurchasePrice:   purchasePrice,
-		PurchaseMileage: purchaseMileage,
-		CurrentMileage:  currentMileage,
+		PurchaseDate:    validationResult.PurchaseDate,
+		PurchasePrice:   validationResult.PurchasePrice,
+		PurchaseMileage: validationResult.PurchaseMileage,
+		CurrentMileage:  validationResult.CurrentMileage,
 		Notes:           notes,
 		Status:          models.VehicleStatusActive,
 	}
 
 	if err := h.vehicleService.CreateVehicle(r.Context(), vehicle); err != nil {
-		formErrors["general"] = "Failed to add vehicle. Please try again."
+		validationResult.Errors["general"] = "Failed to add vehicle. Please try again."
 		renderForm(http.StatusInternalServerError)
 		return
 	}
