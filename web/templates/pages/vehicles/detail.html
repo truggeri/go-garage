@@ -1,0 +1,201 @@
+{{define "title"}}{{.VehicleTitle}} - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>{{.Vehicle.Year}} {{.Vehicle.Make}} {{.Vehicle.Model}}</h1>
+    <div class="page-header-actions">
+        <a href="/vehicles/{{.Vehicle.ID}}/edit" class="btn btn-primary">Edit Vehicle</a>
+        <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+</div>
+
+{{if .Flash}}
+{{range .Flash}}
+<div class="flash flash-{{.Type}}" role="alert">
+    <span class="flash-text">{{.Message}}</span>
+</div>
+{{end}}
+{{end}}
+
+<div class="detail-layout">
+    <div class="detail-main">
+        <div class="card">
+            <div class="card-header card-header--flex">
+                <h2 class="card-title">Vehicle Information</h2>
+                <span class="vehicle-status vehicle-status-{{.Vehicle.Status}}">{{toTitle (toLower (print .Vehicle.Status))}}</span>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Make</dt>
+                        <dd class="detail-value">{{.Vehicle.Make}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Model</dt>
+                        <dd class="detail-value">{{.Vehicle.Model}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Year</dt>
+                        <dd class="detail-value">{{.Vehicle.Year}}</dd>
+                    </div>
+                    {{if .Vehicle.VIN}}
+                    <div class="detail-item">
+                        <dt class="detail-label">VIN</dt>
+                        <dd class="detail-value">{{.Vehicle.VIN}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Vehicle.Color}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Color</dt>
+                        <dd class="detail-value">{{.Vehicle.Color}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Vehicle.LicensePlate}}
+                    <div class="detail-item">
+                        <dt class="detail-label">License Plate</dt>
+                        <dd class="detail-value">{{.Vehicle.LicensePlate}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Vehicle.CurrentMileage}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Current Mileage</dt>
+                        <dd class="detail-value">{{formatMileagePtr .Vehicle.CurrentMileage}}</dd>
+                    </div>
+                    {{end}}
+                </dl>
+            </div>
+        </div>
+
+        {{if or .Vehicle.PurchaseDate .Vehicle.PurchasePrice .Vehicle.PurchaseMileage}}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Purchase Information</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    {{if .Vehicle.PurchaseDate}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Purchase Date</dt>
+                        <dd class="detail-value">{{formatDatePtr .Vehicle.PurchaseDate}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Vehicle.PurchasePrice}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Purchase Price</dt>
+                        <dd class="detail-value">{{formatCurrencyPtr .Vehicle.PurchasePrice}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Vehicle.PurchaseMileage}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Mileage at Purchase</dt>
+                        <dd class="detail-value">{{formatMileagePtr .Vehicle.PurchaseMileage}}</dd>
+                    </div>
+                    {{end}}
+                </dl>
+            </div>
+        </div>
+        {{end}}
+
+        {{if .Vehicle.Notes}}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Notes</h2>
+            </div>
+            <div class="card-body">
+                <p class="detail-notes">{{.Vehicle.Notes}}</p>
+            </div>
+        </div>
+        {{end}}
+
+        <div class="card">
+            <div class="card-header card-header--flex">
+                <h2 class="card-title">Maintenance History</h2>
+                <a href="/maintenance?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-sm">View All</a>
+            </div>
+            {{if .RecentMaintenance}}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Service Type</th>
+                        <th>Date</th>
+                        <th>Mileage</th>
+                        <th>Cost</th>
+                        <th>Provider</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .RecentMaintenance}}
+                    <tr>
+                        <td>{{.ServiceType}}</td>
+                        <td>{{formatDate .ServiceDate}}</td>
+                        <td>{{formatMileagePtr .MileageAtService}}</td>
+                        <td>{{formatCurrencyPtr .Cost}}</td>
+                        <td>{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{else}}
+            <div class="card-body">
+                <p class="text-muted">No maintenance records yet.</p>
+            </div>
+            {{end}}
+            <div class="card-footer">
+                <a href="/maintenance/new?vehicle={{.Vehicle.ID}}" class="btn btn-primary">Add Maintenance Record</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-sidebar">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Statistics</h2>
+            </div>
+            <div class="card-body">
+                <div class="stat-list">
+                    <div class="stat-item">
+                        <span class="stat-item-label">Total Maintenance Records</span>
+                        <span class="stat-item-value">{{.Stats.MaintenanceCount}}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-item-label">Total Maintenance Cost</span>
+                        <span class="stat-item-value">{{formatCurrency .Stats.TotalMaintenanceCost}}</span>
+                    </div>
+                    {{if .Stats.LastMaintenanceDate}}
+                    <div class="stat-item">
+                        <span class="stat-item-label">Last Maintenance</span>
+                        <span class="stat-item-value">{{formatDatePtr .Stats.LastMaintenanceDate}}</span>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="action-list">
+                    <a href="/maintenance/new?vehicle={{.Vehicle.ID}}" class="btn btn-primary btn-block">Add Maintenance</a>
+                    <a href="/maintenance?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">View Records</a>
+                    <a href="/vehicles/{{.Vehicle.ID}}/edit" class="btn btn-secondary btn-block">Edit Vehicle</a>
+                    <a href="/vehicles" class="btn btn-secondary btn-block">Back to Vehicles</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="delete-form" method="POST" action="/vehicles/{{.Vehicle.ID}}/delete" style="display: none;">
+    <input type="hidden" name="_method" value="DELETE">
+</form>
+
+<script>
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
+        document.getElementById('delete-form').submit();
+    }
+}
+</script>
+{{end}}

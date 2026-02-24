@@ -135,13 +135,13 @@ web/static/
 
 #### Vehicle Detail Page
 
-- [ ] Display all vehicle information
-- [ ] Show formatted data (currency, dates)
-- [ ] Edit and delete buttons
-- [ ] Link to vehicle's maintenance records
-- [ ] Vehicle statistics section
-- [ ] Maintenance history preview (recent 5)
-- [ ] Quick add maintenance button
+- [x] Display all vehicle information
+- [x] Show formatted data (currency, dates)
+- [x] Edit and delete buttons
+- [x] Link to vehicle's maintenance records
+- [x] Vehicle statistics section
+- [x] Maintenance history preview (recent 5)
+- [x] Quick add maintenance button
 
 #### Edit Vehicle Page
 

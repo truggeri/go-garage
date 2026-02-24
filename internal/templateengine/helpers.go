@@ -8,10 +8,14 @@ import (
 	"unicode"
 )
 
+// emDash is the em-dash character used as a nil placeholder in formatted output.
+const emDash = "—"
+
 // buildFuncMap returns a FuncMap containing all helper functions available in templates.
 func buildFuncMap() template.FuncMap {
 	return template.FuncMap{
 		"formatDate":        formatDate,
+		"formatDatePtr":     formatDatePtr,
 		"formatDateTime":    formatDateTime,
 		"formatCurrency":    formatCurrency,
 		"formatCurrencyPtr": formatCurrencyPtr,
@@ -34,6 +38,14 @@ func formatDate(t time.Time) string {
 		return ""
 	}
 	return t.Format("Jan 02, 2006")
+}
+
+// formatDatePtr formats a *time.Time as "Jan 02, 2006". Returns "—" if nil.
+func formatDatePtr(t *time.Time) string {
+	if t == nil {
+		return emDash
+	}
+	return formatDate(*t)
 }
 
 // formatDateTime formats a time.Time as "Jan 02, 2006 3:04 PM".
@@ -80,7 +92,7 @@ func formatCurrency(amount float64) string {
 // formatCurrencyPtr formats a *float64 as USD currency. Returns "—" if nil.
 func formatCurrencyPtr(amount *float64) string {
 	if amount == nil {
-		return "—"
+		return emDash
 	}
 	return formatCurrency(*amount)
 }
@@ -88,7 +100,7 @@ func formatCurrencyPtr(amount *float64) string {
 // formatMileagePtr formats a *int mileage with commas (e.g. "45,230 mi"). Returns "—" if nil.
 func formatMileagePtr(miles *int) string {
 	if miles == nil {
-		return "—"
+		return emDash
 	}
 	return formatMileage(*miles)
 }
