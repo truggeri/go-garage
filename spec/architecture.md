@@ -197,7 +197,7 @@ Repositories must **not** contain:
 
 ### File Size Limits
 
-- **Target**: 100–200 lines per file (excluding tests)
+- **Target**: 100–150 lines per file (excluding tests)
 - **Hard limit**: No file should exceed 200 lines (excluding tests)
 - Test files may be longer due to table-driven tests
 
@@ -216,7 +216,7 @@ When a file approaches or exceeds 200 lines, split by responsibility:
 | Pattern | Purpose | Example |
 |---------|---------|---------|
 | `page_<resource>_<action>.go` | Page handler for one action | `page_vehicle_list.go` |
-| `page_<resource>_form.go` | Form parsing helpers | `page_vehicles_form.go` |
+| `page_<resource>_form.go` | Form parsing helpers | `page_vehicle_form.go` |
 | `<resource>.go` | API handler | `vehicle.go` |
 | `<resource>_helpers.go` | Request/response mapping helpers | `vehicle_helpers.go` |
 | `<resource>_response.go` | JSON response builders | `vehicle_response.go` |

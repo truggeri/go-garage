@@ -41,7 +41,7 @@ See `spec/architecture.md` for full details. The key rules are:
 
 ### File Size
 
-- Target **100–200 lines** per non-test Go file. No file should exceed 200 lines.
+- Target **100–150 lines** per non-test Go file. No file should exceed 200 lines.
 - Split large files by responsibility (see `spec/architecture.md` for splitting guidelines).
 
 ## Code Conventions

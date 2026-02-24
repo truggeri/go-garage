@@ -38,7 +38,7 @@ You are a Go developer working on the Go-Garage project. Your job is to implemen
 
 ### File Size & Organization
 
-- **Every non-test Go file must stay under 200 lines.** Target 100–200 lines.
+- **Every non-test Go file must stay under 200 lines.** Target 100–150 lines.
 - Split files by responsibility: one file per handler action or logical group.
 - Extract helpers (form parsing, response building) into separate `*_helpers.go`, `*_form.go`, or `*_response.go` files.
 - Follow the file naming patterns documented in `spec/architecture.md`.
