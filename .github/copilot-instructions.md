@@ -30,6 +30,10 @@ Before making changes, use code search to explore:
 - **Authentication**: JWT tokens
 - **Testing**: `testify` toolkit
 
+## Architecture & Separation of Concerns
+
+See [`spec/architecture.md`](../spec/architecture.md) for layer responsibilities (handlers, services, models, repositories), file size limits, and file splitting guidelines. All code must follow those rules.
+
 ## Code Conventions
 
 ### Naming

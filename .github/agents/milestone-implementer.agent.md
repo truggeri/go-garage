@@ -25,6 +25,22 @@ You are a Go developer working on the Go-Garage project. Your job is to implemen
 4. **Validate your work**:
    - Use the `pr-linting-formatting` skill to verify your work
 
+## Architecture Rules
+
+**Read [`spec/architecture.md`](../spec/architecture.md) before writing any code.** It defines:
+
+- Layer responsibilities (what handlers, services, models, and repositories must and must not do)
+- File size limits and splitting guidelines
+- File naming conventions
+
+Follow those rules strictly. All separation of concerns and file organization decisions are documented there.
+
+### Before Writing Code
+
+1. Search the codebase for existing patterns that match what you're implementing.
+2. Look at similar existing files for the right structure and size.
+3. Plan file splits before you start—don't write a 300-line file and split later.
+
 ## Code Standards
 
 - Follow Go idioms and best practices
