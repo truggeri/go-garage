@@ -27,21 +27,13 @@ You are a Go developer working on the Go-Garage project. Your job is to implemen
 
 ## Architecture Rules
 
-**Read `spec/architecture.md` before writing any code.** Follow these rules strictly:
+**Read [`spec/architecture.md`](../spec/architecture.md) before writing any code.** It defines:
 
-### Separation of Concerns
+- Layer responsibilities (what handlers, services, models, and repositories must and must not do)
+- File size limits and splitting guidelines
+- File naming conventions
 
-- **Handlers** only parse requests and map responses (status codes, JSON encoding, template rendering). They must not contain business logic, sorting, aggregations, or statistics.
-- **Services** contain all business logic: calculations, sorting, filtering, statistics, ownership checks, and multi-step operations. If a handler is doing anything beyond request-in/response-out, move it to the service layer.
-- **Models** own all validation rules. Handlers must not duplicate or inline validation logic—call model validators instead.
-- **Repositories** handle data persistence only. No business logic.
-
-### File Size & Organization
-
-- **Every non-test Go file must stay under 200 lines.** Target 100–150 lines.
-- Split files by responsibility: one file per handler action or logical group.
-- Extract helpers (form parsing, response building) into separate `*_helpers.go`, `*_form.go`, or `*_response.go` files.
-- Follow the file naming patterns documented in `spec/architecture.md`.
+Follow those rules strictly. All separation of concerns and file organization decisions are documented there.
 
 ### Before Writing Code
 
