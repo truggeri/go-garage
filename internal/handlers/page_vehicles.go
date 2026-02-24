@@ -8,11 +8,13 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/repositories"
+	"github.com/truggeri/go-garage/internal/services"
 )
 
 // vehicleListPageData holds the data passed to the vehicle list template.
@@ -106,7 +108,7 @@ func (h *PageHandler) VehicleList(w http.ResponseWriter, r *http.Request) {
 		FilterStatus:    filterStatus,
 	}
 
-	if r.URL.Query().Get("added") == "true" {
+	if r.URL.Query().Get("added") == queryTrue {
 		data.Flash = []flashMessage{
 			{Type: "success", Message: "Vehicle added successfully."},
 		}
@@ -239,6 +241,205 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/vehicles?added=true", http.StatusSeeOther)
 }
 
+// vehicleEditPageData holds the data passed to the edit-vehicle template.
+type vehicleEditPageData struct {
+	// Flash holds optional flash messages rendered by the flash-messages partial template.
+	Flash interface{}
+	// IsAuthenticated indicates whether the user is logged in (always true on this page).
+	IsAuthenticated bool
+	// UserName is the display name of the authenticated user.
+	UserName string
+	// VehicleID is the ID of the vehicle being edited.
+	VehicleID string
+	// VehicleTitle is a short human-readable title for the page (e.g. "2020 Ford Focus").
+	VehicleTitle string
+	// Errors holds field-level and general validation error messages.
+	Errors map[string]string
+	// Form field values for pre-populating / repopulating the form.
+	Make            string
+	Model           string
+	Year            string
+	VIN             string
+	Color           string
+	LicensePlate    string
+	PurchaseDate    string
+	PurchasePrice   string
+	PurchaseMileage string
+	CurrentMileage  string
+	Status          string
+	Notes           string
+}
+
+// VehicleEdit serves the edit vehicle form page (GET /vehicles/{id}/edit).
+func (h *PageHandler) VehicleEdit(w http.ResponseWriter, r *http.Request) {
+	account, ok := middleware.GetAccountFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	vars := mux.Vars(r)
+	vehicleID := vars["id"]
+
+	vehicle, err := h.vehicleService.GetVehicle(r.Context(), vehicleID)
+	if err != nil {
+		var notFound *models.NotFoundError
+		if errors.As(err, &notFound) {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if vehicle.UserID != account.ID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	data := vehicleEditPageData{
+		IsAuthenticated: true,
+		UserName:        account.Name,
+		VehicleID:       vehicleID,
+		VehicleTitle:    fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model),
+		Make:            vehicle.Make,
+		Model:           vehicle.Model,
+		Year:            strconv.Itoa(vehicle.Year),
+		VIN:             vehicle.VIN,
+		Color:           vehicle.Color,
+		LicensePlate:    vehicle.LicensePlate,
+		Status:          string(vehicle.Status),
+		Notes:           vehicle.Notes,
+	}
+
+	if vehicle.PurchaseDate != nil {
+		data.PurchaseDate = vehicle.PurchaseDate.Format("2006-01-02")
+	}
+	if vehicle.PurchasePrice != nil {
+		data.PurchasePrice = strconv.FormatFloat(*vehicle.PurchasePrice, 'f', 2, 64)
+	}
+	if vehicle.PurchaseMileage != nil {
+		data.PurchaseMileage = strconv.Itoa(*vehicle.PurchaseMileage)
+	}
+	if vehicle.CurrentMileage != nil {
+		data.CurrentMileage = strconv.Itoa(*vehicle.CurrentMileage)
+	}
+
+	if err := h.engine.Render(w, "vehicles/edit.html", "base", data); err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+	}
+}
+
+// VehicleUpdate handles the edit vehicle form submission (POST /vehicles/{id}/edit).
+func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
+	account, ok := middleware.GetAccountFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	vars := mux.Vars(r)
+	vehicleID := vars["id"]
+
+	vehicle, err := h.vehicleService.GetVehicle(r.Context(), vehicleID)
+	if err != nil {
+		var notFound *models.NotFoundError
+		if errors.As(err, &notFound) {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	if vehicle.UserID != account.ID {
+		http.Error(w, "Forbidden", http.StatusForbidden)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
+	vehicleMake := r.FormValue("make")
+	model := r.FormValue("model")
+	yearStr := r.FormValue("year")
+	vin := r.FormValue("vin")
+	color := r.FormValue("color")
+	licensePlate := r.FormValue("license_plate")
+	purchaseDateStr := r.FormValue("purchase_date")
+	purchasePriceStr := r.FormValue("purchase_price")
+	purchaseMileageStr := r.FormValue("purchase_mileage")
+	currentMileageStr := r.FormValue("current_mileage")
+	status := r.FormValue("status")
+	notes := r.FormValue("notes")
+
+	validationResult := validateVehicleNewForm(vehicleMake, model, yearStr, purchaseDateStr, purchasePriceStr, purchaseMileageStr, currentMileageStr)
+
+	title := fmt.Sprintf("%s %s %s", yearStr, vehicleMake, model)
+
+	renderForm := func(httpStatus int) {
+		w.WriteHeader(httpStatus)
+		data := vehicleEditPageData{
+			IsAuthenticated: true,
+			UserName:        account.Name,
+			VehicleID:       vehicleID,
+			VehicleTitle:    title,
+			Errors:          validationResult.Errors,
+			Make:            vehicleMake,
+			Model:           model,
+			Year:            yearStr,
+			VIN:             vin,
+			Color:           color,
+			LicensePlate:    licensePlate,
+			PurchaseDate:    purchaseDateStr,
+			PurchasePrice:   purchasePriceStr,
+			PurchaseMileage: purchaseMileageStr,
+			CurrentMileage:  currentMileageStr,
+			Status:          status,
+			Notes:           notes,
+		}
+		_ = h.engine.Render(w, "vehicles/edit.html", "base", data)
+	}
+
+	if len(validationResult.Errors) > 0 {
+		renderForm(http.StatusBadRequest)
+		return
+	}
+
+	vinUpper := strings.ToUpper(strings.TrimSpace(vin))
+	makeClean := strings.TrimSpace(vehicleMake)
+	modelClean := strings.TrimSpace(model)
+	colorVal := color
+	licensePlateVal := licensePlate
+	notesVal := notes
+	newStatus := models.VehicleStatus(status)
+
+	updates := services.VehicleUpdates{
+		VIN:             &vinUpper,
+		Make:            &makeClean,
+		Model:           &modelClean,
+		Year:            &validationResult.Year,
+		Color:           &colorVal,
+		LicensePlate:    &licensePlateVal,
+		CurrentMileage:  validationResult.CurrentMileage,
+		Notes:           &notesVal,
+		PurchaseDate:    validationResult.PurchaseDate,
+		PurchasePrice:   validationResult.PurchasePrice,
+		PurchaseMileage: validationResult.PurchaseMileage,
+		Status:          &newStatus,
+	}
+
+	if _, err := h.vehicleService.UpdateVehicle(r.Context(), vehicleID, updates); err != nil {
+		validationResult.Errors = map[string]string{"general": "Failed to update vehicle. Please try again."}
+		renderForm(http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/vehicles/"+vehicleID+"?updated=true", http.StatusSeeOther)
+}
+
 // vehicleStats holds computed statistics for a vehicle's maintenance history.
 type vehicleStats struct {
 	// MaintenanceCount is the total number of maintenance records for the vehicle.
@@ -334,6 +535,12 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		VehicleTitle:      title,
 		RecentMaintenance: recent,
 		Stats:             stats,
+	}
+
+	if r.URL.Query().Get("updated") == queryTrue {
+		data.Flash = []flashMessage{
+			{Type: "success", Message: "Vehicle updated successfully."},
+		}
 	}
 
 	if err := h.engine.Render(w, "vehicles/detail.html", "base", data); err != nil {

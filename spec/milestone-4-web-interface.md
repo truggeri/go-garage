@@ -145,11 +145,11 @@ web/static/
 
 #### Edit Vehicle Page
 
-- [ ] Pre-populated form with current data
-- [ ] Same fields as add page
-- [ ] Update validation
-- [ ] Cancel and save buttons
-- [ ] Confirmation on save
+- [x] Pre-populated form with current data
+- [x] Same fields as add page
+- [x] Update validation
+- [x] Cancel and save buttons
+- [x] Confirmation on save
 
 ### 6. Maintenance Management Pages
 

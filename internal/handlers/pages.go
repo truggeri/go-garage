@@ -13,6 +13,9 @@ type PageHandler struct {
 	maintenanceService services.MaintenanceService
 }
 
+// queryTrue is the string value used to detect boolean "true" in URL query parameters.
+const queryTrue = "true"
+
 // NewPageHandler creates a new PageHandler with the given template engine and services.
 func NewPageHandler(
 	engine *templateengine.Engine,

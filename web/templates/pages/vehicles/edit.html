@@ -1,0 +1,172 @@
+{{define "title"}}Edit {{.VehicleTitle}} - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>Edit Vehicle</h1>
+    <a href="/vehicles/{{.VehicleID}}" class="btn btn-secondary">Cancel</a>
+</div>
+
+{{if .Errors.general}}
+<div class="flash flash-error" role="alert">
+    <span class="flash-text">{{.Errors.general}}</span>
+</div>
+{{end}}
+
+<div class="card">
+    <form method="POST" action="/vehicles/{{.VehicleID}}/edit" novalidate>
+        <div class="form-section">
+            <h2 class="form-section-title">Vehicle Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="make">Make <span class="required">*</span></label>
+                    <input class="form-input{{if .Errors.make}} is-invalid{{end}}"
+                           type="text" id="make" name="make"
+                           value="{{.Make}}"
+                           required placeholder="e.g. Toyota"
+                           aria-describedby="make-error">
+                    {{if .Errors.make}}
+                    <p class="form-error" id="make-error">{{.Errors.make}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="model">Model <span class="required">*</span></label>
+                    <input class="form-input{{if .Errors.model}} is-invalid{{end}}"
+                           type="text" id="model" name="model"
+                           value="{{.Model}}"
+                           required placeholder="e.g. Camry"
+                           aria-describedby="model-error">
+                    {{if .Errors.model}}
+                    <p class="form-error" id="model-error">{{.Errors.model}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="year">Year <span class="required">*</span></label>
+                    <input class="form-input{{if .Errors.year}} is-invalid{{end}}"
+                           type="number" id="year" name="year"
+                           value="{{.Year}}"
+                           required min="1900" max="2100"
+                           placeholder="e.g. 2020"
+                           aria-describedby="year-error">
+                    {{if .Errors.year}}
+                    <p class="form-error" id="year-error">{{.Errors.year}}</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="vin">VIN</label>
+                    <input class="form-input{{if .Errors.vin}} is-invalid{{end}}"
+                           type="text" id="vin" name="vin"
+                           value="{{.VIN}}"
+                           placeholder="17-character VIN"
+                           maxlength="17"
+                           aria-describedby="vin-error">
+                    {{if .Errors.vin}}
+                    <p class="form-error" id="vin-error">{{.Errors.vin}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="color">Color</label>
+                    <input class="form-input"
+                           type="text" id="color" name="color"
+                           value="{{.Color}}"
+                           placeholder="e.g. Blue">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="license_plate">License Plate</label>
+                    <input class="form-input"
+                           type="text" id="license_plate" name="license_plate"
+                           value="{{.LicensePlate}}"
+                           placeholder="e.g. ABC-1234">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="current_mileage">Current Mileage</label>
+                    <input class="form-input{{if .Errors.current_mileage}} is-invalid{{end}}"
+                           type="number" id="current_mileage" name="current_mileage"
+                           value="{{.CurrentMileage}}"
+                           min="0"
+                           placeholder="e.g. 45000"
+                           aria-describedby="current-mileage-error">
+                    {{if .Errors.current_mileage}}
+                    <p class="form-error" id="current-mileage-error">{{.Errors.current_mileage}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="status">Status</label>
+                    <select class="form-input" id="status" name="status">
+                        <option value="active"{{if eq .Status "active"}} selected{{end}}>Active</option>
+                        <option value="sold"{{if eq .Status "sold"}} selected{{end}}>Sold</option>
+                        <option value="scrapped"{{if eq .Status "scrapped"}} selected{{end}}>Scrapped</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-section-title">Purchase Information</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="purchase_date">Purchase Date</label>
+                    <input class="form-input"
+                           type="date" id="purchase_date" name="purchase_date"
+                           value="{{.PurchaseDate}}">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="purchase_price">Purchase Price</label>
+                    <input class="form-input{{if .Errors.purchase_price}} is-invalid{{end}}"
+                           type="number" id="purchase_price" name="purchase_price"
+                           value="{{.PurchasePrice}}"
+                           min="0" step="0.01"
+                           placeholder="e.g. 25000.00"
+                           aria-describedby="purchase-price-error">
+                    {{if .Errors.purchase_price}}
+                    <p class="form-error" id="purchase-price-error">{{.Errors.purchase_price}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="purchase_mileage">Mileage at Purchase</label>
+                    <input class="form-input{{if .Errors.purchase_mileage}} is-invalid{{end}}"
+                           type="number" id="purchase_mileage" name="purchase_mileage"
+                           value="{{.PurchaseMileage}}"
+                           min="0"
+                           placeholder="e.g. 12000"
+                           aria-describedby="purchase-mileage-error">
+                    {{if .Errors.purchase_mileage}}
+                    <p class="form-error" id="purchase-mileage-error">{{.Errors.purchase_mileage}}</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-section-title">Additional Notes</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="notes">Notes</label>
+                <textarea class="form-input"
+                          id="notes" name="notes"
+                          rows="4"
+                          placeholder="Any additional notes about this vehicle">{{.Notes}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <a href="/vehicles/{{.VehicleID}}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{{end}}
