@@ -233,11 +233,14 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if validationErrs := models.ValidateVehicleAll(vehicle); len(validationErrs) > 0 {
-		// Don't expose internal field validation to the form
-		delete(validationErrs, "user_id")
-		delete(validationErrs, "status")
-		if len(validationErrs) > 0 {
-			formErrors = validationErrs
+		// Filter to only user-facing form field errors
+		formErrors = make(map[string]string)
+		for field, msg := range validationErrs {
+			if field != "user_id" && field != "status" {
+				formErrors[field] = msg
+			}
+		}
+		if len(formErrors) > 0 {
 			renderForm(http.StatusBadRequest)
 			return
 		}
