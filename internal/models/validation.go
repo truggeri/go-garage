@@ -89,69 +89,86 @@ func ValidatePassword(password string) error {
 	return nil
 }
 
-// ValidateVehicle validates a Vehicle model
-func ValidateVehicle(v *Vehicle) error {
+// vehicleValidationFields defines the order in which vehicle validation errors
+// are returned by ValidateVehicle.
+var vehicleValidationFields = []string{
+	"user_id", "vin", "make", "model", "year", "status",
+	"purchase_price", "purchase_mileage", "current_mileage",
+}
+
+// ValidateVehicleAll validates a Vehicle model and returns all validation errors
+// as a map of field name to error message.
+func ValidateVehicleAll(v *Vehicle) map[string]string {
+	errs := make(map[string]string)
+
 	if v.UserID == "" {
-		return NewValidationError("user_id", "user ID is required")
+		errs["user_id"] = "user ID is required"
 	}
 
 	if v.VIN == "" {
-		return NewValidationError("vin", "VIN is required")
-	}
+		errs["vin"] = "VIN is required"
+	} else {
+		// Normalize VIN to uppercase and remove spaces
+		normalizedVIN := strings.ToUpper(strings.ReplaceAll(v.VIN, " ", ""))
 
-	// Normalize VIN to uppercase and remove spaces
-	normalizedVIN := strings.ToUpper(strings.ReplaceAll(v.VIN, " ", ""))
-
-	if len(normalizedVIN) != vinLength {
-		return NewValidationError("vin", "VIN must be exactly 17 characters")
-	}
-
-	if !vinRegex.MatchString(normalizedVIN) {
-		return NewValidationError("vin", "VIN contains invalid characters (cannot include I, O, or Q)")
+		if len(normalizedVIN) != vinLength {
+			errs["vin"] = "VIN must be exactly 17 characters"
+		} else if !vinRegex.MatchString(normalizedVIN) {
+			errs["vin"] = "VIN contains invalid characters (cannot include I, O, or Q)"
+		}
 	}
 
 	if v.Make == "" {
-		return NewValidationError("make", "make is required")
+		errs["make"] = "make is required"
 	}
 
 	if v.Model == "" {
-		return NewValidationError("model", "model is required")
+		errs["model"] = "model is required"
 	}
 
 	if v.Year == 0 {
-		return NewValidationError("year", "year is required")
-	}
-
-	currentYear := time.Now().Year()
-	if v.Year < minYear || v.Year > currentYear+1 {
-		return NewValidationError("year", "year must be between 1900 and current year + 1")
+		errs["year"] = "year is required"
+	} else {
+		currentYear := time.Now().Year()
+		if v.Year < minYear || v.Year > currentYear+1 {
+			errs["year"] = "year must be between 1900 and current year + 1"
+		}
 	}
 
 	if v.Status == "" {
-		return NewValidationError("status", "status is required")
-	}
-
-	if v.Status != VehicleStatusActive && v.Status != VehicleStatusSold && v.Status != VehicleStatusScrapped {
-		return NewValidationError("status", "status must be 'active', 'sold', or 'scrapped'")
+		errs["status"] = "status is required"
+	} else if v.Status != VehicleStatusActive && v.Status != VehicleStatusSold && v.Status != VehicleStatusScrapped {
+		errs["status"] = "status must be 'active', 'sold', or 'scrapped'"
 	}
 
 	if v.PurchasePrice != nil && *v.PurchasePrice < 0 {
-		return NewValidationError("purchase_price", "purchase price cannot be negative")
+		errs["purchase_price"] = "purchase price cannot be negative"
 	}
 
 	if v.PurchaseMileage != nil && *v.PurchaseMileage < 0 {
-		return NewValidationError("purchase_mileage", "purchase mileage cannot be negative")
+		errs["purchase_mileage"] = "purchase mileage cannot be negative"
 	}
 
 	if v.CurrentMileage != nil && *v.CurrentMileage < 0 {
-		return NewValidationError("current_mileage", "current mileage cannot be negative")
+		errs["current_mileage"] = "current mileage cannot be negative"
 	}
 
 	// Validate current mileage is not less than purchase mileage
 	if v.PurchaseMileage != nil && v.CurrentMileage != nil && *v.CurrentMileage < *v.PurchaseMileage {
-		return NewValidationError("current_mileage", "current mileage cannot be less than purchase mileage")
+		errs["current_mileage"] = "current mileage cannot be less than purchase mileage"
 	}
 
+	return errs
+}
+
+// ValidateVehicle validates a Vehicle model and returns the first error found.
+func ValidateVehicle(v *Vehicle) error {
+	errs := ValidateVehicleAll(v)
+	for _, field := range vehicleValidationFields {
+		if msg, ok := errs[field]; ok {
+			return NewValidationError(field, msg)
+		}
+	}
 	return nil
 }
 
