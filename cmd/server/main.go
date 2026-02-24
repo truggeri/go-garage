@@ -125,6 +125,7 @@ func main() {
 	protectedPages.HandleFunc("/vehicles", pageHandler.VehicleList).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleNew).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleCreate).Methods("POST")
+	protectedPages.HandleFunc("/vehicles/{id}", pageHandler.VehicleDetail).Methods("GET")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()
