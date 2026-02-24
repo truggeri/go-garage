@@ -30,6 +30,20 @@ Before making changes, use code search to explore:
 - **Authentication**: JWT tokens
 - **Testing**: `testify` toolkit
 
+## Architecture & Separation of Concerns
+
+See `spec/architecture.md` for full details. The key rules are:
+
+- **Handlers**: Only parse requests and map responses. No business logic, no direct DB access, no validation rules.
+- **Services**: All business logic, calculations, aggregations, sorting, and cross-repository coordination.
+- **Models**: Domain types, validation rules, constants, and custom error types. No HTTP or DB concerns.
+- **Repositories**: Data persistence only. No business logic or HTTP concerns.
+
+### File Size
+
+- Target **100–200 lines** per non-test Go file. No file should exceed 200 lines.
+- Split large files by responsibility (see `spec/architecture.md` for splitting guidelines).
+
 ## Code Conventions
 
 ### Naming
