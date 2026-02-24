@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
-	"github.com/truggeri/go-garage/internal/services"
 )
 
 // VehicleEdit serves the edit vehicle form page (GET /vehicles/{id}/edit).
@@ -120,44 +119,20 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Build updates for the service.
-	vinVal := strings.ToUpper(strings.TrimSpace(vin))
-	makeVal := strings.TrimSpace(vehicleMake)
-	modelVal := strings.TrimSpace(model)
-	notesVal := notes
+	// Apply form values to the fetched vehicle.
+	vehicle.VIN = strings.ToUpper(strings.TrimSpace(vin))
+	vehicle.Make = strings.TrimSpace(vehicleMake)
+	vehicle.Model = strings.TrimSpace(model)
+	vehicle.Year = parseResult.Year
+	vehicle.Color = color
+	vehicle.LicensePlate = licensePlate
+	vehicle.PurchaseDate = parseResult.PurchaseDate
+	vehicle.PurchasePrice = parseResult.PurchasePrice
+	vehicle.PurchaseMileage = parseResult.PurchaseMileage
+	vehicle.CurrentMileage = parseResult.CurrentMileage
+	vehicle.Notes = notes
 
-	updates := services.VehicleUpdates{
-		VIN:             &vinVal,
-		Make:            &makeVal,
-		Model:           &modelVal,
-		Year:            &parseResult.Year,
-		Color:           &color,
-		LicensePlate:    &licensePlate,
-		PurchaseDate:    &parseResult.PurchaseDate,
-		PurchasePrice:   &parseResult.PurchasePrice,
-		PurchaseMileage: &parseResult.PurchaseMileage,
-		CurrentMileage:  parseResult.CurrentMileage,
-		Notes:           &notesVal,
-	}
-
-	// Validate the resulting vehicle before saving.
-	candidate := &models.Vehicle{
-		UserID:          account.ID,
-		VIN:             vinVal,
-		Make:            makeVal,
-		Model:           modelVal,
-		Year:            parseResult.Year,
-		Color:           color,
-		LicensePlate:    licensePlate,
-		PurchaseDate:    parseResult.PurchaseDate,
-		PurchasePrice:   parseResult.PurchasePrice,
-		PurchaseMileage: parseResult.PurchaseMileage,
-		CurrentMileage:  parseResult.CurrentMileage,
-		Notes:           notes,
-		Status:          vehicle.Status,
-	}
-
-	if validationErrs := models.ValidateVehicleAll(candidate); len(validationErrs) > 0 {
+	if validationErrs := models.ValidateVehicleAll(vehicle); len(validationErrs) > 0 {
 		formErrors = make(map[string]string)
 		for field, msg := range validationErrs {
 			if field != "user_id" && field != "status" {
@@ -170,7 +145,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if _, err := h.vehicleService.UpdateVehicle(r.Context(), vehicleID, updates); err != nil {
+	if err := h.vehicleService.SaveVehicle(r.Context(), vehicle); err != nil {
 		formErrors = map[string]string{"general": "Failed to update vehicle. Please try again."}
 		renderForm(http.StatusInternalServerError)
 		return

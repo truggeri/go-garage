@@ -120,7 +120,6 @@ func TestPageHandler_VehicleUpdate(t *testing.T) {
 	t.Run("redirects to vehicle detail on success", func(t *testing.T) {
 		vehicleStub := &stubVehicleSvc{
 			getResult: baseVehicle,
-			updateRes: baseVehicle,
 		}
 		handler := newTestVehicleDetailPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
 
@@ -266,7 +265,6 @@ func TestPageHandler_VehicleUpdate(t *testing.T) {
 	t.Run("accepts optional fields", func(t *testing.T) {
 		vehicleStub := &stubVehicleSvc{
 			getResult: baseVehicle,
-			updateRes: baseVehicle,
 		}
 		handler := newTestVehicleDetailPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
 
