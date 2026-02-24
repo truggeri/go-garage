@@ -33,3 +33,6 @@ type flashMessage struct {
 	Type    string
 	Message string
 }
+
+// queryTrue is the literal value used when checking boolean query parameters.
+const queryTrue = "true"
