@@ -166,15 +166,15 @@ web/static/
 
 #### Add Maintenance Page
 
-- [ ] Select vehicle dropdown
-- [ ] Service type dropdown/input
-- [ ] Service date picker
-- [ ] Mileage input
-- [ ] Cost input with currency
-- [ ] Service provider input
-- [ ] Notes textarea
-- [ ] Form validation
-- [ ] Submit and cancel buttons
+- [x] Select vehicle dropdown (PR #87)
+- [x] Service type dropdown/input (PR #87)
+- [x] Service date picker (PR #87)
+- [x] Mileage input (PR #87)
+- [x] Cost input with currency (PR #87)
+- [x] Service provider input (PR #87)
+- [x] Notes textarea (PR #87)
+- [x] Form validation (PR #87)
+- [x] Submit and cancel buttons (PR #87)
 
 #### Maintenance Detail Page
 
