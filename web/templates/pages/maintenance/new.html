@@ -1,0 +1,125 @@
+{{define "title"}}Add Maintenance Record - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>Add Maintenance Record</h1>
+    <a href="/maintenance" class="btn btn-secondary">Cancel</a>
+</div>
+
+{{if .Errors.general}}
+<div class="flash flash-error" role="alert">
+    <span class="flash-text">{{.Errors.general}}</span>
+</div>
+{{end}}
+
+{{if .Vehicles}}
+<div class="card">
+    <form method="POST" action="/maintenance/new" novalidate>
+        <div class="form-section">
+            <h2 class="form-section-title">Record Details</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="vehicle_id">Vehicle <span class="required">*</span></label>
+                <select class="form-input{{if .Errors.vehicle_id}} is-invalid{{end}}"
+                        id="vehicle_id" name="vehicle_id"
+                        required
+                        aria-describedby="vehicle-error">
+                    <option value="">Select a vehicle</option>
+                    {{range .Vehicles}}
+                    <option value="{{.ID}}"{{if eq $.VehicleID .ID}} selected{{end}}>{{index $.VehicleNames .ID}}</option>
+                    {{end}}
+                </select>
+                {{if .Errors.vehicle_id}}
+                <p class="form-error" id="vehicle-error">{{.Errors.vehicle_id}}</p>
+                {{end}}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="service_type">Service Type <span class="required">*</span></label>
+                    <input class="form-input{{if .Errors.service_type}} is-invalid{{end}}"
+                           type="text" id="service_type" name="service_type"
+                           value="{{.ServiceType}}"
+                           required placeholder="e.g. Oil Change"
+                           aria-describedby="service-type-error">
+                    {{if .Errors.service_type}}
+                    <p class="form-error" id="service-type-error">{{.Errors.service_type}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="service_date">Service Date <span class="required">*</span></label>
+                    <input class="form-input{{if .Errors.service_date}} is-invalid{{end}}"
+                           type="date" id="service_date" name="service_date"
+                           value="{{.ServiceDate}}"
+                           required
+                           aria-describedby="service-date-error">
+                    {{if .Errors.service_date}}
+                    <p class="form-error" id="service-date-error">{{.Errors.service_date}}</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="mileage_at_service">Mileage at Service</label>
+                    <input class="form-input{{if .Errors.mileage_at_service}} is-invalid{{end}}"
+                           type="number" id="mileage_at_service" name="mileage_at_service"
+                           value="{{.MileageAtService}}"
+                           min="0"
+                           placeholder="e.g. 45000"
+                           aria-describedby="mileage-error">
+                    {{if .Errors.mileage_at_service}}
+                    <p class="form-error" id="mileage-error">{{.Errors.mileage_at_service}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="cost">Cost</label>
+                    <input class="form-input{{if .Errors.cost}} is-invalid{{end}}"
+                           type="number" id="cost" name="cost"
+                           value="{{.Cost}}"
+                           min="0" step="0.01"
+                           placeholder="e.g. 49.99"
+                           aria-describedby="cost-error">
+                    {{if .Errors.cost}}
+                    <p class="form-error" id="cost-error">{{.Errors.cost}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="service_provider">Service Provider</label>
+                    <input class="form-input"
+                           type="text" id="service_provider" name="service_provider"
+                           value="{{.ServiceProvider}}"
+                           placeholder="e.g. Quick Lube">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-section-title">Additional Notes</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="notes">Notes</label>
+                <textarea class="form-input"
+                          id="notes" name="notes"
+                          rows="4"
+                          placeholder="Any additional notes about this service">{{.Notes}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add Record</button>
+            <a href="/maintenance" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{{else}}
+<div class="empty-state">
+    <h2>No Vehicles Found</h2>
+    <p class="text-muted">You need to add a vehicle before logging maintenance records.</p>
+    <a href="/vehicles/new" class="btn btn-primary">Add a Vehicle</a>
+</div>
+{{end}}
+{{end}}
