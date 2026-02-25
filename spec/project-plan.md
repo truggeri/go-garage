@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Edit Vehicle Page
+Milestone 4, Maintenance List Page
 
 ## Task tracker
 
@@ -54,7 +54,7 @@ Milestone 4, Edit Vehicle Page
 - [x] Vehicle List Page
 - [x] Add Vehicle Page
 - [x] Vehicle Detail Page
-- [ ] Edit Vehicle Page
+- [x] Edit Vehicle Page
 - [ ] Maintenance List Page
 - [ ] Add Maintenance Page
 - [ ] Maintenance Detail Page

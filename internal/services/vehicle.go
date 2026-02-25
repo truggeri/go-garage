@@ -33,6 +33,9 @@ type VehicleService interface {
 	// CountVehicles returns the total number of vehicles matching the filters
 	CountVehicles(ctx context.Context, filters repositories.VehicleFilters) (int, error)
 
+	// SaveVehicle validates and persists a fully-populated vehicle
+	SaveVehicle(ctx context.Context, vehicle *models.Vehicle) error
+
 	// VerifyOwnership verifies that a vehicle belongs to a specific user
 	VerifyOwnership(ctx context.Context, vehicleID, userID string) error
 }
@@ -153,6 +156,11 @@ func (s *DefaultVehicleService) CountVehicles(ctx context.Context, filters repos
 // DeleteVehicle removes a vehicle from the system
 func (s *DefaultVehicleService) DeleteVehicle(ctx context.Context, id string) error {
 	return s.repo.Delete(ctx, id)
+}
+
+// SaveVehicle validates and persists a fully-populated vehicle.
+func (s *DefaultVehicleService) SaveVehicle(ctx context.Context, vehicle *models.Vehicle) error {
+	return s.repo.Update(ctx, vehicle)
 }
 
 // VerifyOwnership verifies that a vehicle belongs to a specific user

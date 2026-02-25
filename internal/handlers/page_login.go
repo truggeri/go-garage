@@ -19,7 +19,7 @@ type loginPageData struct {
 func (h *PageHandler) LoginForm(w http.ResponseWriter, r *http.Request) {
 	data := loginPageData{}
 
-	if r.URL.Query().Get("registered") == "true" {
+	if r.URL.Query().Get("registered") == queryTrue {
 		data.Flash = []flashMessage{
 			{Type: "success", Message: "Account created successfully. Please log in."},
 		}

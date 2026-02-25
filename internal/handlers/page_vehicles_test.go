@@ -416,4 +416,25 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	})
+
+	t.Run("shows success flash when updated=true", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{
+			getResult: &models.Vehicle{
+				ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020,
+				Status: models.VehicleStatusActive, CurrentMileage: &mileage,
+			},
+		}
+		handler := newTestVehicleDetailPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1?updated=true", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleDetail(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Vehicle updated successfully")
+	})
 }

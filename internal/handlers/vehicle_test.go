@@ -58,6 +58,10 @@ func (s *stubVehicleSvc) DeleteVehicle(_ context.Context, _ string) error {
 	return s.deleteErr
 }
 
+func (s *stubVehicleSvc) SaveVehicle(_ context.Context, _ *models.Vehicle) error {
+	return s.updateErr
+}
+
 func (s *stubVehicleSvc) ListVehicles(_ context.Context, _ repositories.VehicleFilters, _ repositories.PaginationParams) ([]*models.Vehicle, error) {
 	return s.listResult, s.listErr
 }

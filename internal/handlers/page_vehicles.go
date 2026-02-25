@@ -107,7 +107,7 @@ func (h *PageHandler) VehicleList(w http.ResponseWriter, r *http.Request) {
 		FilterStatus:    filterStatus,
 	}
 
-	if r.URL.Query().Get("added") == "true" {
+	if r.URL.Query().Get("added") == queryTrue {
 		data.Flash = []flashMessage{
 			{Type: "success", Message: "Vehicle added successfully."},
 		}
@@ -350,6 +350,12 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		VehicleTitle:      title,
 		RecentMaintenance: recent,
 		Stats:             stats,
+	}
+
+	if r.URL.Query().Get("updated") == queryTrue {
+		data.Flash = []flashMessage{
+			{Type: "success", Message: "Vehicle updated successfully."},
+		}
 	}
 
 	if err := h.engine.Render(w, "vehicles/detail.html", "base", data); err != nil {
