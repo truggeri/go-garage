@@ -3,6 +3,7 @@ package templateengine
 import (
 	"fmt"
 	"html/template"
+	"net/url"
 	"strings"
 	"time"
 	"unicode"
@@ -29,6 +30,7 @@ func buildFuncMap() template.FuncMap {
 		"add":               add,
 		"sub":               sub,
 		"safeHTML":          safeHTML,
+		"urlEncode":         url.QueryEscape,
 	}
 }
 

@@ -155,14 +155,14 @@ web/static/
 
 #### Maintenance List Page
 
-- [ ] Display all maintenance records
-- [ ] Filter by vehicle
+- [x] Display all maintenance records
+- [x] Filter by vehicle
 - [ ] Filter by date range
-- [ ] Filter by service type
+- [x] Filter by service type
 - [ ] Sort by date, cost
-- [ ] Pagination
-- [ ] "Add New Record" button
-- [ ] Actions per record (view, edit, delete)
+- [x] Pagination
+- [x] "Add New Record" button
+- [x] Actions per record (view, edit, delete)
 
 #### Add Maintenance Page
 
