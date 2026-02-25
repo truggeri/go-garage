@@ -18,7 +18,7 @@ func GetSampleUsers() []*models.User {
 			ID:           "550e8400-e29b-41d4-a716-446655440001",
 			Username:     "john_doe",
 			Email:        "john.doe@example.com",
-			PasswordHash: "$2a$10$YPKxdGqFt2Gh8VlZfzL5ouYXfQjDnHvYSqHABTxGZrRJLBY5WNQ0u", // password123
+			PasswordHash: "$2a$10$Q0cA5lEcp0O9jhRKD5N2b.hWnSN5oujuSlPnAKag60TaiK9avvlB.", // password123
 			FirstName:    "John",
 			LastName:     "Doe",
 			CreatedAt:    now,
@@ -29,7 +29,7 @@ func GetSampleUsers() []*models.User {
 			ID:           "550e8400-e29b-41d4-a716-446655440002",
 			Username:     "jane_smith",
 			Email:        "jane.smith@example.com",
-			PasswordHash: "$2a$10$YPKxdGqFt2Gh8VlZfzL5ouYXfQjDnHvYSqHABTxGZrRJLBY5WNQ0u", // password123
+			PasswordHash: "$2a$10$Q0cA5lEcp0O9jhRKD5N2b.hWnSN5oujuSlPnAKag60TaiK9avvlB.", // password123
 			FirstName:    "Jane",
 			LastName:     "Smith",
 			CreatedAt:    now,
@@ -40,7 +40,7 @@ func GetSampleUsers() []*models.User {
 			ID:           "550e8400-e29b-41d4-a716-446655440003",
 			Username:     "bob_wilson",
 			Email:        "bob.wilson@example.com",
-			PasswordHash: "$2a$10$YPKxdGqFt2Gh8VlZfzL5ouYXfQjDnHvYSqHABTxGZrRJLBY5WNQ0u", // password123
+			PasswordHash: "$2a$10$Q0cA5lEcp0O9jhRKD5N2b.hWnSN5oujuSlPnAKag60TaiK9avvlB.", // password123
 			FirstName:    "Robert",
 			LastName:     "Wilson",
 			CreatedAt:    now,

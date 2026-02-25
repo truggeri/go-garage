@@ -5,6 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/truggeri/go-garage/internal/models"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestGetSampleUsers(t *testing.T) {
@@ -44,6 +45,12 @@ func TestGetSampleUsers(t *testing.T) {
 	for _, user := range users {
 		assert.False(t, idMap[user.ID], "ID %s should be unique", user.ID)
 		idMap[user.ID] = true
+	}
+
+	// Verify all password hashes are valid bcrypt hashes for "password123"
+	for i, user := range users {
+		err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte("password123"))
+		assert.NoError(t, err, "User %d password hash should be valid for 'password123'", i)
 	}
 }
 
