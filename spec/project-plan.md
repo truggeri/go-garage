@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Maintenance Detail Page
+Milestone 4, Edit Maintenance Page
 
 ## Task tracker
 
@@ -57,7 +57,7 @@ Milestone 4, Maintenance Detail Page
 - [x] Edit Vehicle Page
 - [x] Maintenance List Page
 - [x] Add Maintenance Page (PR #87)
-- [ ] Maintenance Detail Page
+- [x] Maintenance Detail Page
 - [ ] Edit Maintenance Page
 - [ ] View Profile
 - [ ] Edit Profile

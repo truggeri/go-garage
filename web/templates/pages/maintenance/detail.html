@@ -1,0 +1,121 @@
+{{define "title"}}{{.Record.ServiceType}} - {{.VehicleTitle}} - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>{{.Record.ServiceType}}</h1>
+    <div class="page-header-actions">
+        <a href="/maintenance/{{.Record.ID}}/edit" class="btn btn-primary">Edit Record</a>
+        <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+</div>
+
+{{if .Flash}}
+{{range .Flash}}
+<div class="flash flash-{{.Type}}" role="alert">
+    <span class="flash-text">{{.Message}}</span>
+</div>
+{{end}}
+{{end}}
+
+<div class="detail-layout">
+    <div class="detail-main">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Service Details</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Service Type</dt>
+                        <dd class="detail-value">{{.Record.ServiceType}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Service Date</dt>
+                        <dd class="detail-value">{{formatDate .Record.ServiceDate}}</dd>
+                    </div>
+                    {{if .Record.MileageAtService}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Mileage at Service</dt>
+                        <dd class="detail-value">{{formatMileagePtr .Record.MileageAtService}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.Cost}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Cost</dt>
+                        <dd class="detail-value">{{formatCurrencyPtr .Record.Cost}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.ServiceProvider}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Service Provider</dt>
+                        <dd class="detail-value">{{.Record.ServiceProvider}}</dd>
+                    </div>
+                    {{end}}
+                </dl>
+            </div>
+        </div>
+
+        {{if .Record.Notes}}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Notes</h2>
+            </div>
+            <div class="card-body">
+                <p class="detail-notes">{{.Record.Notes}}</p>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <div class="detail-sidebar">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Vehicle</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Make</dt>
+                        <dd class="detail-value">{{.Vehicle.Make}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Model</dt>
+                        <dd class="detail-value">{{.Vehicle.Model}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Year</dt>
+                        <dd class="detail-value">{{.Vehicle.Year}}</dd>
+                    </div>
+                </dl>
+                <a href="/vehicles/{{.Vehicle.ID}}" class="btn btn-secondary btn-block">View Vehicle</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="action-list">
+                    <a href="/maintenance/{{.Record.ID}}/edit" class="btn btn-primary btn-block">Edit Record</a>
+                    <a href="/maintenance?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">All Records for Vehicle</a>
+                    <a href="/maintenance/new?vehicle_id={{.Vehicle.ID}}" class="btn btn-secondary btn-block">Add Maintenance</a>
+                    <a href="/maintenance" class="btn btn-secondary btn-block">Back to Maintenance</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="delete-form" method="POST" action="/maintenance/{{.Record.ID}}/delete" style="display: none;">
+    <input type="hidden" name="_method" value="DELETE">
+</form>
+
+<script>
+function confirmDelete() {
+    if (confirm('Are you sure you want to delete this maintenance record? This action cannot be undone.')) {
+        document.getElementById('delete-form').submit();
+    }
+}
+</script>
+{{end}}

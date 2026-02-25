@@ -178,11 +178,11 @@ web/static/
 
 #### Maintenance Detail Page
 
-- [ ] Display all maintenance info
-- [ ] Show associated vehicle info
-- [ ] Formatted dates and currency
-- [ ] Edit and delete buttons
-- [ ] Link back to vehicle
+- [x] Display all maintenance info
+- [x] Show associated vehicle info
+- [x] Formatted dates and currency
+- [x] Edit and delete buttons
+- [x] Link back to vehicle
 
 #### Edit Maintenance Page
 
