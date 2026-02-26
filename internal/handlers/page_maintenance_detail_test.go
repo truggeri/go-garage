@@ -19,7 +19,7 @@ func newTestMaintenanceDetailPageHandler(
 ) *PageHandler {
 	t.Helper()
 	engine := templateengine.NewEngine("../../web/templates", true)
-	return NewPageHandler(engine, &mockAuthService{}, vehicleSvc, maintenanceSvc)
+	return NewPageHandler(engine, &mockAuthService{}, vehicleSvc, maintenanceSvc, nil)
 }
 
 func TestPageHandler_MaintenanceDetail(t *testing.T) {

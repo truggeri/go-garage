@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, View Profile
+Milestone 4, Edit Profile
 
 ## Task tracker
 
@@ -59,7 +59,7 @@ Milestone 4, View Profile
 - [x] Add Maintenance Page (PR #87)
 - [x] Maintenance Detail Page
 - [x] Edit Maintenance Page (PR #88)
-- [ ] View Profile
+- [x] View Profile
 - [ ] Edit Profile
 - [ ] Change Password
 - [ ] Navigation Bar
