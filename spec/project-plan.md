@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Flash Messages
+Milestone 5, Unit Tests
 
 ## Task tracker
 
@@ -75,4 +75,4 @@ Milestone 4, Flash Messages
 
 ### Milestone 5: Testing Deployment
 
-- [ ] Security Tests
+- [x] Security Tests
