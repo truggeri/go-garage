@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Navigation Bar
+Milestone 4, Flash Messages
 
 ## Task tracker
 
@@ -62,7 +62,7 @@ Milestone 4, Navigation Bar
 - [x] View Profile (PR #99)
 - [x] Edit Profile
 - [x] Change Password
-- [ ] Navigation Bar
+- [x] Navigation Bar
 - [ ] Flash Messages
 - [ ] Client-Side Validation
 - [ ] Server-Side Integration

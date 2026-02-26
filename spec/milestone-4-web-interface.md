@@ -223,13 +223,13 @@ web/static/
 
 #### Navigation Bar
 
-- [ ] Logo/brand name
-- [ ] Links to main sections (Dashboard, Vehicles, Maintenance)
-- [ ] User dropdown menu
+- [x] Logo/brand name
+- [x] Links to main sections (Dashboard, Vehicles, Maintenance)
+- [x] User dropdown menu
   - Profile
   - Settings
   - Logout
-- [ ] Responsive mobile menu
+- [x] Responsive mobile menu
 
 #### Flash Messages
 
