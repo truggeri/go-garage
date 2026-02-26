@@ -296,7 +296,11 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	vehicle := resource.(*models.Vehicle)
+	vehicle, ok := resource.(*models.Vehicle)
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
 	allMaintenance, err := h.maintenanceService.GetVehicleMaintenance(r.Context(), vehicle.ID)
 	if err != nil {

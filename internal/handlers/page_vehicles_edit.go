@@ -22,7 +22,11 @@ func (h *PageHandler) VehicleEdit(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	vehicle := resource.(*models.Vehicle)
+	vehicle, ok := resource.(*models.Vehicle)
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
 	data := vehicleEditPageDataFromVehicle(account, vehicle)
 
@@ -44,7 +48,11 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	vehicle := resource.(*models.Vehicle)
+	vehicle, ok := resource.(*models.Vehicle)
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Bad Request", http.StatusBadRequest)
