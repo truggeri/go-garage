@@ -29,7 +29,7 @@
                     flash.classList.add("flash-dismiss");
                     flash.addEventListener("transitionend", function () {
                         flash.remove();
-                    });
+                    }, { once: true });
                 }, autoDismissDelay);
             }
         });
