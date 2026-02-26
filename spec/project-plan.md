@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 5, Unit Tests
+Milestone 4, Flash Messages
 
 ## Task tracker
 
