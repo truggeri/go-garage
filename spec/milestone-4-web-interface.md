@@ -186,10 +186,10 @@ web/static/
 
 #### Edit Maintenance Page
 
-- [ ] Pre-populated form
-- [ ] Same fields as add page
-- [ ] Update validation
-- [ ] Save and cancel buttons
+- [x] Pre-populated form (PR #88)
+- [x] Same fields as add page (PR #88)
+- [x] Update validation (PR #88)
+- [x] Save and cancel buttons (PR #88)
 
 ### 7. User Profile Pages
 
