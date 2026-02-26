@@ -69,6 +69,11 @@ func (h *PageHandler) ViewProfile(w http.ResponseWriter, r *http.Request) {
 			{Type: "success", Message: "Profile updated successfully."},
 		}
 	}
+	if r.URL.Query().Get("password_changed") == queryTrue {
+		data.Flash = []flashMessage{
+			{Type: "success", Message: "Password changed successfully."},
+		}
+	}
 
 	if err := h.engine.Render(w, "profile/view.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

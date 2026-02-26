@@ -134,6 +134,8 @@ func main() {
 	protectedPages.HandleFunc("/profile", pageHandler.ViewProfile).Methods("GET")
 	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileEdit).Methods("GET")
 	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileUpdate).Methods("POST")
+	protectedPages.HandleFunc("/profile/password", pageHandler.ChangePassword).Methods("GET")
+	protectedPages.HandleFunc("/profile/password", pageHandler.ChangePasswordSubmit).Methods("POST")
 
 	// Vehicle detail page routes (require cookie auth + vehicle ownership)
 	vehiclePages := protectedPages.PathPrefix("/vehicles/{id}").Subrouter()

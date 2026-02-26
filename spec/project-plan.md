@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Change Password
+Milestone 4, Navigation Bar
 
 ## Task tracker
 
@@ -61,7 +61,7 @@ Milestone 4, Change Password
 - [x] Edit Maintenance Page (PR #88)
 - [x] View Profile (PR #99)
 - [x] Edit Profile
-- [ ] Change Password
+- [x] Change Password
 - [ ] Navigation Bar
 - [ ] Flash Messages
 - [ ] Client-Side Validation
