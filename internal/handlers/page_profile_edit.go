@@ -17,6 +17,8 @@ type profileEditPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
 	// Form field values for repopulating the form after a failed submission.
@@ -43,6 +45,7 @@ func (h *PageHandler) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 	data := profileEditPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "profile",
 		Username:        user.Username,
 		Email:           user.Email,
 		FirstName:       user.FirstName,
@@ -77,6 +80,7 @@ func (h *PageHandler) ProfileUpdate(w http.ResponseWriter, r *http.Request) {
 		data := profileEditPageData{
 			IsAuthenticated: true,
 			UserName:        account.Name,
+			ActiveNav:       "profile",
 			Errors:          formErrors,
 			Username:        username,
 			Email:           email,

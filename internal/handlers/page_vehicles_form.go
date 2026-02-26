@@ -84,6 +84,8 @@ type vehicleEditPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// VehicleID is the ID of the vehicle being edited.
 	VehicleID string
 	// Errors holds field-level and general validation error messages.
@@ -108,6 +110,7 @@ func vehicleEditPageDataFromVehicle(account *middleware.AccountInfo, v *models.V
 	data := vehicleEditPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "vehicles",
 		VehicleID:       v.ID,
 		Make:            v.Make,
 		Model:           v.Model,

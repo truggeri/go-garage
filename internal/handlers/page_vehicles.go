@@ -22,6 +22,8 @@ type vehicleListPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Vehicles is the slice of vehicles to display on the current page.
 	Vehicles []*models.Vehicle
 	// TotalCount is the total number of vehicles matching the current filters.
@@ -96,6 +98,7 @@ func (h *PageHandler) VehicleList(w http.ResponseWriter, r *http.Request) {
 	data := vehicleListPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "vehicles",
 		Vehicles:        vehicles,
 		TotalCount:      totalCount,
 		Page:            page,
@@ -124,6 +127,8 @@ type vehicleNewPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
 	// Form field values for repopulating the form after a failed submission.
@@ -151,6 +156,7 @@ func (h *PageHandler) VehicleNew(w http.ResponseWriter, r *http.Request) {
 	data := vehicleNewPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "vehicles",
 	}
 
 	if err := h.engine.Render(w, "vehicles/new.html", "base", data); err != nil {
@@ -191,6 +197,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 		data := vehicleNewPageData{
 			IsAuthenticated: true,
 			UserName:        account.Name,
+			ActiveNav:       "vehicles",
 			Errors:          formErrors,
 			Make:            vehicleMake,
 			Model:           model,
@@ -271,6 +278,8 @@ type vehicleDetailPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Vehicle is the vehicle to display.
 	Vehicle *models.Vehicle
 	// VehicleTitle is a short human-readable title for the page (e.g. "2020 Ford Focus").
@@ -336,6 +345,7 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 	data := vehicleDetailPageData{
 		IsAuthenticated:   true,
 		UserName:          account.Name,
+		ActiveNav:         "vehicles",
 		Vehicle:           vehicle,
 		VehicleTitle:      title,
 		RecentMaintenance: recent,

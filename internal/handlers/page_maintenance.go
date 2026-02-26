@@ -16,6 +16,8 @@ type maintenanceListPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Records is the slice of maintenance records to display on the current page.
 	Records []*models.MaintenanceRecord
 	// Vehicles is the list of user's vehicles, used to populate the vehicle filter dropdown.
@@ -83,6 +85,7 @@ func (h *PageHandler) MaintenanceList(w http.ResponseWriter, r *http.Request) {
 	data := maintenanceListPageData{
 		IsAuthenticated:   true,
 		UserName:          account.Name,
+		ActiveNav:         "maintenance",
 		Records:           records,
 		Vehicles:          userVehicles,
 		VehicleNames:      buildVehicleNameMap(userVehicles),

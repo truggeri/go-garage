@@ -18,6 +18,8 @@ type maintenanceNewPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Vehicles is the list of the user's vehicles, used to populate the vehicle dropdown.
 	Vehicles []*models.Vehicle
 	// VehicleNames maps vehicle IDs to human-readable names.
@@ -98,6 +100,7 @@ func (h *PageHandler) MaintenanceNew(w http.ResponseWriter, r *http.Request) {
 	data := maintenanceNewPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "maintenance",
 		Vehicles:        vehicles,
 		VehicleNames:    buildVehicleNameMap(vehicles),
 		VehicleID:       r.URL.Query().Get("vehicle_id"),
@@ -140,6 +143,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 		data := maintenanceNewPageData{
 			IsAuthenticated:  true,
 			UserName:         account.Name,
+			ActiveNav:        "maintenance",
 			Vehicles:         vehicles,
 			VehicleNames:     buildVehicleNameMap(vehicles),
 			Errors:           formErrors,

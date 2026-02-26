@@ -79,6 +79,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 		data := vehicleEditPageData{
 			IsAuthenticated: true,
 			UserName:        account.Name,
+			ActiveNav:       "vehicles",
 			VehicleID:       vehicle.ID,
 			Errors:          formErrors,
 			Make:            vehicleMake,

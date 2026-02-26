@@ -8,14 +8,20 @@
         <div class="navbar-menu">
             {{if .IsAuthenticated}}
             <div class="navbar-links">
-                <a href="/dashboard" class="navbar-link">Dashboard</a>
-                <a href="/vehicles" class="navbar-link">Vehicles</a>
-                <a href="/maintenance" class="navbar-link">Maintenance</a>
+                <a href="/dashboard" class="navbar-link{{if eq .ActiveNav "dashboard"}} navbar-link--active{{end}}">Dashboard</a>
+                <a href="/vehicles" class="navbar-link{{if eq .ActiveNav "vehicles"}} navbar-link--active{{end}}">Vehicles</a>
+                <a href="/maintenance" class="navbar-link{{if eq .ActiveNav "maintenance"}} navbar-link--active{{end}}">Maintenance</a>
             </div>
-            <div class="navbar-user">
-                <span class="navbar-username">{{.UserName}}</span>
-                <a href="/profile" class="navbar-link">Profile</a>
-                <a href="/logout" class="navbar-link">Logout</a>
+            <div class="navbar-user-dropdown">
+                <button class="navbar-user-toggle" aria-expanded="false" aria-haspopup="true">
+                    <span class="navbar-username">{{.UserName}}</span>
+                    <span class="navbar-caret" aria-hidden="true">&#9662;</span>
+                </button>
+                <div class="navbar-dropdown-menu" role="menu">
+                    <a href="/profile" class="navbar-dropdown-item{{if eq .ActiveNav "profile"}} navbar-dropdown-item--active{{end}}" role="menuitem">Profile</a>
+                    <div class="navbar-dropdown-divider" role="separator"></div>
+                    <a href="/logout" class="navbar-dropdown-item" role="menuitem">Logout</a>
+                </div>
             </div>
             {{else}}
             <div class="navbar-links">

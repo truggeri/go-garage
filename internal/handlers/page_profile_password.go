@@ -16,6 +16,8 @@ type changePasswordPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
 }
@@ -31,6 +33,7 @@ func (h *PageHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	data := changePasswordPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "profile",
 	}
 
 	if err := h.engine.Render(w, "profile/password.html", "base", data); err != nil {
@@ -60,6 +63,7 @@ func (h *PageHandler) ChangePasswordSubmit(w http.ResponseWriter, r *http.Reques
 		data := changePasswordPageData{
 			IsAuthenticated: true,
 			UserName:        account.Name,
+			ActiveNav:       "profile",
 			Errors:          formErrors,
 		}
 		_ = h.engine.Render(w, "profile/password.html", "base", data)
