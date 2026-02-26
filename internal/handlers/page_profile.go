@@ -16,6 +16,8 @@ type profilePageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// User is the full user model for the authenticated user.
 	User *models.User
 	// CreatedAt is the formatted account creation date.
@@ -58,6 +60,7 @@ func (h *PageHandler) ViewProfile(w http.ResponseWriter, r *http.Request) {
 	data := profilePageData{
 		IsAuthenticated:  true,
 		UserName:         account.Name,
+		ActiveNav:        "profile",
 		User:             user,
 		CreatedAt:        user.CreatedAt,
 		VehicleCount:     len(vehicles),

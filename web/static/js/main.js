@@ -45,6 +45,45 @@
     }
 
     // ========================================
+    // User Dropdown Menu
+    // ========================================
+
+    /**
+     * Initialize the user dropdown menu in the navigation bar.
+     * Clicking the toggle button opens/closes the dropdown.
+     * Clicking outside the dropdown or pressing Escape closes it.
+     */
+    function initUserDropdown() {
+        var toggle = document.querySelector(".navbar-user-toggle");
+        var menu = document.querySelector(".navbar-dropdown-menu");
+        if (!toggle || !menu) {
+            return;
+        }
+
+        toggle.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var expanded = toggle.getAttribute("aria-expanded") === "true";
+            toggle.setAttribute("aria-expanded", String(!expanded));
+            menu.classList.toggle("active");
+        });
+
+        document.addEventListener("click", function () {
+            if (menu.classList.contains("active")) {
+                menu.classList.remove("active");
+                toggle.setAttribute("aria-expanded", "false");
+            }
+        });
+
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && menu.classList.contains("active")) {
+                menu.classList.remove("active");
+                toggle.setAttribute("aria-expanded", "false");
+                toggle.focus();
+            }
+        });
+    }
+
+    // ========================================
     // Dark Mode Toggle
     // ========================================
 
@@ -88,6 +127,7 @@
     document.addEventListener("DOMContentLoaded", function () {
         initFlashMessages();
         initNavbarToggle();
+        initUserDropdown();
         initThemeToggle();
     });
 })();

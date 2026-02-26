@@ -18,6 +18,8 @@ type maintenanceEditPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// RecordID is the ID of the maintenance record being edited.
 	RecordID string
 	// VehicleTitle is a short human-readable title for the vehicle (e.g. "2020 Ford Focus").
@@ -43,6 +45,7 @@ func maintenanceEditPageDataFromRecord(
 	data := maintenanceEditPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "maintenance",
 		RecordID:        record.ID,
 		VehicleTitle:    fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model),
 		ServiceType:     record.ServiceType,
@@ -123,6 +126,7 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 		data := maintenanceEditPageData{
 			IsAuthenticated:  true,
 			UserName:         account.Name,
+			ActiveNav:        "maintenance",
 			RecordID:         record.ID,
 			VehicleTitle:     vehicleTitle,
 			Errors:           formErrors,

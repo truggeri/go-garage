@@ -17,6 +17,8 @@ type dashboardPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// VehicleCount is the total number of vehicles belonging to the user.
 	VehicleCount int
 	// MaintenanceCount is the total number of maintenance records across all vehicles.
@@ -98,6 +100,7 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	data := dashboardPageData{
 		IsAuthenticated:   true,
 		UserName:          account.Name,
+		ActiveNav:         "dashboard",
 		VehicleCount:      len(vehicles),
 		MaintenanceCount:  totalCount,
 		TotalSpent:        totalSpent,

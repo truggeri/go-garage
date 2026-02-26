@@ -18,6 +18,8 @@ type maintenanceDetailPageData struct {
 	IsAuthenticated bool
 	// UserName is the display name of the authenticated user.
 	UserName string
+	// ActiveNav identifies the active navigation item for highlighting.
+	ActiveNav string
 	// Record is the maintenance record to display.
 	Record *models.MaintenanceRecord
 	// Vehicle is the vehicle associated with this maintenance record.
@@ -69,6 +71,7 @@ func (h *PageHandler) MaintenanceDetail(w http.ResponseWriter, r *http.Request) 
 	data := maintenanceDetailPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
+		ActiveNav:       "maintenance",
 		Record:          record,
 		Vehicle:         vehicle,
 		VehicleTitle:    title,

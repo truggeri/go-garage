@@ -6,6 +6,7 @@ import "net/http"
 func (h *PageHandler) Home(w http.ResponseWriter, r *http.Request) {
 	data := map[string]interface{}{
 		"IsAuthenticated": false,
+		"ActiveNav":       "",
 	}
 	if err := h.engine.Render(w, "home.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
