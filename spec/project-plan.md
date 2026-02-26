@@ -59,7 +59,7 @@ Milestone 4, Edit Profile
 - [x] Add Maintenance Page (PR #87)
 - [x] Maintenance Detail Page
 - [x] Edit Maintenance Page (PR #88)
-- [x] View Profile
+- [x] View Profile (PR #99)
 - [ ] Edit Profile
 - [ ] Change Password
 - [ ] Navigation Bar

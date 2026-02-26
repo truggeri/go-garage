@@ -195,12 +195,12 @@ web/static/
 
 #### View Profile
 
-- [x] Display user information
-- [x] Username, email, name
-- [x] Account creation date
-- [x] Total vehicles count
-- [x] Total maintenance records count
-- [x] Edit profile button
+- [x] Display user information (PR #99)
+- [x] Username, email, name (PR #99)
+- [x] Account creation date (PR #99)
+- [x] Total vehicles count (PR #99)
+- [x] Total maintenance records count (PR #99)
+- [x] Edit profile button (PR #99)
 
 #### Edit Profile
 
