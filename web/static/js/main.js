@@ -65,6 +65,7 @@
      * Initialize the user dropdown menu in the navigation bar.
      * Clicking the toggle button opens/closes the dropdown.
      * Clicking outside the dropdown or pressing Escape closes it.
+     * Arrow keys navigate between menu items when the dropdown is open.
      */
     function initUserDropdown() {
         var toggle = document.querySelector(".navbar-user-toggle");
@@ -73,25 +74,55 @@
             return;
         }
 
+        function getMenuItems() {
+            return menu.querySelectorAll('[role="menuitem"]');
+        }
+
+        function closeMenu() {
+            menu.classList.remove("active");
+            toggle.setAttribute("aria-expanded", "false");
+        }
+
         toggle.addEventListener("click", function (e) {
             e.stopPropagation();
             var expanded = toggle.getAttribute("aria-expanded") === "true";
             toggle.setAttribute("aria-expanded", String(!expanded));
             menu.classList.toggle("active");
+            if (!expanded) {
+                var items = getMenuItems();
+                if (items.length > 0) {
+                    items[0].focus();
+                }
+            }
         });
 
         document.addEventListener("click", function () {
             if (menu.classList.contains("active")) {
-                menu.classList.remove("active");
-                toggle.setAttribute("aria-expanded", "false");
+                closeMenu();
             }
         });
 
         document.addEventListener("keydown", function (e) {
             if (e.key === "Escape" && menu.classList.contains("active")) {
-                menu.classList.remove("active");
-                toggle.setAttribute("aria-expanded", "false");
+                closeMenu();
                 toggle.focus();
+            }
+        });
+
+        menu.addEventListener("keydown", function (e) {
+            var items = getMenuItems();
+            if (items.length === 0) { return; }
+            var current = document.activeElement;
+            var index = Array.prototype.indexOf.call(items, current);
+
+            if (e.key === "ArrowDown") {
+                e.preventDefault();
+                var next = (index + 1) % items.length;
+                items[next].focus();
+            } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                var prev = (index - 1 + items.length) % items.length;
+                items[prev].focus();
             }
         });
     }

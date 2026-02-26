@@ -8,9 +8,9 @@
         <div class="navbar-menu">
             {{if .IsAuthenticated}}
             <div class="navbar-links">
-                <a href="/dashboard" class="navbar-link{{if eq .ActiveNav "dashboard"}} navbar-link--active{{end}}">Dashboard</a>
-                <a href="/vehicles" class="navbar-link{{if eq .ActiveNav "vehicles"}} navbar-link--active{{end}}">Vehicles</a>
-                <a href="/maintenance" class="navbar-link{{if eq .ActiveNav "maintenance"}} navbar-link--active{{end}}">Maintenance</a>
+                <a href="/dashboard" class="navbar-link{{if eq .ActiveNav "dashboard"}} navbar-link--active{{end}}"{{if eq .ActiveNav "dashboard"}} aria-current="page"{{end}}>Dashboard</a>
+                <a href="/vehicles" class="navbar-link{{if eq .ActiveNav "vehicles"}} navbar-link--active{{end}}"{{if eq .ActiveNav "vehicles"}} aria-current="page"{{end}}>Vehicles</a>
+                <a href="/maintenance" class="navbar-link{{if eq .ActiveNav "maintenance"}} navbar-link--active{{end}}"{{if eq .ActiveNav "maintenance"}} aria-current="page"{{end}}>Maintenance</a>
             </div>
             <div class="navbar-user-dropdown">
                 <button class="navbar-user-toggle" aria-expanded="false" aria-haspopup="true">
