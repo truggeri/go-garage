@@ -212,12 +212,12 @@ web/static/
 
 #### Change Password
 
-- [ ] Current password input
-- [ ] New password input
-- [ ] Confirm new password input
+- [x] Current password input
+- [x] New password input
+- [x] Confirm new password input
 - [ ] Password strength indicator
-- [ ] Validation
-- [ ] Save button
+- [x] Validation
+- [x] Save button
 
 ### 8. Navigation and UI Components
 
