@@ -11,6 +11,7 @@ type PageHandler struct {
 	authService        services.AuthenticationService
 	vehicleService     services.VehicleService
 	maintenanceService services.MaintenanceService
+	userService        services.UserService
 }
 
 // NewPageHandler creates a new PageHandler with the given template engine and services.
@@ -19,12 +20,14 @@ func NewPageHandler(
 	authService services.AuthenticationService,
 	vehicleSvc services.VehicleService,
 	maintenanceSvc services.MaintenanceService,
+	userSvc services.UserService,
 ) *PageHandler {
 	return &PageHandler{
 		engine:             engine,
 		authService:        authService,
 		vehicleService:     vehicleSvc,
 		maintenanceService: maintenanceSvc,
+		userService:        userSvc,
 	}
 }
 

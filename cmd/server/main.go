@@ -98,7 +98,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc)
+	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc, userSvc)
 
 	// Setup router and routes
 	router := mux.NewRouter()
@@ -134,6 +134,7 @@ func main() {
 	protectedPages.HandleFunc("/maintenance/{id}", pageHandler.MaintenanceDetail).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceEdit).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceUpdate).Methods("POST")
+	protectedPages.HandleFunc("/profile", pageHandler.ViewProfile).Methods("GET")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

@@ -1,0 +1,77 @@
+{{define "title"}}Profile - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>My Profile</h1>
+    <div class="page-header-actions">
+        <a href="/profile/edit" class="btn btn-primary">Edit Profile</a>
+    </div>
+</div>
+
+<div class="detail-layout">
+    <div class="detail-main">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Account Information</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Username</dt>
+                        <dd class="detail-value">{{.User.Username}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Email</dt>
+                        <dd class="detail-value">{{.User.Email}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">First Name</dt>
+                        <dd class="detail-value">{{if .User.FirstName}}{{.User.FirstName}}{{else}}—{{end}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Last Name</dt>
+                        <dd class="detail-value">{{if .User.LastName}}{{.User.LastName}}{{else}}—{{end}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Member Since</dt>
+                        <dd class="detail-value">{{formatDate .CreatedAt}}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-sidebar">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Statistics</h2>
+            </div>
+            <div class="card-body">
+                <div class="stat-list">
+                    <div class="stat-item">
+                        <span class="stat-item-label">Total Vehicles</span>
+                        <span class="stat-item-value">{{.VehicleCount}}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-item-label">Total Maintenance Records</span>
+                        <span class="stat-item-value">{{.MaintenanceCount}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="action-list">
+                    <a href="/profile/edit" class="btn btn-primary btn-block">Edit Profile</a>
+                    <a href="/profile/password" class="btn btn-secondary btn-block">Change Password</a>
+                    <a href="/dashboard" class="btn btn-secondary btn-block">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}
