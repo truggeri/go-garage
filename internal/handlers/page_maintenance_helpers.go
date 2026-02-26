@@ -1,11 +1,13 @@
 package handlers
 
 import (
+	"errors"
 	"math"
 	"net/http"
 	"sort"
 	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/repositories"
 )
@@ -116,4 +118,32 @@ func fetchAllUserMaintenanceRecords(
 		records = all[offset:end]
 	}
 	return records, totalCount, page
+}
+
+// getMaintenanceRecordAndVehicle retrieves a maintenance record and its associated vehicle.
+func (h *PageHandler) getMaintenanceRecordAndVehicle(r *http.Request) (*models.MaintenanceRecord, *models.Vehicle, error) {
+	vars := mux.Vars(r)
+	recordID := vars["id"]
+
+	record, err := h.maintenanceService.GetMaintenance(r.Context(), recordID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	vehicle, err := h.vehicleService.GetVehicle(r.Context(), record.VehicleID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return record, vehicle, nil
+}
+
+// writeMaintenanceRecordError writes the appropriate HTTP error for maintenance record lookup failures.
+func writeMaintenanceRecordError(w http.ResponseWriter, err error) {
+	var notFound *models.NotFoundError
+	if errors.As(err, &notFound) {
+		http.Error(w, "Not Found", http.StatusNotFound)
+		return
+	}
+	http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 }

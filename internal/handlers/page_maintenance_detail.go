@@ -74,6 +74,12 @@ func (h *PageHandler) MaintenanceDetail(w http.ResponseWriter, r *http.Request) 
 		VehicleTitle:    title,
 	}
 
+	if r.URL.Query().Get("updated") == queryTrue {
+		data.Flash = []flashMessage{
+			{Type: "success", Message: "Maintenance record updated successfully."},
+		}
+	}
+
 	if err := h.engine.Render(w, "maintenance/detail.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
