@@ -204,11 +204,11 @@ web/static/
 
 #### Edit Profile
 
-- [ ] Update username
-- [ ] Update email
-- [ ] Update first/last name
-- [ ] Form validation
-- [ ] Save and cancel buttons
+- [x] Update username
+- [x] Update email
+- [x] Update first/last name
+- [x] Form validation
+- [x] Save and cancel buttons
 
 #### Change Password
 

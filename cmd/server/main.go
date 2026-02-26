@@ -135,6 +135,8 @@ func main() {
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceEdit).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceUpdate).Methods("POST")
 	protectedPages.HandleFunc("/profile", pageHandler.ViewProfile).Methods("GET")
+	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileEdit).Methods("GET")
+	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileUpdate).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

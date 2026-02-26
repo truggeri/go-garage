@@ -64,6 +64,12 @@ func (h *PageHandler) ViewProfile(w http.ResponseWriter, r *http.Request) {
 		MaintenanceCount: maintenanceCount,
 	}
 
+	if r.URL.Query().Get("updated") == queryTrue {
+		data.Flash = []flashMessage{
+			{Type: "success", Message: "Profile updated successfully."},
+		}
+	}
+
 	if err := h.engine.Render(w, "profile/view.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
