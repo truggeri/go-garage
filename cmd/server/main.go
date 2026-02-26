@@ -125,9 +125,6 @@ func main() {
 	protectedPages.HandleFunc("/vehicles", pageHandler.VehicleList).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleNew).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleCreate).Methods("POST")
-	protectedPages.HandleFunc("/vehicles/{id}", pageHandler.VehicleDetail).Methods("GET")
-	protectedPages.HandleFunc("/vehicles/{id}/edit", pageHandler.VehicleEdit).Methods("GET")
-	protectedPages.HandleFunc("/vehicles/{id}/edit", pageHandler.VehicleUpdate).Methods("POST")
 	protectedPages.HandleFunc("/maintenance", pageHandler.MaintenanceList).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/new", pageHandler.MaintenanceNew).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/new", pageHandler.MaintenanceCreate).Methods("POST")
@@ -135,6 +132,13 @@ func main() {
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceEdit).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceUpdate).Methods("POST")
 	protectedPages.HandleFunc("/profile", pageHandler.ViewProfile).Methods("GET")
+
+	// Vehicle detail page routes (require cookie auth + vehicle ownership)
+	vehiclePages := protectedPages.PathPrefix("/vehicles/{id}").Subrouter()
+	vehiclePages.Use(middleware.PageResourceOwnershipGuard(newVehicleLookup(vehicleSvc)))
+	vehiclePages.HandleFunc("", pageHandler.VehicleDetail).Methods("GET")
+	vehiclePages.HandleFunc("/edit", pageHandler.VehicleEdit).Methods("GET")
+	vehiclePages.HandleFunc("/edit", pageHandler.VehicleUpdate).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

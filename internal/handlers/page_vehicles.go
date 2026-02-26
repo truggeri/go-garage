@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"net/http"
@@ -10,7 +9,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/repositories"
@@ -293,26 +291,18 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	vehicleID := vars["id"]
-
-	vehicle, err := h.vehicleService.GetVehicle(r.Context(), vehicleID)
-	if err != nil {
-		var notFound *models.NotFoundError
-		if errors.As(err, &notFound) {
-			http.Error(w, "Not Found", http.StatusNotFound)
-			return
-		}
+	resource, ok := middleware.GetLoadedResourceFromContext(r.Context())
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	vehicle, ok := resource.(*models.Vehicle)
+	if !ok {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
-	if vehicle.UserID != account.ID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	allMaintenance, err := h.maintenanceService.GetVehicleMaintenance(r.Context(), vehicleID)
+	allMaintenance, err := h.maintenanceService.GetVehicleMaintenance(r.Context(), vehicle.ID)
 	if err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return

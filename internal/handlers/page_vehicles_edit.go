@@ -1,12 +1,10 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 )
@@ -19,22 +17,14 @@ func (h *PageHandler) VehicleEdit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	vehicleID := vars["id"]
-
-	vehicle, err := h.vehicleService.GetVehicle(r.Context(), vehicleID)
-	if err != nil {
-		var notFound *models.NotFoundError
-		if errors.As(err, &notFound) {
-			http.Error(w, "Not Found", http.StatusNotFound)
-			return
-		}
+	resource, ok := middleware.GetLoadedResourceFromContext(r.Context())
+	if !ok {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	if vehicle.UserID != account.ID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	vehicle, ok := resource.(*models.Vehicle)
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -53,22 +43,14 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	vehicleID := vars["id"]
-
-	vehicle, err := h.vehicleService.GetVehicle(r.Context(), vehicleID)
-	if err != nil {
-		var notFound *models.NotFoundError
-		if errors.As(err, &notFound) {
-			http.Error(w, "Not Found", http.StatusNotFound)
-			return
-		}
+	resource, ok := middleware.GetLoadedResourceFromContext(r.Context())
+	if !ok {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	if vehicle.UserID != account.ID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
+	vehicle, ok := resource.(*models.Vehicle)
+	if !ok {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
@@ -97,7 +79,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 		data := vehicleEditPageData{
 			IsAuthenticated: true,
 			UserName:        account.Name,
-			VehicleID:       vehicleID,
+			VehicleID:       vehicle.ID,
 			Errors:          formErrors,
 			Make:            vehicleMake,
 			Model:           model,
@@ -151,5 +133,5 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/vehicles/%s?updated=true", vehicleID), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/vehicles/%s?updated=true", vehicle.ID), http.StatusSeeOther)
 }
