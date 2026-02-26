@@ -12,13 +12,26 @@
      * Clicking the close button removes the flash element from the DOM.
      */
     function initFlashMessages() {
-        document.querySelectorAll(".flash-close").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                var flash = btn.closest(".flash");
-                if (flash) {
+        var autoDismissDelay = 5000;
+        var flashes = document.querySelectorAll(".flash");
+
+        flashes.forEach(function (flash) {
+            var closeBtn = flash.querySelector(".flash-close");
+            if (closeBtn) {
+                closeBtn.addEventListener("click", function () {
                     flash.remove();
-                }
-            });
+                });
+            }
+
+            // Auto-dismiss after delay; skip for error messages.
+            if (!flash.classList.contains("flash-error")) {
+                setTimeout(function () {
+                    flash.classList.add("flash-dismiss");
+                    flash.addEventListener("transitionend", function () {
+                        flash.remove();
+                    });
+                }, autoDismissDelay);
+            }
         });
     }
 

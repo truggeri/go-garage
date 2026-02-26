@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Flash Messages
+Milestone 4, Client-Side Validation
 
 ## Task tracker
 
@@ -63,7 +63,7 @@ Milestone 4, Flash Messages
 - [x] Edit Profile
 - [x] Change Password
 - [x] Navigation Bar
-- [ ] Flash Messages
+- [x] Flash Messages
 - [ ] Client-Side Validation
 - [ ] Server-Side Integration
 - [ ] Responsive Design

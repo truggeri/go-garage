@@ -233,12 +233,12 @@ web/static/
 
 #### Flash Messages
 
-- [ ] Success messages (green)
-- [ ] Error messages (red)
-- [ ] Warning messages (yellow)
-- [ ] Info messages (blue)
-- [ ] Auto-dismiss option
-- [ ] Close button
+- [x] Success messages (green)
+- [x] Error messages (red)
+- [x] Warning messages (yellow)
+- [x] Info messages (blue)
+- [x] Auto-dismiss option
+- [x] Close button
 
 #### Confirmation Dialogs
 
