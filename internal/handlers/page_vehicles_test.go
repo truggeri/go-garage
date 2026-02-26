@@ -8,7 +8,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/templateengine"
@@ -344,23 +343,22 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 	serviceDate := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
 	mileage := 45000
 
+	baseVehicle := &models.Vehicle{
+		ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020,
+		Status: models.VehicleStatusActive, CurrentMileage: &mileage,
+	}
+
 	t.Run("renders vehicle detail page for authenticated user", func(t *testing.T) {
-		vehicleStub := &stubVehicleSvc{
-			getResult: &models.Vehicle{
-				ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020,
-				Status: models.VehicleStatusActive, CurrentMileage: &mileage,
-			},
-		}
 		maintenanceStub := &stubMaintenanceSvc{
 			listResult: []*models.MaintenanceRecord{
 				{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate, Cost: &cost},
 			},
 		}
-		handler := newTestVehicleDetailPageHandler(t, vehicleStub, maintenanceStub)
+		handler := newTestVehicleDetailPageHandler(t, &stubVehicleSvc{}, maintenanceStub)
 
 		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
 		req = addAuthContext(req, "u1", "testuser")
+		req = addResourceContext(req, baseVehicle)
 		rec := httptest.NewRecorder()
 
 		handler.VehicleDetail(rec, req)
@@ -373,43 +371,23 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 		assert.Contains(t, body, "Oil Change")
 	})
 
-	t.Run("returns 404 when vehicle not found", func(t *testing.T) {
-		vehicleStub := &stubVehicleSvc{
-			getErr: models.NewNotFoundError("Vehicle", "v99"),
-		}
-		handler := newTestVehicleDetailPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
-
-		req := httptest.NewRequest(http.MethodGet, "/vehicles/v99", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "v99"})
-		req = addAuthContext(req, "u1", "testuser")
-		rec := httptest.NewRecorder()
-
-		handler.VehicleDetail(rec, req)
-
-		assert.Equal(t, http.StatusNotFound, rec.Code)
-	})
-
-	t.Run("returns 403 when vehicle belongs to another user", func(t *testing.T) {
-		vehicleStub := &stubVehicleSvc{
-			getResult: &models.Vehicle{ID: "v1", UserID: "other-user", Make: "Toyota", Model: "Camry", Year: 2021, Status: models.VehicleStatusActive},
-		}
-		handler := newTestVehicleDetailPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
-
-		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
-		req = addAuthContext(req, "u1", "testuser")
-		rec := httptest.NewRecorder()
-
-		handler.VehicleDetail(rec, req)
-
-		assert.Equal(t, http.StatusForbidden, rec.Code)
-	})
-
 	t.Run("returns 500 when account missing from context", func(t *testing.T) {
 		handler := newTestVehicleDetailPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
 
 		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		req = addResourceContext(req, baseVehicle)
+		rec := httptest.NewRecorder()
+
+		handler.VehicleDetail(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+	})
+
+	t.Run("returns 500 when resource missing from context", func(t *testing.T) {
+		handler := newTestVehicleDetailPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1", nil)
+		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
 		handler.VehicleDetail(rec, req)
@@ -418,17 +396,11 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 	})
 
 	t.Run("shows success flash when updated=true", func(t *testing.T) {
-		vehicleStub := &stubVehicleSvc{
-			getResult: &models.Vehicle{
-				ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020,
-				Status: models.VehicleStatusActive, CurrentMileage: &mileage,
-			},
-		}
-		handler := newTestVehicleDetailPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
+		handler := newTestVehicleDetailPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
 
 		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1?updated=true", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
 		req = addAuthContext(req, "u1", "testuser")
+		req = addResourceContext(req, baseVehicle)
 		rec := httptest.NewRecorder()
 
 		handler.VehicleDetail(rec, req)

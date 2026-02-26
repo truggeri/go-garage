@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ import (
 	"github.com/truggeri/go-garage/internal/database"
 	"github.com/truggeri/go-garage/internal/handlers"
 	"github.com/truggeri/go-garage/internal/middleware"
+	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/repositories"
 	"github.com/truggeri/go-garage/internal/services"
 	"github.com/truggeri/go-garage/internal/templateengine"
@@ -125,13 +127,17 @@ func main() {
 	protectedPages.HandleFunc("/vehicles", pageHandler.VehicleList).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleNew).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleCreate).Methods("POST")
-	protectedPages.HandleFunc("/vehicles/{id}", pageHandler.VehicleDetail).Methods("GET")
-	protectedPages.HandleFunc("/vehicles/{id}/edit", pageHandler.VehicleEdit).Methods("GET")
-	protectedPages.HandleFunc("/vehicles/{id}/edit", pageHandler.VehicleUpdate).Methods("POST")
 	protectedPages.HandleFunc("/maintenance", pageHandler.MaintenanceList).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/new", pageHandler.MaintenanceNew).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/new", pageHandler.MaintenanceCreate).Methods("POST")
 	protectedPages.HandleFunc("/maintenance/{id}", pageHandler.MaintenanceDetail).Methods("GET")
+
+	// Vehicle detail page routes (require cookie auth + vehicle ownership)
+	vehiclePages := protectedPages.PathPrefix("/vehicles/{id}").Subrouter()
+	vehiclePages.Use(middleware.PageResourceOwnershipGuard(newVehicleLookup(vehicleSvc)))
+	vehiclePages.HandleFunc("", pageHandler.VehicleDetail).Methods("GET")
+	vehiclePages.HandleFunc("/edit", pageHandler.VehicleEdit).Methods("GET")
+	vehiclePages.HandleFunc("/edit", pageHandler.VehicleUpdate).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()
@@ -227,5 +233,22 @@ func createHealthCheckHandler(garageDB *database.SQLiteGarage) http.HandlerFunc 
 		w.WriteHeader(statusCode)
 		fmt.Fprintf(w, `{"status":"%s","database":"%s","timestamp":"%s"}`,
 			overallStatus, dbStatus, time.Now().Format(time.RFC3339))
+	}
+}
+
+// newVehicleLookup returns a ResourceLookup that loads a vehicle by the "id"
+// path variable and returns its owner ID.
+func newVehicleLookup(svc services.VehicleService) middleware.ResourceLookup {
+	return func(ctx context.Context, r *http.Request) (interface{}, string, error) {
+		vehicleID := mux.Vars(r)["id"]
+		vehicle, err := svc.GetVehicle(ctx, vehicleID)
+		if err != nil {
+			var notFound *models.NotFoundError
+			if errors.As(err, &notFound) {
+				return nil, "", middleware.ErrResourceNotFound
+			}
+			return nil, "", err
+		}
+		return vehicle, vehicle.UserID, nil
 	}
 }

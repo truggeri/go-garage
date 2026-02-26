@@ -80,6 +80,11 @@ func addAuthContext(r *http.Request, userID, userName string) *http.Request {
 	return r.WithContext(ctx)
 }
 
+func addResourceContext(r *http.Request, resource interface{}) *http.Request {
+	ctx := context.WithValue(r.Context(), middleware.LoadedResourceContextKey, resource)
+	return r.WithContext(ctx)
+}
+
 func TestVehicleHandler_ListAll(t *testing.T) {
 	t.Run("returns vehicles for authenticated user", func(t *testing.T) {
 		stub := &stubVehicleSvc{
