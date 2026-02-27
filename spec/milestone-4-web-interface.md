@@ -299,10 +299,10 @@ web/static/
 
 #### Error Pages
 
-- [ ] 404 Not Found page
-- [ ] 500 Server Error page
-- [ ] 403 Forbidden page
-- [ ] Links back to safety (home/dashboard)
+- [x] 404 Not Found page
+- [x] 500 Server Error page
+- [x] 403 Forbidden page
+- [x] Links back to safety (home/dashboard)
 
 ### 13. Frontend JavaScript
 

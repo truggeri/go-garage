@@ -753,6 +753,12 @@ html[data-theme="dark"] .theme-toggle-moon { display: none; }
     margin-bottom: var(--spacing-xl);
 }
 
+.error-page-actions {
+    display: flex;
+    gap: var(--spacing-md);
+    justify-content: center;
+}
+
 /* ========================================
    Footer
    ======================================== */

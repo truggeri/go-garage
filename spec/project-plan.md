@@ -70,7 +70,7 @@ Milestone 4, Server-Side Integration
 - [x] Accessibility
 - [x] Loading States
 - [x] Empty States
-- [ ] Error Pages
+- [x] Error Pages
 - [ ] Documentation
 
 ### Milestone 5: Testing Deployment
