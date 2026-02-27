@@ -542,6 +542,10 @@ html[data-theme="dark"] .theme-toggle-moon { display: none; }
     border-color: var(--color-danger);
 }
 
+.form-input.is-valid {
+    border-color: var(--color-success);
+}
+
 .form-error {
     font-size: var(--font-size-sm);
     color: var(--color-danger);
