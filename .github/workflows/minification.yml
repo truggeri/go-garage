@@ -6,7 +6,7 @@ on:
 
 jobs:
   minify:
-    name: Minify ${{ matrix.name }}
+    name: Minify assets
     runs-on: ubuntu-latest
     permissions:
       contents: write
