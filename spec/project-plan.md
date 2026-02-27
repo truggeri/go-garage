@@ -68,7 +68,7 @@ Milestone 4, Server-Side Integration
 - [ ] Server-Side Integration
 - [ ] Responsive Design
 - [x] Accessibility
-- [ ] Loading States
+- [x] Loading States
 - [x] Empty States
 - [ ] Error Pages
 - [ ] Documentation
