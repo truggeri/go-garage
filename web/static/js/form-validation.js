@@ -76,7 +76,7 @@
 
         // Password strength (fields with data-validate-password)
         if (field.getAttribute("data-validate-password") === "true") {
-            if (!PASSWORD_REGEX.test(field.value)) {
+            if (!PASSWORD_REGEX.test(value)) {
                 return "Password does not meet the requirements.";
             }
         }
@@ -85,7 +85,7 @@
         var matchId = field.getAttribute("data-match-field");
         if (matchId) {
             var matchField = field.form.querySelector("#" + matchId);
-            if (matchField && field.value !== matchField.value) {
+            if (matchField && value !== matchField.value.trim()) {
                 return "Passwords do not match.";
             }
         }
@@ -256,13 +256,10 @@
                     }
                 });
 
-                // Clear error on input to give immediate feedback
+                // Update validation on input for real-time feedback
                 field.addEventListener("input", function () {
                     if (field.classList.contains("is-invalid")) {
-                        var error = validateField(field);
-                        if (!error) {
-                            showSuccess(field);
-                        }
+                        validateAndShow(field);
                     }
                 });
             });
