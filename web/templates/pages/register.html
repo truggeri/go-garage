@@ -59,6 +59,7 @@
             <input class="form-input{{if .Errors.password}} is-invalid{{end}}"
                    type="password" id="password" name="password"
                    required autocomplete="new-password"
+                   data-validate-password="true"
                    {{if .Errors.password}}aria-invalid="true" {{end}}aria-describedby="password-error password-hint">
             <p class="form-hint" id="password-hint">Must be at least 8 characters with uppercase, lowercase, and a number.</p>
             {{if .Errors.password}}
@@ -71,6 +72,7 @@
             <input class="form-input{{if .Errors.confirm_password}} is-invalid{{end}}"
                    type="password" id="confirm_password" name="confirm_password"
                    required autocomplete="new-password"
+                   data-match-field="password"
                    {{if .Errors.confirm_password}}aria-invalid="true" {{end}}aria-describedby="confirm-password-error">
             {{if .Errors.confirm_password}}
             <p class="form-error" id="confirm-password-error">{{.Errors.confirm_password}}</p>

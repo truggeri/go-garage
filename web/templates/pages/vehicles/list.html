@@ -6,6 +6,7 @@
     <a href="/vehicles/new" class="btn btn-primary">Add Vehicle</a>
 </div>
 
+{{if or .Vehicles .FilterMake .FilterStatus}}
 <div class="filter-bar" role="search" aria-label="Filter vehicles">
     <form method="GET" action="/vehicles" class="filter-form">
         <div class="filter-group">
@@ -27,6 +28,7 @@
         {{end}}
     </form>
 </div>
+{{end}}
 
 {{if .Vehicles}}
 <div class="vehicle-grid">
@@ -63,11 +65,13 @@
 
 {{else}}
 <div class="empty-state">
-    <h2>No vehicles found</h2>
     {{if or .FilterMake .FilterStatus}}
+    <h2>No vehicles found</h2>
     <p class="text-muted">No vehicles match your current filters. <a href="/vehicles">Clear filters</a> to see all vehicles.</p>
     {{else}}
-    <p class="text-muted">You haven&#39;t added any vehicles yet.</p>
+    <div class="empty-state-icon" aria-hidden="true">🚗</div>
+    <h2>No vehicles yet</h2>
+    <p class="text-muted">Add your first vehicle to start tracking maintenance and expenses.</p>
     <a href="/vehicles/new" class="btn btn-primary">Add Your First Vehicle</a>
     {{end}}
 </div>

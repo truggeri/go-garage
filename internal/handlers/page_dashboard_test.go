@@ -76,7 +76,8 @@ func TestPageHandler_Dashboard(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Welcome back, newuser")
-		assert.Contains(t, body, "No maintenance records yet")
+		assert.Contains(t, body, "Get started with Go-Garage")
+		assert.Contains(t, body, "Add Your First Vehicle")
 	})
 
 	t.Run("returns 500 when vehicle service fails", func(t *testing.T) {

@@ -5,7 +5,9 @@
     <h1>{{.Vehicle.Year}} {{.Vehicle.Make}} {{.Vehicle.Model}}</h1>
     <div class="page-header-actions">
         <a href="/vehicles/{{.Vehicle.ID}}/edit" class="btn btn-primary">Edit Vehicle</a>
-        <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+        <button type="button" class="btn btn-danger"
+                data-confirm-delete="delete-form"
+                data-confirm-message="Are you sure you want to delete this vehicle? This action cannot be undone.">Delete</button>
     </div>
 </div>
 
@@ -190,12 +192,4 @@
 <form id="delete-form" method="POST" action="/vehicles/{{.Vehicle.ID}}/delete" style="display: none;">
     <input type="hidden" name="_method" value="DELETE">
 </form>
-
-<script>
-function confirmDelete() {
-    if (confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
-        document.getElementById('delete-form').submit();
-    }
-}
-</script>
 {{end}}
