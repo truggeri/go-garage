@@ -250,4 +250,52 @@ func TestPageResourceOwnershipGuard(t *testing.T) {
 		assert.Equal(t, http.StatusNotFound, rec.Code)
 		assert.False(t, handlerCalled)
 	})
+
+	t.Run("calls custom error handler for 403", func(t *testing.T) {
+		lookup := func(_ context.Context, _ *http.Request) (interface{}, string, error) {
+			return testResource, "other-user", nil
+		}
+
+		var gotCode int
+		errHandler := func(w http.ResponseWriter, _ *http.Request, code int) {
+			gotCode = code
+			w.WriteHeader(code)
+		}
+
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+		handler := PageResourceOwnershipGuard(lookup, errHandler)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1", nil)
+		req = authCtx(req, testUserID, "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusForbidden, rec.Code)
+		assert.Equal(t, http.StatusForbidden, gotCode)
+	})
+
+	t.Run("calls custom error handler for 404", func(t *testing.T) {
+		lookup := func(_ context.Context, _ *http.Request) (interface{}, string, error) {
+			return nil, "", ErrResourceNotFound
+		}
+
+		var gotCode int
+		errHandler := func(w http.ResponseWriter, _ *http.Request, code int) {
+			gotCode = code
+			w.WriteHeader(code)
+		}
+
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
+		handler := PageResourceOwnershipGuard(lookup, errHandler)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/v99", nil)
+		req = authCtx(req, testUserID, "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusNotFound, rec.Code)
+		assert.Equal(t, http.StatusNotFound, gotCode)
+	})
 }
