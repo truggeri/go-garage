@@ -20,6 +20,8 @@ type changePasswordPageData struct {
 	ActiveNav string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
+	// CSRFToken is the CSRF protection token to embed in the form.
+	CSRFToken string
 }
 
 // ChangePassword serves the change password form page (GET /profile/password).
@@ -34,6 +36,7 @@ func (h *PageHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated: true,
 		UserName:        account.Name,
 		ActiveNav:       "profile",
+		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 	}
 
 	if err := h.engine.Render(w, "profile/password.html", "base", data); err != nil {
@@ -65,6 +68,7 @@ func (h *PageHandler) ChangePasswordSubmit(w http.ResponseWriter, r *http.Reques
 			UserName:        account.Name,
 			ActiveNav:       "profile",
 			Errors:          formErrors,
+			CSRFToken:       middleware.GetCSRFToken(r.Context()),
 		}
 		_ = h.engine.Render(w, "profile/password.html", "base", data)
 	}

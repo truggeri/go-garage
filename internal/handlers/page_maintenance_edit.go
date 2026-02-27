@@ -26,6 +26,8 @@ type maintenanceEditPageData struct {
 	VehicleTitle string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
+	// CSRFToken is the CSRF protection token to embed in the form.
+	CSRFToken string
 	// Form field values for repopulating the form after a failed submission.
 	ServiceType      string
 	ServiceDate      string
@@ -82,6 +84,7 @@ func (h *PageHandler) MaintenanceEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := maintenanceEditPageDataFromRecord(account, record, vehicle)
+	data.CSRFToken = middleware.GetCSRFToken(r.Context())
 
 	if err := h.engine.Render(w, "maintenance/edit.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -130,6 +133,7 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 			RecordID:         record.ID,
 			VehicleTitle:     vehicleTitle,
 			Errors:           formErrors,
+			CSRFToken:        middleware.GetCSRFToken(r.Context()),
 			ServiceType:      serviceType,
 			ServiceDate:      serviceDateStr,
 			MileageAtService: mileageStr,

@@ -25,7 +25,8 @@ type maintenanceNewPageData struct {
 	// VehicleNames maps vehicle IDs to human-readable names.
 	VehicleNames map[string]string
 	// Errors holds field-level and general validation error messages.
-	Errors map[string]string
+	Errors    map[string]string
+	CSRFToken string
 	// Form field values for repopulating the form after a failed submission.
 	VehicleID        string
 	ServiceType      string
@@ -104,6 +105,7 @@ func (h *PageHandler) MaintenanceNew(w http.ResponseWriter, r *http.Request) {
 		Vehicles:        vehicles,
 		VehicleNames:    buildVehicleNameMap(vehicles),
 		VehicleID:       r.URL.Query().Get("vehicle_id"),
+		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 	}
 
 	if err := h.engine.Render(w, "maintenance/new.html", "base", data); err != nil {
@@ -147,6 +149,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 			Vehicles:         vehicles,
 			VehicleNames:     buildVehicleNameMap(vehicles),
 			Errors:           formErrors,
+			CSRFToken:        middleware.GetCSRFToken(r.Context()),
 			VehicleID:        vehicleID,
 			ServiceType:      serviceType,
 			ServiceDate:      serviceDateStr,

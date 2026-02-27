@@ -131,6 +131,8 @@ type vehicleNewPageData struct {
 	ActiveNav string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
+	// CSRFToken is the CSRF protection token to embed in the form.
+	CSRFToken string
 	// Form field values for repopulating the form after a failed submission.
 	Make            string
 	Model           string
@@ -157,6 +159,7 @@ func (h *PageHandler) VehicleNew(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated: true,
 		UserName:        account.Name,
 		ActiveNav:       "vehicles",
+		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 	}
 
 	if err := h.engine.Render(w, "vehicles/new.html", "base", data); err != nil {
@@ -199,6 +202,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 			UserName:        account.Name,
 			ActiveNav:       "vehicles",
 			Errors:          formErrors,
+			CSRFToken:       middleware.GetCSRFToken(r.Context()),
 			Make:            vehicleMake,
 			Model:           model,
 			Year:            yearStr,

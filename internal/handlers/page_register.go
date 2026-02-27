@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 
+	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/services"
 )
@@ -16,11 +17,13 @@ type registerPageData struct {
 	Email     string
 	FirstName string
 	LastName  string
+	// CSRFToken is the CSRF protection token to embed in the form.
+	CSRFToken string
 }
 
 // RegisterForm serves the registration page (GET /register).
 func (h *PageHandler) RegisterForm(w http.ResponseWriter, r *http.Request) {
-	data := registerPageData{}
+	data := registerPageData{CSRFToken: middleware.GetCSRFToken(r.Context())}
 	if err := h.engine.Render(w, "register.html", "auth", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
@@ -65,6 +68,7 @@ func (h *PageHandler) RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 			Email:     email,
 			FirstName: firstName,
 			LastName:  lastName,
+			CSRFToken: middleware.GetCSRFToken(r.Context()),
 		}
 		if renderErr := h.engine.Render(w, "register.html", "auth", data); renderErr != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -103,6 +107,7 @@ func (h *PageHandler) RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 			Email:     email,
 			FirstName: firstName,
 			LastName:  lastName,
+			CSRFToken: middleware.GetCSRFToken(r.Context()),
 		}
 		if renderErr := h.engine.Render(w, "register.html", "auth", data); renderErr != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

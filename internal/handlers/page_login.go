@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 )
 
@@ -13,11 +14,13 @@ type loginPageData struct {
 	Flash      interface{}
 	Errors     map[string]string
 	Identifier string
+	// CSRFToken is the CSRF protection token to embed in the form.
+	CSRFToken string
 }
 
 // LoginForm serves the login page (GET /login).
 func (h *PageHandler) LoginForm(w http.ResponseWriter, r *http.Request) {
-	data := loginPageData{}
+	data := loginPageData{CSRFToken: middleware.GetCSRFToken(r.Context())}
 
 	if r.URL.Query().Get("registered") == queryTrue {
 		data.Flash = []flashMessage{
@@ -54,6 +57,7 @@ func (h *PageHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		data := loginPageData{
 			Errors:     errors,
 			Identifier: identifier,
+			CSRFToken:  middleware.GetCSRFToken(r.Context()),
 		}
 		if renderErr := h.engine.Render(w, "login.html", "auth", data); renderErr != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -74,6 +78,7 @@ func (h *PageHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 		data := loginPageData{
 			Errors:     errors,
 			Identifier: identifier,
+			CSRFToken:  middleware.GetCSRFToken(r.Context()),
 		}
 		if renderErr := h.engine.Render(w, "login.html", "auth", data); renderErr != nil {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)

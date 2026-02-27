@@ -15,6 +15,7 @@
 {{if .Vehicles}}
 <div class="card">
     <form method="POST" action="/maintenance/new" novalidate>
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         <div class="form-section">
             <h2 class="form-section-title">Record Details</h2>
 

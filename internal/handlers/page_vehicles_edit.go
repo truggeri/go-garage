@@ -29,6 +29,7 @@ func (h *PageHandler) VehicleEdit(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := vehicleEditPageDataFromVehicle(account, vehicle)
+	data.CSRFToken = middleware.GetCSRFToken(r.Context())
 
 	if err := h.engine.Render(w, "vehicles/edit.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
@@ -82,6 +83,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 			ActiveNav:       "vehicles",
 			VehicleID:       vehicle.ID,
 			Errors:          formErrors,
+			CSRFToken:       middleware.GetCSRFToken(r.Context()),
 			Make:            vehicleMake,
 			Model:           model,
 			Year:            yearStr,
