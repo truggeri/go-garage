@@ -43,7 +43,7 @@ jobs:
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Update minified css file
+      - name: Update minified files
         if: steps.check.outputs.changed == 'true'
         run: |
           cp /tmp/minified-output.css web/static/css/main-minified.css &&
