@@ -25,8 +25,7 @@ type maintenanceNewPageData struct {
 	// VehicleNames maps vehicle IDs to human-readable names.
 	VehicleNames map[string]string
 	// Errors holds field-level and general validation error messages.
-	Errors map[string]string
-	// CSRFToken is the CSRF protection token to embed in the form.
+	Errors    map[string]string
 	CSRFToken string
 	// Form field values for repopulating the form after a failed submission.
 	VehicleID        string

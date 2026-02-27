@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Server-Side Integration
+Milestone 4, Responsive Design
 
 ## Task tracker
 
@@ -65,7 +65,7 @@ Milestone 4, Server-Side Integration
 - [x] Navigation Bar
 - [x] Flash Messages
 - [x] Client-Side Validation
-- [ ] Server-Side Integration
+- [x] Server-Side Integration
 - [ ] Responsive Design
 - [x] Accessibility
 - [ ] Loading States
