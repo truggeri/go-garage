@@ -34,6 +34,7 @@ func TestCSRFProtection_SetsTokenCookie(t *testing.T) {
 	require.NotNil(t, csrfCookie, "csrf_token cookie should be set")
 	assert.NotEmpty(t, csrfCookie.Value)
 	assert.True(t, csrfCookie.HttpOnly)
+	assert.Equal(t, csrfCookieMaxAge, csrfCookie.MaxAge)
 	assert.Equal(t, http.SameSiteStrictMode, csrfCookie.SameSite)
 }
 

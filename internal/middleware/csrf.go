@@ -19,6 +19,9 @@ const csrfFormField = "csrf_token"
 // csrfTokenLength is the number of random bytes used to generate a token (32 bytes = 64 hex chars).
 const csrfTokenLength = 32
 
+// csrfCookieMaxAge is the lifetime of the CSRF cookie in seconds (5 minutes).
+const csrfCookieMaxAge = 5 * 60
+
 // GetCSRFToken retrieves the CSRF token stored in the request context.
 // Returns an empty string when no token is present.
 func GetCSRFToken(ctx context.Context) string {
@@ -64,6 +67,7 @@ func readOrCreateToken(w http.ResponseWriter, r *http.Request) string {
 		Name:     csrfCookieName,
 		Value:    token,
 		Path:     "/",
+		MaxAge:   csrfCookieMaxAge,
 		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 		Secure:   r.TLS != nil,
