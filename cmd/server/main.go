@@ -114,7 +114,7 @@ func main() {
 
 	// Web page routes (public, with CSRF protection for forms)
 	publicPages := router.NewRoute().Subrouter()
-	publicPages.Use(middleware.CSRFProtection())
+	publicPages.Use(middleware.CSRFProtection(cfg.CSRF.Secret))
 	publicPages.HandleFunc("/", pageHandler.Home).Methods("GET")
 	publicPages.HandleFunc("/register", pageHandler.RegisterForm).Methods("GET")
 	publicPages.HandleFunc("/register", pageHandler.RegisterSubmit).Methods("POST")
@@ -122,9 +122,11 @@ func main() {
 	publicPages.HandleFunc("/login", pageHandler.LoginSubmit).Methods("POST")
 
 	// Web page routes (require cookie authentication + CSRF protection)
+	// CookieAuthGuard must run before CSRFProtection so that session info
+	// (AccountInfo) is available in context for HMAC-based token generation.
 	protectedPages := router.NewRoute().Subrouter()
-	protectedPages.Use(middleware.CSRFProtection())
 	protectedPages.Use(middleware.CookieAuthGuard(tokenMgr))
+	protectedPages.Use(middleware.CSRFProtection(cfg.CSRF.Secret))
 	protectedPages.HandleFunc("/dashboard", pageHandler.Dashboard).Methods("GET")
 	protectedPages.HandleFunc("/vehicles", pageHandler.VehicleList).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleNew).Methods("GET")

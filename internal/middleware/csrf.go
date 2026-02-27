@@ -2,25 +2,25 @@ package middleware
 
 import (
 	"context"
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"net/http"
+	"strings"
 )
 
 // csrfTokenContextKey is the context key for the CSRF token.
 const csrfTokenContextKey contextKey = "csrfToken"
 
-// csrfCookieName is the name of the cookie that stores the CSRF token.
-const csrfCookieName = "csrf_token"
-
 // csrfFormField is the name of the hidden form field that carries the CSRF token.
 const csrfFormField = "csrf_token"
 
-// csrfTokenLength is the number of random bytes used to generate a token (32 bytes = 64 hex chars).
-const csrfTokenLength = 32
+// csrfNonceLength is the number of random bytes used to generate a nonce (32 bytes = 64 hex chars).
+const csrfNonceLength = 32
 
-// csrfCookieMaxAge is the lifetime of the CSRF cookie in seconds (5 minutes).
-const csrfCookieMaxAge = 5 * 60
+// csrfTokenSeparator separates the nonce from the HMAC signature in the token string.
+const csrfTokenSeparator = "."
 
 // GetCSRFToken retrieves the CSRF token stored in the request context.
 // Returns an empty string when no token is present.
@@ -29,58 +29,78 @@ func GetCSRFToken(ctx context.Context) string {
 	return v
 }
 
-// CSRFProtection creates middleware that implements the double-submit cookie
-// pattern for CSRF protection. On every request it ensures a csrf_token cookie
-// exists and stores the token in the request context so that handlers can pass
-// it to templates. On state-changing requests (POST, PUT, DELETE) it validates
-// that the form field value matches the cookie value.
-func CSRFProtection() func(http.Handler) http.Handler {
+// CSRFProtection creates middleware that implements HMAC-based CSRF protection.
+// On every request it generates a new CSRF token using the user's session ID
+// (from AccountInfo if present) and a cryptographic nonce, signed with the
+// provided secret. On state-changing requests (POST, PUT, DELETE) it validates
+// that the form field token was signed with the same session ID and secret.
+func CSRFProtection(secret string) func(http.Handler) http.Handler {
+	secretBytes := []byte(secret)
+
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			token := readOrCreateToken(w, r)
-
-			ctx := context.WithValue(r.Context(), csrfTokenContextKey, token)
-			r = r.WithContext(ctx)
+			sessionID := sessionIDFromContext(r.Context())
 
 			if r.Method == http.MethodPost || r.Method == http.MethodPut || r.Method == http.MethodDelete {
 				formToken := r.FormValue(csrfFormField)
-				if formToken == "" || formToken != token {
+				if !validateCSRFToken(formToken, sessionID, secretBytes) {
 					http.Error(w, "Forbidden - invalid CSRF token", http.StatusForbidden)
 					return
 				}
 			}
 
-			next.ServeHTTP(w, r)
+			token := generateCSRFToken(sessionID, secretBytes)
+			ctx := context.WithValue(r.Context(), csrfTokenContextKey, token)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-// readOrCreateToken reads the CSRF token from the cookie or generates a new
-// one, setting it as a cookie on the response.
-func readOrCreateToken(w http.ResponseWriter, r *http.Request) string {
-	if cookie, err := r.Cookie(csrfCookieName); err == nil && cookie.Value != "" {
-		return cookie.Value
+// sessionIDFromContext returns the authenticated user's ID when available,
+// or an empty string for unauthenticated requests (e.g. login/register pages).
+func sessionIDFromContext(ctx context.Context) string {
+	acct, ok := GetAccountFromContext(ctx)
+	if ok && acct != nil {
+		return acct.ID
 	}
-
-	token := generateToken()
-	http.SetCookie(w, &http.Cookie{
-		Name:     csrfCookieName,
-		Value:    token,
-		Path:     "/",
-		MaxAge:   csrfCookieMaxAge,
-		HttpOnly: true,
-		SameSite: http.SameSiteStrictMode,
-		Secure:   r.TLS != nil,
-	})
-	return token
+	return ""
 }
 
-// generateToken creates a cryptographically random hex-encoded token.
-func generateToken() string {
-	b := make([]byte, csrfTokenLength)
+// generateCSRFToken creates an HMAC-based CSRF token in the format "nonce.signature".
+// The signature is HMAC-SHA256(sessionID | nonce, secret) where | is a delimiter
+// to prevent concatenation ambiguity.
+func generateCSRFToken(sessionID string, secret []byte) string {
+	nonce := generateNonce()
+	sig := computeHMAC(sessionID+"|"+nonce, secret)
+	return nonce + csrfTokenSeparator + sig
+}
+
+// validateCSRFToken checks that the provided token has a valid HMAC signature
+// for the given session ID and secret.
+func validateCSRFToken(token, sessionID string, secret []byte) bool {
+	parts := strings.SplitN(token, csrfTokenSeparator, 2)
+	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
+		return false
+	}
+
+	nonce, providedSig := parts[0], parts[1]
+	expectedSig := computeHMAC(sessionID+"|"+nonce, secret)
+
+	return hmac.Equal([]byte(providedSig), []byte(expectedSig))
+}
+
+// computeHMAC returns a hex-encoded HMAC-SHA256 of the given message.
+func computeHMAC(message string, secret []byte) string {
+	mac := hmac.New(sha256.New, secret)
+	mac.Write([]byte(message))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
+// generateNonce creates a cryptographically random hex-encoded nonce.
+func generateNonce() string {
+	b := make([]byte, csrfNonceLength)
 	if _, err := rand.Read(b); err != nil {
-		// Fallback should never happen in practice; crypto/rand reads from the OS.
-		panic("csrf: failed to generate random token: " + err.Error())
+		panic("csrf: failed to generate random nonce: " + err.Error())
 	}
 	return hex.EncodeToString(b)
 }

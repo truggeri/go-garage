@@ -14,6 +14,7 @@ func TestLoad_WithDefaults(t *testing.T) {
 
 	// Set required env
 	t.Setenv("JWT_SECRET", "test-required-secret-key")
+	t.Setenv("CSRF_SECRET", "test-csrf-secret-key")
 
 	config, err := Load()
 
@@ -38,6 +39,7 @@ func TestLoad_WithEnvironmentVariables(t *testing.T) {
 	t.Setenv("LOG_LEVEL", "debug")
 	t.Setenv("LOG_FORMAT", "text")
 	t.Setenv("JWT_SECRET", "test-secret-key")
+	t.Setenv("CSRF_SECRET", "test-csrf-secret-key")
 	t.Setenv("ENVIRONMENT", "production")
 
 	config, err := Load()
@@ -111,6 +113,7 @@ func TestLoad_ProductionWithJWTSecret(t *testing.T) {
 	os.Clearenv()
 	t.Setenv("ENVIRONMENT", "production")
 	t.Setenv("JWT_SECRET", "production-secret-key")
+	t.Setenv("CSRF_SECRET", "production-csrf-secret-key")
 
 	config, err := Load()
 
@@ -118,6 +121,17 @@ func TestLoad_ProductionWithJWTSecret(t *testing.T) {
 	assert.NotNil(t, config, "Config should not be nil")
 	assert.Equal(t, "production", config.Env)
 	assert.Equal(t, "production-secret-key", config.JWT.Secret)
+}
+
+func TestLoad_WithoutCSRFSecret(t *testing.T) {
+	os.Clearenv()
+	t.Setenv("JWT_SECRET", "test-jwt-secret")
+
+	config, err := Load()
+
+	assert.Error(t, err, "Load should return an error without CSRF secret")
+	assert.Nil(t, config, "Config should be nil when validation fails")
+	assert.Contains(t, err.Error(), "CSRF_SECRET is required")
 }
 
 func TestValidate_ValidPort(t *testing.T) {
@@ -135,6 +149,9 @@ func TestValidate_ValidPort(t *testing.T) {
 		},
 		JWT: JWTConfig{
 			Secret: "test-secret",
+		},
+		CSRF: CSRFConfig{
+			Secret: "test-csrf-secret",
 		},
 		Env: "development",
 	}

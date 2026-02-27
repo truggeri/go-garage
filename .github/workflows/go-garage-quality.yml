@@ -119,6 +119,7 @@ jobs:
             -e ENVIRONMENT=development \
             -e DB_PATH=/app/data/test.db \
             -e JWT_SECRET=b6d7d32d7b1b94437fb4365ae04896ad83014dd303932732f019c438cc2e98c9 \
+            -e CSRF_SECRET=a1c3e5f7091b2d4f6a8c0e2b4d6f8a0c1e3b5d7f9a2c4e6b8d0f2a4c6e8b0d3 \
             -p 8080:8080 \
             go-garage:ci-validation
 

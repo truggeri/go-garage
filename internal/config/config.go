@@ -14,6 +14,7 @@ type Config struct {
 	Database DatabaseConfig
 	Logging  LoggingConfig
 	JWT      JWTConfig
+	CSRF     CSRFConfig
 	Env      string
 }
 
@@ -39,6 +40,11 @@ type JWTConfig struct {
 	Secret string
 }
 
+// CSRFConfig holds CSRF protection configuration
+type CSRFConfig struct {
+	Secret string
+}
+
 // Load creates a new Config by loading values from environment variables
 // It automatically loads .env file if it exists (for local development)
 func Load() (*Config, error) {
@@ -58,6 +64,9 @@ func Load() (*Config, error) {
 		},
 		JWT: JWTConfig{
 			Secret: getEnvOrDefault("JWT_SECRET", ""),
+		},
+		CSRF: CSRFConfig{
+			Secret: getEnvOrDefault("CSRF_SECRET", ""),
 		},
 		Env: getEnvOrDefault("ENVIRONMENT", "development"),
 	}
@@ -107,6 +116,10 @@ func (c *Config) Validate() error {
 
 	if c.JWT.Secret == "" {
 		return fmt.Errorf("JWT_SECRET is required in production environment")
+	}
+
+	if c.CSRF.Secret == "" {
+		return fmt.Errorf("CSRF_SECRET is required")
 	}
 
 	return nil
