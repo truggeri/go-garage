@@ -70,7 +70,7 @@ Milestone 4, Client-Side Validation
 - [x] Accessibility
 - [ ] Loading States
 - [ ] Empty States
-- [ ] Error Pages
+- [x] Error Pages
 - [ ] Documentation
 
 ### Milestone 5: Testing Deployment
