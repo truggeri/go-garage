@@ -429,6 +429,12 @@ html[data-theme="dark"] .theme-toggle-moon { display: none; }
     margin-bottom: var(--spacing-sm);
     font-size: var(--font-size-sm);
     border: 1px solid transparent;
+    opacity: 1;
+    transition: opacity 0.4s ease;
+}
+
+.flash-dismiss {
+    opacity: 0;
 }
 
 .flash-success {
