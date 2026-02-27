@@ -66,7 +66,7 @@ Milestone 4, Client-Side Validation
 - [x] Flash Messages
 - [ ] Client-Side Validation
 - [ ] Server-Side Integration
-- [ ] Responsive Design
+- [x] Responsive Design
 - [x] Accessibility
 - [ ] Loading States
 - [ ] Empty States

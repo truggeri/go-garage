@@ -32,7 +32,7 @@
         <h2 class="card-title">Recent Maintenance</h2>
     </div>
     {{if .RecentMaintenance}}
-    <table class="table">
+    <table class="table table-responsive">
         <thead>
             <tr>
                 <th>Vehicle</th>
@@ -44,10 +44,10 @@
         <tbody>
             {{range .RecentMaintenance}}
             <tr>
-                <td>{{.VehicleName}}</td>
-                <td>{{.ServiceType}}</td>
-                <td>{{formatDate .ServiceDate}}</td>
-                <td>{{formatCurrencyPtr .Cost}}</td>
+                <td data-label="Vehicle">{{.VehicleName}}</td>
+                <td data-label="Service Type">{{.ServiceType}}</td>
+                <td data-label="Date">{{formatDate .ServiceDate}}</td>
+                <td data-label="Cost">{{formatCurrencyPtr .Cost}}</td>
             </tr>
             {{end}}
         </tbody>

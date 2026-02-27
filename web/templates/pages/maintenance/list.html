@@ -32,7 +32,7 @@
 </div>
 
 {{if .Records}}
-<table class="table">
+<table class="table table-responsive">
     <thead>
         <tr>
             <th>Service Type</th>
@@ -47,13 +47,13 @@
     <tbody>
         {{range .Records}}
         <tr>
-            <td>{{.ServiceType}}</td>
-            <td>{{index $.VehicleNames .VehicleID}}</td>
-            <td>{{formatDate .ServiceDate}}</td>
-            <td>{{formatMileagePtr .MileageAtService}}</td>
-            <td>{{formatCurrencyPtr .Cost}}</td>
-            <td>{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
-            <td>
+            <td data-label="Service Type">{{.ServiceType}}</td>
+            <td data-label="Vehicle">{{index $.VehicleNames .VehicleID}}</td>
+            <td data-label="Date">{{formatDate .ServiceDate}}</td>
+            <td data-label="Mileage">{{formatMileagePtr .MileageAtService}}</td>
+            <td data-label="Cost">{{formatCurrencyPtr .Cost}}</td>
+            <td data-label="Provider">{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
+            <td data-label="Actions">
                 <a href="/maintenance/{{.ID}}" class="btn btn-secondary btn-sm">View</a>
                 <a href="/maintenance/{{.ID}}/edit" class="btn btn-secondary btn-sm">Edit</a>
             </td>
