@@ -293,9 +293,9 @@ web/static/
 
 #### Empty States
 
-- [ ] "No vehicles yet" message with CTA
-- [ ] "No maintenance records" message
-- [ ] Helpful guidance for new users
+- [x] "No vehicles yet" message with CTA
+- [x] "No maintenance records" message
+- [x] Helpful guidance for new users
 
 #### Error Pages
 
