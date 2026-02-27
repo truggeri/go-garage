@@ -75,4 +75,4 @@ Milestone 4, Client-Side Validation
 
 ### Milestone 5: Testing Deployment
 
-- [ ] Security Tests
+- [x] Security Tests
