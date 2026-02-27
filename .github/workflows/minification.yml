@@ -11,20 +11,6 @@ jobs:
     permissions:
       contents: write
 
-    strategy:
-      matrix:
-        include:
-          - name: JavaScript
-            type: js
-            input: web/static/js/main.js
-            output: web/static/js/main-minified.js
-            commit_message: "Adding minified javascript"
-          - name: CSS
-            type: css
-            input: web/static/css/main.css
-            output: web/static/css/main-minified.css
-            commit_message: "Adding minified css"
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -40,27 +26,35 @@ jobs:
       - name: Install minifier
         run: go install github.com/tdewolff/minify/v2/cmd/minify@latest
 
-      - name: Run minifier
-        run: minify --type=${{ matrix.type }} ${{ matrix.input }} -o /tmp/minified-output
+      - name: Run css minifier
+        run: minify --type=css web/static/css/main.css -o /tmp/minified-output.css
+
+      - name: Run js minifier
+        run: minify --type=hs web/static/js/main.js -o /tmp/minified-output.js
 
       - name: Check if minified output has changed
         id: check
         run: |
-          if [ ! -f ${{ matrix.output }} ] || ! diff -q /tmp/minified-output ${{ matrix.output }} > /dev/null 2>&1; then
+          if [ ! -f web/static/css/main-minified.css ] || ! diff -q /tmp/minified-output.css web/static/css/main-minified.css > /dev/null 2>&1; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          elif [ ! -f web/static/js/main-minified.js ] || ! diff -q /tmp/minified-output.js web/static/js/main-minified.js > /dev/null 2>&1; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Update minified file
+      - name: Update minified css file
         if: steps.check.outputs.changed == 'true'
-        run: cp /tmp/minified-output ${{ matrix.output }}
+        run: |
+          cp /tmp/minified-output.css web/static/css/main-minified.css &&
+          cp /tmp/minified-output.js web/static/js/main-minified.js
 
       - name: Commit and push changes
         if: steps.check.outputs.changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add ${{ matrix.output }}
-          git commit -m "${{ matrix.commit_message }}"
+          git add web/static/css/main-minified.css
+          git add web/static/js/main-minified.js
+          git commit -m "Adding minified assets"
           git push
