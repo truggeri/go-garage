@@ -21,6 +21,8 @@ type profileEditPageData struct {
 	ActiveNav string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
+	// CSRFToken is the CSRF protection token to embed in the form.
+	CSRFToken string
 	// Form field values for repopulating the form after a failed submission.
 	Username  string
 	Email     string
@@ -46,6 +48,7 @@ func (h *PageHandler) ProfileEdit(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated: true,
 		UserName:        account.Name,
 		ActiveNav:       "profile",
+		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 		Username:        user.Username,
 		Email:           user.Email,
 		FirstName:       user.FirstName,
@@ -82,6 +85,7 @@ func (h *PageHandler) ProfileUpdate(w http.ResponseWriter, r *http.Request) {
 			UserName:        account.Name,
 			ActiveNav:       "profile",
 			Errors:          formErrors,
+			CSRFToken:       middleware.GetCSRFToken(r.Context()),
 			Username:        username,
 			Email:           email,
 			FirstName:       firstName,

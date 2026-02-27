@@ -90,6 +90,8 @@ type vehicleEditPageData struct {
 	VehicleID string
 	// Errors holds field-level and general validation error messages.
 	Errors map[string]string
+	// CSRFToken is the CSRF protection token to embed in the form.
+	CSRFToken string
 	// Form field values for repopulating the form after a failed submission.
 	Make            string
 	Model           string

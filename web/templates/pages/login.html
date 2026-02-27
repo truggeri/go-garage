@@ -14,6 +14,7 @@
     {{end}}
 
     <form method="POST" action="/login" novalidate>
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         <div class="form-group">
             <label class="form-label" for="identifier">Email or Username</label>
             <input class="form-input{{if .Errors.identifier}} is-invalid{{end}}"
