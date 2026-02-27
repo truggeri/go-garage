@@ -50,41 +50,48 @@ func TestXSSPrevention_LoginPage(t *testing.T) {
 func TestXSSPrevention_RegisterPage(t *testing.T) {
 	handler := newTestPageHandler(t, &mockAuthService{})
 
-	payload := `<script>alert('xss')</script>`
+	xssPayloads := []string{
+		`<script>alert('xss')</script>`,
+		`"><img src=x onerror=alert(1)>`,
+		`<svg onload=alert(1)>`,
+		`' onmouseover='alert(1)'`,
+	}
 
-	t.Run("escapes XSS in username field", func(t *testing.T) {
-		form := url.Values{}
-		form.Set("username", payload)
-		form.Set("email", "")
-		form.Set("password", "Test1234")
-		form.Set("confirm_password", "Test1234")
+	for _, payload := range xssPayloads {
+		t.Run("escapes XSS in username field: "+payload[:min(len(payload), 30)], func(t *testing.T) {
+			form := url.Values{}
+			form.Set("username", payload)
+			form.Set("email", "")
+			form.Set("password", "Test1234")
+			form.Set("confirm_password", "Test1234")
 
-		req := httptest.NewRequest(http.MethodPost, "/register", strings.NewReader(form.Encode()))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		rec := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodPost, "/register", strings.NewReader(form.Encode()))
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			rec := httptest.NewRecorder()
 
-		handler.RegisterSubmit(rec, req)
+			handler.RegisterSubmit(rec, req)
 
-		body := rec.Body.String()
-		assert.NotContains(t, body, payload, "raw XSS payload must be escaped in response")
-	})
+			body := rec.Body.String()
+			assert.NotContains(t, body, payload, "raw XSS payload must be escaped in response")
+		})
 
-	t.Run("escapes XSS in email field", func(t *testing.T) {
-		form := url.Values{}
-		form.Set("username", "testuser")
-		form.Set("email", payload)
-		form.Set("password", "")
-		form.Set("confirm_password", "")
+		t.Run("escapes XSS in email field: "+payload[:min(len(payload), 30)], func(t *testing.T) {
+			form := url.Values{}
+			form.Set("username", "testuser")
+			form.Set("email", payload)
+			form.Set("password", "")
+			form.Set("confirm_password", "")
 
-		req := httptest.NewRequest(http.MethodPost, "/register", strings.NewReader(form.Encode()))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		rec := httptest.NewRecorder()
+			req := httptest.NewRequest(http.MethodPost, "/register", strings.NewReader(form.Encode()))
+			req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+			rec := httptest.NewRecorder()
 
-		handler.RegisterSubmit(rec, req)
+			handler.RegisterSubmit(rec, req)
 
-		body := rec.Body.String()
-		assert.NotContains(t, body, payload, "raw XSS payload must be escaped in response")
-	})
+			body := rec.Body.String()
+			assert.NotContains(t, body, payload, "raw XSS payload must be escaped in response")
+		})
+	}
 }
 
 // TestCSRFProtection_CookieAttributes verifies that authentication cookies
