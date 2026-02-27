@@ -115,7 +115,7 @@
                 <a href="/maintenance?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-sm">View All</a>
             </div>
             {{if .RecentMaintenance}}
-            <table class="table">
+            <table class="table table-responsive">
                 <thead>
                     <tr>
                         <th>Service Type</th>
@@ -128,11 +128,11 @@
                 <tbody>
                     {{range .RecentMaintenance}}
                     <tr>
-                        <td>{{.ServiceType}}</td>
-                        <td>{{formatDate .ServiceDate}}</td>
-                        <td>{{formatMileagePtr .MileageAtService}}</td>
-                        <td>{{formatCurrencyPtr .Cost}}</td>
-                        <td>{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
+                        <td data-label="Service Type">{{.ServiceType}}</td>
+                        <td data-label="Date">{{formatDate .ServiceDate}}</td>
+                        <td data-label="Mileage">{{formatMileagePtr .MileageAtService}}</td>
+                        <td data-label="Cost">{{formatCurrencyPtr .Cost}}</td>
+                        <td data-label="Provider">{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
                     </tr>
                     {{end}}
                 </tbody>
