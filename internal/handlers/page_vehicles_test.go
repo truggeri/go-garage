@@ -74,7 +74,7 @@ func TestPageHandler_VehicleList(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
-		assert.Contains(t, body, "No vehicles found")
+		assert.Contains(t, body, "No vehicles yet")
 		assert.Contains(t, body, "Add Your First Vehicle")
 	})
 

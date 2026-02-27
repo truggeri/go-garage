@@ -6,6 +6,7 @@
     <a href="/maintenance/new" class="btn btn-primary">Add Record</a>
 </div>
 
+{{if .Vehicles}}
 <div class="filter-bar" role="search" aria-label="Filter maintenance records">
     <form method="GET" action="/maintenance" class="filter-form">
         <div class="filter-group">
@@ -30,9 +31,10 @@
         {{end}}
     </form>
 </div>
+{{end}}
 
 {{if .Records}}
-<table class="table">
+<table class="table table-responsive">
     <thead>
         <tr>
             <th>Service Type</th>
@@ -47,13 +49,13 @@
     <tbody>
         {{range .Records}}
         <tr>
-            <td>{{.ServiceType}}</td>
-            <td>{{index $.VehicleNames .VehicleID}}</td>
-            <td>{{formatDate .ServiceDate}}</td>
-            <td>{{formatMileagePtr .MileageAtService}}</td>
-            <td>{{formatCurrencyPtr .Cost}}</td>
-            <td>{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
-            <td>
+            <td data-label="Service Type">{{.ServiceType}}</td>
+            <td data-label="Vehicle">{{index $.VehicleNames .VehicleID}}</td>
+            <td data-label="Date">{{formatDate .ServiceDate}}</td>
+            <td data-label="Mileage">{{formatMileagePtr .MileageAtService}}</td>
+            <td data-label="Cost">{{formatCurrencyPtr .Cost}}</td>
+            <td data-label="Provider">{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
+            <td data-label="Actions">
                 <a href="/maintenance/{{.ID}}" class="btn btn-secondary btn-sm">View</a>
                 <a href="/maintenance/{{.ID}}/edit" class="btn btn-secondary btn-sm">Edit</a>
             </td>
@@ -76,13 +78,17 @@
 
 {{else}}
 <div class="empty-state">
-    <h2>No maintenance records found</h2>
     {{if or .FilterVehicleID .FilterServiceType}}
+    <h2>No maintenance records found</h2>
     <p class="text-muted">No records match your current filters. <a href="/maintenance">Clear filters</a> to see all records.</p>
     {{else if .Vehicles}}
-    <p class="text-muted">You haven&#39;t added any maintenance records yet.</p>
+    <div class="empty-state-icon" aria-hidden="true">🔧</div>
+    <h2>No maintenance records yet</h2>
+    <p class="text-muted">Start logging maintenance to keep track of your vehicle&#39;s service history.</p>
     <a href="/maintenance/new" class="btn btn-primary">Add Your First Record</a>
     {{else}}
+    <div class="empty-state-icon" aria-hidden="true">🚗</div>
+    <h2>No vehicles yet</h2>
     <p class="text-muted">Add a vehicle first, then you can log maintenance records.</p>
     <a href="/vehicles/new" class="btn btn-primary">Add a Vehicle</a>
     {{end}}

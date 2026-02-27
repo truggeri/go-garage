@@ -102,6 +102,7 @@ func main() {
 
 	// Setup router and routes
 	router := mux.NewRouter()
+	router.NotFoundHandler = http.HandlerFunc(pageHandler.NotFound)
 
 	// Static file serving
 	staticDir := "./web/static/"
@@ -142,7 +143,7 @@ func main() {
 
 	// Vehicle detail page routes (require cookie auth + vehicle ownership)
 	vehiclePages := protectedPages.PathPrefix("/vehicles/{id}").Subrouter()
-	vehiclePages.Use(middleware.PageResourceOwnershipGuard(newVehicleLookup(vehicleSvc)))
+	vehiclePages.Use(middleware.PageResourceOwnershipGuard(newVehicleLookup(vehicleSvc), pageHandler.RenderError))
 	vehiclePages.HandleFunc("", pageHandler.VehicleDetail).Methods("GET")
 	vehiclePages.HandleFunc("/edit", pageHandler.VehicleEdit).Methods("GET")
 	vehiclePages.HandleFunc("/edit", pageHandler.VehicleUpdate).Methods("POST")

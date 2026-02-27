@@ -5,7 +5,9 @@
     <h1>{{.Vehicle.Year}} {{.Vehicle.Make}} {{.Vehicle.Model}}</h1>
     <div class="page-header-actions">
         <a href="/vehicles/{{.Vehicle.ID}}/edit" class="btn btn-primary">Edit Vehicle</a>
-        <button type="button" class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+        <button type="button" class="btn btn-danger"
+                data-confirm-delete="delete-form"
+                data-confirm-message="Are you sure you want to delete this vehicle? This action cannot be undone.">Delete</button>
     </div>
 </div>
 
@@ -113,7 +115,7 @@
                 <a href="/maintenance?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-sm">View All</a>
             </div>
             {{if .RecentMaintenance}}
-            <table class="table">
+            <table class="table table-responsive">
                 <thead>
                     <tr>
                         <th>Service Type</th>
@@ -126,11 +128,11 @@
                 <tbody>
                     {{range .RecentMaintenance}}
                     <tr>
-                        <td>{{.ServiceType}}</td>
-                        <td>{{formatDate .ServiceDate}}</td>
-                        <td>{{formatMileagePtr .MileageAtService}}</td>
-                        <td>{{formatCurrencyPtr .Cost}}</td>
-                        <td>{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
+                        <td data-label="Service Type">{{.ServiceType}}</td>
+                        <td data-label="Date">{{formatDate .ServiceDate}}</td>
+                        <td data-label="Mileage">{{formatMileagePtr .MileageAtService}}</td>
+                        <td data-label="Cost">{{formatCurrencyPtr .Cost}}</td>
+                        <td data-label="Provider">{{if .ServiceProvider}}{{.ServiceProvider}}{{else}}—{{end}}</td>
                     </tr>
                     {{end}}
                 </tbody>
@@ -190,12 +192,4 @@
 <form id="delete-form" method="POST" action="/vehicles/{{.Vehicle.ID}}/delete" style="display: none;">
     <input type="hidden" name="_method" value="DELETE">
 </form>
-
-<script>
-function confirmDelete() {
-    if (confirm('Are you sure you want to delete this vehicle? This action cannot be undone.')) {
-        document.getElementById('delete-form').submit();
-    }
-}
-</script>
 {{end}}

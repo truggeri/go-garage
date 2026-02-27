@@ -66,11 +66,11 @@ Milestone 4, Responsive Design
 - [x] Flash Messages
 - [x] Client-Side Validation
 - [x] Server-Side Integration
-- [ ] Responsive Design
+- [x] Responsive Design
 - [x] Accessibility
-- [ ] Loading States
-- [ ] Empty States
-- [ ] Error Pages
+- [x] Loading States
+- [x] Empty States
+- [x] Error Pages
 - [ ] Documentation
 
 ### Milestone 5: Testing Deployment
