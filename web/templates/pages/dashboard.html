@@ -6,6 +6,7 @@
     <p class="text-muted">Here&#39;s an overview of your garage.</p>
 </div>
 
+{{if .VehicleCount}}
 <div class="stat-grid">
     <div class="stat-card">
         <span class="stat-value">{{.VehicleCount}}</span>
@@ -56,4 +57,12 @@
     <p class="text-muted">No maintenance records yet. <a href="/maintenance/new">Add your first record.</a></p>
     {{end}}
 </div>
+{{else}}
+<div class="empty-state empty-state-hero">
+    <div class="empty-state-icon" aria-hidden="true">🚗</div>
+    <h2>Get started with Go-Garage</h2>
+    <p class="text-muted">Add your first vehicle to begin tracking maintenance and expenses.</p>
+    <a href="/vehicles/new" class="btn btn-primary">Add Your First Vehicle</a>
+</div>
+{{end}}
 {{end}}
