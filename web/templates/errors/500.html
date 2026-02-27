@@ -5,6 +5,12 @@
     <h1>500</h1>
     <h2>Internal Server Error</h2>
     <p>Something went wrong on our end. Please try again later.</p>
-    <a href="/" class="btn btn-primary">Back to Home</a>
+    <div class="error-page-actions">
+        {{if .IsAuthenticated}}
+        <a href="/dashboard" class="btn btn-primary">Back to Dashboard</a>
+        {{else}}
+        <a href="/" class="btn btn-primary">Back to Home</a>
+        {{end}}
+    </div>
 </div>
 {{end}}

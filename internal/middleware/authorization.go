@@ -54,31 +54,43 @@ func ResourceAuthorizationGuard(checker ResourceOwnershipChecker) func(http.Hand
 	}
 }
 
+// PageErrorHandler is called by page middleware to render an error response.
+// It receives the response writer, request, and the HTTP status code.
+type PageErrorHandler func(w http.ResponseWriter, r *http.Request, code int)
+
 // PageResourceOwnershipGuard creates middleware for page routes that loads a
 // resource, verifies the authenticated user owns it, and stores it in the
 // request context under LoadedResourceContextKey.
-// On failure it returns plain-text HTTP errors appropriate for browser pages.
-func PageResourceOwnershipGuard(lookup ResourceLookup) func(http.Handler) http.Handler {
+// An optional PageErrorHandler can be provided to render error pages;
+// when omitted, plain-text HTTP errors are returned.
+func PageResourceOwnershipGuard(lookup ResourceLookup, onError ...PageErrorHandler) func(http.Handler) http.Handler {
+	renderErr := func(w http.ResponseWriter, r *http.Request, code int, fallback string) {
+		if len(onError) > 0 && onError[0] != nil {
+			onError[0](w, r, code)
+			return
+		}
+		http.Error(w, fallback, code)
+	}
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			acctInfo, ok := GetAccountFromContext(r.Context())
 			if !ok || acctInfo == nil {
-				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				renderErr(w, r, http.StatusInternalServerError, "Internal Server Error")
 				return
 			}
 
 			resource, ownerID, err := lookup(r.Context(), r)
 			if err != nil {
 				if errors.Is(err, ErrResourceNotFound) {
-					http.Error(w, "Not Found", http.StatusNotFound)
+					renderErr(w, r, http.StatusNotFound, "Not Found")
 				} else {
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+					renderErr(w, r, http.StatusInternalServerError, "Internal Server Error")
 				}
 				return
 			}
 
 			if ownerID != acctInfo.ID {
-				http.Error(w, "Forbidden", http.StatusForbidden)
+				renderErr(w, r, http.StatusForbidden, "Forbidden")
 				return
 			}
 

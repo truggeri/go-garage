@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Client-Side Validation
+Milestone 4, Server-Side Integration
 
 ## Task tracker
 
@@ -64,13 +64,13 @@ Milestone 4, Client-Side Validation
 - [x] Change Password
 - [x] Navigation Bar
 - [x] Flash Messages
-- [ ] Client-Side Validation
+- [x] Client-Side Validation
 - [ ] Server-Side Integration
 - [x] Responsive Design
 - [x] Accessibility
-- [ ] Loading States
-- [ ] Empty States
-- [ ] Error Pages
+- [x] Loading States
+- [x] Empty States
+- [x] Error Pages
 - [ ] Documentation
 
 ### Milestone 5: Testing Deployment

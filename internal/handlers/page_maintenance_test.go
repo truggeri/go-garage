@@ -68,7 +68,7 @@ func TestPageHandler_MaintenanceList(t *testing.T) {
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
-		assert.Contains(t, body, "No maintenance records found")
+		assert.Contains(t, body, "No maintenance records yet")
 	})
 
 	t.Run("renders empty state with no vehicles", func(t *testing.T) {
