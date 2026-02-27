@@ -287,9 +287,9 @@ web/static/
 
 #### Loading States
 
-- [ ] Loading spinners for async operations
-- [ ] Disabled buttons during submission
-- [ ] Progress indicators
+- [x] Loading spinners for async operations
+- [x] Disabled buttons during submission
+- [x] Progress indicators
 
 #### Empty States
 
