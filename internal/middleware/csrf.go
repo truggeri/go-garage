@@ -67,10 +67,11 @@ func sessionIDFromContext(ctx context.Context) string {
 }
 
 // generateCSRFToken creates an HMAC-based CSRF token in the format "nonce.signature".
-// The signature is HMAC-SHA256(sessionID + nonce, secret).
+// The signature is HMAC-SHA256(sessionID | nonce, secret) where | is a delimiter
+// to prevent concatenation ambiguity.
 func generateCSRFToken(sessionID string, secret []byte) string {
 	nonce := generateNonce()
-	sig := computeHMAC(sessionID+nonce, secret)
+	sig := computeHMAC(sessionID+"|"+nonce, secret)
 	return nonce + csrfTokenSeparator + sig
 }
 
@@ -83,7 +84,7 @@ func validateCSRFToken(token, sessionID string, secret []byte) bool {
 	}
 
 	nonce, providedSig := parts[0], parts[1]
-	expectedSig := computeHMAC(sessionID+nonce, secret)
+	expectedSig := computeHMAC(sessionID+"|"+nonce, secret)
 
 	return hmac.Equal([]byte(providedSig), []byte(expectedSig))
 }
