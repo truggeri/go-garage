@@ -327,11 +327,11 @@ web/static/
 
 ### 15. Documentation
 
-- [ ] UI component documentation
-- [ ] Template usage guide
-- [ ] CSS class documentation
-- [ ] JavaScript module documentation
-- [ ] Style guide
+- [x] UI component documentation (PR #TBD)
+- [x] Template usage guide (PR #TBD)
+- [x] CSS class documentation (PR #TBD)
+- [x] JavaScript module documentation (PR #TBD)
+- [x] Style guide (PR #TBD)
 
 ## Deliverables
 

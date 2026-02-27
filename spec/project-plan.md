@@ -4,7 +4,7 @@ This project is split into milestones. Each milestone has its own document in th
 
 ## Next task
 
-Milestone 4, Responsive Design
+Milestone 5, Testing Deployment
 
 ## Task tracker
 
@@ -71,7 +71,7 @@ Milestone 4, Responsive Design
 - [x] Loading States
 - [x] Empty States
 - [x] Error Pages
-- [ ] Documentation
+- [x] Documentation (PR #TBD)
 
 ### Milestone 5: Testing Deployment
 
