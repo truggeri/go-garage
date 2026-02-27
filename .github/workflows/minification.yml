@@ -30,7 +30,7 @@ jobs:
         run: minify --type=css web/static/css/main.css -o /tmp/minified-output.css
 
       - name: Run js minifier
-        run: minify --type=hs web/static/js/main.js -o /tmp/minified-output.js
+        run: minify --type=js web/static/js/main.js -o /tmp/minified-output.js
 
       - name: Check if minified output has changed
         id: check
