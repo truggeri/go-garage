@@ -47,13 +47,13 @@
         }
 
         // MinLength
-        var minLength = parseInt(field.getAttribute("minlength"), 10) || DEFAULT_MIN_LENGTH;
+        var minLength = parseInt(field.getAttribute("minlength"), DEFAULT_MIN_LENGTH);
         if (value.length < minLength) {
             return "Must be at least " + minLength + " characters.";
         }
 
         // MaxLength (browser usually enforces, but validate anyway)
-        var maxLength = parseInt(field.getAttribute("maxlength"), 10) || DEFAULT_MAX_LENGTH;
+        var maxLength = parseInt(field.getAttribute("maxlength"), DEFAULT_MAX_LENGTH);
         if (value.length > maxLength) {
             return "Must be no more than " + maxLength + " characters.";
         }
