@@ -9,10 +9,15 @@
 
     var EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     var PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    var DEFAULT_MIN_LENGTH = 3;
+    var DEFAULT_MAX_LENGTH = 20;
 
     /**
      * Validate a single form field based on its HTML5 attributes and custom rules.
-     * Returns an error message string, or empty string if valid.
+     * Checks required, email format, min/max length, number range, date,
+     * password strength, and password confirmation.
+     * @param {HTMLElement} field - The form field element to validate.
+     * @returns {string} An error message if invalid, or empty string if valid.
      */
     function validateField(field) {
         var value = field.value.trim();
@@ -42,14 +47,14 @@
         }
 
         // MinLength
-        var minLength = field.getAttribute("minlength");
-        if (minLength && value.length < parseInt(minLength, 10)) {
+        var minLength = parseInt(field.getAttribute("minlength"), 10) || DEFAULT_MIN_LENGTH;
+        if (value.length < minLength) {
             return "Must be at least " + minLength + " characters.";
         }
 
         // MaxLength (browser usually enforces, but validate anyway)
-        var maxLength = field.getAttribute("maxlength");
-        if (maxLength && value.length > parseInt(maxLength, 10)) {
+        var maxLength = parseInt(field.getAttribute("maxlength"), 10) || DEFAULT_MAX_LENGTH;
+        if (value.length > maxLength) {
             return "Must be no more than " + maxLength + " characters.";
         }
 
@@ -100,6 +105,8 @@
     /**
      * Get or create the error message element for a field.
      * Appends to the end of the form-group to avoid conflicts with hint text.
+     * @param {HTMLElement} field - The form field element.
+     * @returns {HTMLParagraphElement|null} The error element, or null if no form-group parent.
      */
     function getErrorElement(field) {
         var group = field.closest(".form-group");
@@ -117,7 +124,10 @@
     }
 
     /**
-     * Show validation error on a field.
+     * Show a validation error on a field by adding the is-invalid class,
+     * setting aria-invalid, and displaying the error message.
+     * @param {HTMLElement} field - The form field element.
+     * @param {string} message - The error message to display.
      */
     function showError(field, message) {
         field.classList.add("is-invalid");
@@ -134,7 +144,9 @@
     }
 
     /**
-     * Show validation success on a field.
+     * Show validation success on a field by adding the is-valid class,
+     * removing aria-invalid, and hiding the error message.
+     * @param {HTMLElement} field - The form field element.
      */
     function showSuccess(field) {
         field.classList.remove("is-invalid");
@@ -149,7 +161,9 @@
     }
 
     /**
-     * Clear all validation state from a field.
+     * Clear all validation state from a field by removing is-invalid/is-valid
+     * classes, aria-invalid, and hiding the error message.
+     * @param {HTMLElement} field - The form field element.
      */
     function clearValidation(field) {
         field.classList.remove("is-invalid", "is-valid");
@@ -164,7 +178,9 @@
     }
 
     /**
-     * Add an ID to the field's aria-describedby list.
+     * Add an ID to the field's aria-describedby attribute list.
+     * @param {HTMLElement} field - The form field element.
+     * @param {string} id - The ID to add to the aria-describedby list.
      */
     function addDescribedBy(field, id) {
         var current = field.getAttribute("aria-describedby") || "";
@@ -176,7 +192,9 @@
     }
 
     /**
-     * Remove an ID from the field's aria-describedby list.
+     * Remove an ID from the field's aria-describedby attribute list.
+     * @param {HTMLElement} field - The form field element.
+     * @param {string} id - The ID to remove from the aria-describedby list.
      */
     function removeDescribedBy(field, id) {
         var current = field.getAttribute("aria-describedby") || "";
@@ -195,7 +213,10 @@
     // ========================================
 
     /**
-     * Get all validatable fields from a form.
+     * Get all validatable fields from a form (inputs, selects, textareas
+     * excluding hidden, submit, and disabled fields).
+     * @param {HTMLFormElement} form - The form element to query.
+     * @returns {NodeList} A list of validatable field elements.
      */
     function getValidatableFields(form) {
         return form.querySelectorAll(
@@ -206,8 +227,10 @@
     }
 
     /**
-     * Check whether a field should be validated.
-     * Only validate fields that have validation constraints.
+     * Check whether a field has any validation constraints.
+     * Returns true if the field has attributes or types that require validation.
+     * @param {HTMLElement} field - The form field element.
+     * @returns {boolean} True if the field has validation constraints.
      */
     function hasConstraints(field) {
         return field.hasAttribute("required") ||
@@ -223,7 +246,10 @@
     }
 
     /**
-     * Validate a single field and update UI. Returns true if valid.
+     * Validate a single field and update the UI accordingly.
+     * Shows an error or success state based on the validation result.
+     * @param {HTMLElement} field - The form field element.
+     * @returns {boolean} True if the field is valid, false otherwise.
      */
     function validateAndShow(field) {
         if (!hasConstraints(field)) {
@@ -239,7 +265,8 @@
     }
 
     /**
-     * Initialize client-side validation on all forms with novalidate attribute.
+     * Initialize client-side validation on all forms with the novalidate attribute.
+     * Attaches blur, input, and submit event listeners to each validatable field.
      */
     function initFormValidation() {
         var forms = document.querySelectorAll("form[novalidate]");
