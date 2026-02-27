@@ -20,7 +20,7 @@
                    type="text" id="identifier" name="identifier"
                    value="{{.Identifier}}"
                    required autocomplete="username"
-                   aria-describedby="identifier-error">
+                   {{if .Errors.identifier}}aria-invalid="true" {{end}}aria-describedby="identifier-error">
             {{if .Errors.identifier}}
             <p class="form-error" id="identifier-error">{{.Errors.identifier}}</p>
             {{end}}
@@ -31,7 +31,7 @@
             <input class="form-input{{if .Errors.password}} is-invalid{{end}}"
                    type="password" id="password" name="password"
                    required autocomplete="current-password"
-                   aria-describedby="password-error">
+                   {{if .Errors.password}}aria-invalid="true" {{end}}aria-describedby="password-error">
             {{if .Errors.password}}
             <p class="form-error" id="password-error">{{.Errors.password}}</p>
             {{end}}

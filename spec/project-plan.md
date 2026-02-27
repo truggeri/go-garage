@@ -67,7 +67,7 @@ Milestone 4, Client-Side Validation
 - [ ] Client-Side Validation
 - [ ] Server-Side Integration
 - [ ] Responsive Design
-- [ ] Accessibility
+- [x] Accessibility
 - [ ] Loading States
 - [ ] Empty States
 - [ ] Error Pages

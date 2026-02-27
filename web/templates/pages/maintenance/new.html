@@ -19,11 +19,11 @@
             <h2 class="form-section-title">Record Details</h2>
 
             <div class="form-group">
-                <label class="form-label" for="vehicle_id">Vehicle <span class="required">*</span></label>
+                <label class="form-label" for="vehicle_id">Vehicle <span class="required" aria-hidden="true">*</span></label>
                 <select class="form-input{{if .Errors.vehicle_id}} is-invalid{{end}}"
                         id="vehicle_id" name="vehicle_id"
                         required
-                        aria-describedby="vehicle-error">
+                        {{if .Errors.vehicle_id}}aria-invalid="true" {{end}}aria-describedby="vehicle-error">
                     <option value="">Select a vehicle</option>
                     {{range .Vehicles}}
                     <option value="{{.ID}}"{{if eq $.VehicleID .ID}} selected{{end}}>{{index $.VehicleNames .ID}}</option>
@@ -36,24 +36,24 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="service_type">Service Type <span class="required">*</span></label>
+                    <label class="form-label" for="service_type">Service Type <span class="required" aria-hidden="true">*</span></label>
                     <input class="form-input{{if .Errors.service_type}} is-invalid{{end}}"
                            type="text" id="service_type" name="service_type"
                            value="{{.ServiceType}}"
                            required placeholder="e.g. Oil Change"
-                           aria-describedby="service-type-error">
+                           {{if .Errors.service_type}}aria-invalid="true" {{end}}aria-describedby="service-type-error">
                     {{if .Errors.service_type}}
                     <p class="form-error" id="service-type-error">{{.Errors.service_type}}</p>
                     {{end}}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="service_date">Service Date <span class="required">*</span></label>
+                    <label class="form-label" for="service_date">Service Date <span class="required" aria-hidden="true">*</span></label>
                     <input class="form-input{{if .Errors.service_date}} is-invalid{{end}}"
                            type="date" id="service_date" name="service_date"
                            value="{{.ServiceDate}}"
                            required
-                           aria-describedby="service-date-error">
+                           {{if .Errors.service_date}}aria-invalid="true" {{end}}aria-describedby="service-date-error">
                     {{if .Errors.service_date}}
                     <p class="form-error" id="service-date-error">{{.Errors.service_date}}</p>
                     {{end}}

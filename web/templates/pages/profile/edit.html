@@ -18,26 +18,26 @@
             <h2 class="form-section-title">Account Information</h2>
 
             <div class="form-group">
-                <label class="form-label" for="username">Username <span class="required">*</span></label>
+                <label class="form-label" for="username">Username <span class="required" aria-hidden="true">*</span></label>
                 <input class="form-input{{if .Errors.username}} is-invalid{{end}}"
                        type="text" id="username" name="username"
                        value="{{.Username}}"
                        required minlength="3" maxlength="30"
                        placeholder="e.g. johndoe"
-                       aria-describedby="username-error">
+                       {{if .Errors.username}}aria-invalid="true" {{end}}aria-describedby="username-error">
                 {{if .Errors.username}}
                 <p class="form-error" id="username-error">{{.Errors.username}}</p>
                 {{end}}
             </div>
 
             <div class="form-group">
-                <label class="form-label" for="email">Email <span class="required">*</span></label>
+                <label class="form-label" for="email">Email <span class="required" aria-hidden="true">*</span></label>
                 <input class="form-input{{if .Errors.email}} is-invalid{{end}}"
                        type="email" id="email" name="email"
                        value="{{.Email}}"
                        required
                        placeholder="e.g. john@example.com"
-                       aria-describedby="email-error">
+                       {{if .Errors.email}}aria-invalid="true" {{end}}aria-describedby="email-error">
                 {{if .Errors.email}}
                 <p class="form-error" id="email-error">{{.Errors.email}}</p>
                 {{end}}

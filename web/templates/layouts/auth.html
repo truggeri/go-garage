@@ -10,6 +10,7 @@
     {{block "extra_head" .}}{{end}}
 </head>
 <body class="auth-page">
+    <a href="#main-content" class="skip-link">Skip to content</a>
     <button class="theme-toggle theme-toggle--fixed" id="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
         <span class="theme-toggle-sun" aria-hidden="true">&#9728;</span>
         <span class="theme-toggle-moon" aria-hidden="true">&#9790;</span>
@@ -19,7 +20,9 @@
             <a href="/">Go-Garage</a>
         </div>
         {{template "flash-messages" .}}
-        {{block "content" .}}{{end}}
+        <div id="main-content">
+            {{block "content" .}}{{end}}
+        </div>
     </div>
     {{template "footer" .}}
     <script src="/static/js/main-minified.js" defer></script>

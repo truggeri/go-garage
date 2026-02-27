@@ -275,13 +275,13 @@ web/static/
 
 ### 11. Accessibility
 
-- [ ] Semantic HTML
-- [ ] ARIA labels where needed
-- [ ] Keyboard navigation support
-- [ ] Focus indicators
-- [ ] Alt text for images
-- [ ] Color contrast compliance
-- [ ] Screen reader testing
+- [x] Semantic HTML
+- [x] ARIA labels where needed
+- [x] Keyboard navigation support
+- [x] Focus indicators
+- [x] Alt text for images
+- [x] Color contrast compliance
+- [x] Screen reader testing
 
 ### 12. User Experience
 

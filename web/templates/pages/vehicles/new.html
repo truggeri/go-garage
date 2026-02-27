@@ -19,37 +19,37 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="make">Make <span class="required">*</span></label>
+                    <label class="form-label" for="make">Make <span class="required" aria-hidden="true">*</span></label>
                     <input class="form-input{{if .Errors.make}} is-invalid{{end}}"
                            type="text" id="make" name="make"
                            value="{{.Make}}"
                            required placeholder="e.g. Toyota"
-                           aria-describedby="make-error">
+                           {{if .Errors.make}}aria-invalid="true" {{end}}aria-describedby="make-error">
                     {{if .Errors.make}}
                     <p class="form-error" id="make-error">{{.Errors.make}}</p>
                     {{end}}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="model">Model <span class="required">*</span></label>
+                    <label class="form-label" for="model">Model <span class="required" aria-hidden="true">*</span></label>
                     <input class="form-input{{if .Errors.model}} is-invalid{{end}}"
                            type="text" id="model" name="model"
                            value="{{.Model}}"
                            required placeholder="e.g. Camry"
-                           aria-describedby="model-error">
+                           {{if .Errors.model}}aria-invalid="true" {{end}}aria-describedby="model-error">
                     {{if .Errors.model}}
                     <p class="form-error" id="model-error">{{.Errors.model}}</p>
                     {{end}}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="year">Year <span class="required">*</span></label>
+                    <label class="form-label" for="year">Year <span class="required" aria-hidden="true">*</span></label>
                     <input class="form-input{{if .Errors.year}} is-invalid{{end}}"
                            type="number" id="year" name="year"
                            value="{{.Year}}"
                            required min="1900" max="2100"
                            placeholder="e.g. 2020"
-                           aria-describedby="year-error">
+                           {{if .Errors.year}}aria-invalid="true" {{end}}aria-describedby="year-error">
                     {{if .Errors.year}}
                     <p class="form-error" id="year-error">{{.Errors.year}}</p>
                     {{end}}
