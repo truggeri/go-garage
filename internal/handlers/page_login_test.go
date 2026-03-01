@@ -67,7 +67,7 @@ func TestPageHandler_LoginSubmit(t *testing.T) {
 		handler.LoginSubmit(rec, req)
 
 		assert.Equal(t, http.StatusSeeOther, rec.Code)
-		assert.Equal(t, "/", rec.Header().Get("Location"))
+		assert.Equal(t, "/dashboard", rec.Header().Get("Location"))
 
 		cookies := rec.Result().Cookies()
 		var accessCookie, refreshCookie *http.Cookie
