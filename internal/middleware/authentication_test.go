@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -225,5 +226,102 @@ func TestCookieAuthGuard(t *testing.T) {
 
 		assert.Equal(t, http.StatusSeeOther, rec.Code)
 		assert.Equal(t, "/login", rec.Header().Get("Location"))
+	})
+
+	t.Run("refreshes access token when expired and refresh token is valid", func(t *testing.T) {
+		expiredAccessMgr, err := auth.BuildTokenManager("test-secret-key-12345", auth.TokenDurations{
+			AccessValidity:  -1 * time.Hour,
+			RefreshValidity: 7 * 24 * time.Hour,
+		})
+		require.NoError(t, err)
+
+		expiredBundle, err := expiredAccessMgr.GenerateTokenBundle(payload)
+		require.NoError(t, err)
+
+		var capturedAcctInfo *AccountInfo
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			acct, ok := GetAccountFromContext(r.Context())
+			if ok {
+				capturedAcctInfo = acct
+			}
+			w.WriteHeader(http.StatusOK)
+		})
+
+		guardedHandler := CookieAuthGuard(tokenMgr)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: expiredBundle.AccessToken})
+		req.AddCookie(&http.Cookie{Name: "refresh_token", Value: expiredBundle.RefreshToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, capturedAcctInfo)
+		assert.Equal(t, "user-test-123", capturedAcctInfo.ID)
+		assert.Equal(t, "testuser", capturedAcctInfo.Name)
+
+		var newAccessToken, newRefreshToken string
+		for _, c := range rec.Result().Cookies() {
+			switch c.Name {
+			case "access_token":
+				newAccessToken = c.Value
+			case "refresh_token":
+				newRefreshToken = c.Value
+			}
+		}
+		assert.NotEmpty(t, newAccessToken)
+		assert.NotEmpty(t, newRefreshToken)
+		assert.NotEqual(t, expiredBundle.AccessToken, newAccessToken)
+	})
+
+	t.Run("redirects to login when access token is expired and refresh token is also expired", func(t *testing.T) {
+		expiredMgr, err := auth.BuildTokenManager("test-secret-key-12345", auth.TokenDurations{
+			AccessValidity:  -1 * time.Hour,
+			RefreshValidity: -1 * time.Hour,
+		})
+		require.NoError(t, err)
+
+		expiredBundle, err := expiredMgr.GenerateTokenBundle(payload)
+		require.NoError(t, err)
+
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		guardedHandler := CookieAuthGuard(tokenMgr)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: expiredBundle.AccessToken})
+		req.AddCookie(&http.Cookie{Name: "refresh_token", Value: expiredBundle.RefreshToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusSeeOther, rec.Code)
+		assert.Equal(t, "/login", rec.Header().Get("Location"))
+	})
+
+	t.Run("refreshes access token when access token cookie is absent and refresh token is valid", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		innerHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			acct, ok := GetAccountFromContext(r.Context())
+			if ok {
+				capturedAcctInfo = acct
+			}
+			w.WriteHeader(http.StatusOK)
+		})
+
+		guardedHandler := CookieAuthGuard(tokenMgr)(innerHandler)
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		req.AddCookie(&http.Cookie{Name: "refresh_token", Value: bundle.RefreshToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, capturedAcctInfo)
+		assert.Equal(t, "user-test-123", capturedAcctInfo.ID)
 	})
 }
