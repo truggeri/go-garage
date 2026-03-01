@@ -1,7 +1,7 @@
 {{define "navigation"}}
 <nav class="navbar" role="navigation" aria-label="main navigation">
     <div class="container navbar-content">
-        <a href="/" class="navbar-brand">Go-Garage</a>
+        <a href="{{if .IsAuthenticated}}/dashboard{{else}}/{{end}}" class="navbar-brand">Go-Garage</a>
         <button class="navbar-toggle" aria-label="Toggle navigation" aria-expanded="false">
             <span class="navbar-toggle-icon"></span>
         </button>
