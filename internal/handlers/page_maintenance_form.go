@@ -104,7 +104,7 @@ func (h *PageHandler) MaintenanceNew(w http.ResponseWriter, r *http.Request) {
 		ActiveNav:       "maintenance",
 		Vehicles:        vehicles,
 		VehicleNames:    buildVehicleNameMap(vehicles),
-		VehicleID:       r.URL.Query().Get("vehicle_id"),
+		VehicleID:       r.URL.Query().Get("vehicle"),
 		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 	}
 

@@ -104,7 +104,7 @@ func TestPageHandler_MaintenanceNew(t *testing.T) {
 		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
 		handler := newTestMaintenanceFormPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
 
-		req := httptest.NewRequest(http.MethodGet, "/maintenance/new?vehicle_id=v1", nil)
+		req := httptest.NewRequest(http.MethodGet, "/maintenance/new?vehicle=v1", nil)
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
