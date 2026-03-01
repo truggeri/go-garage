@@ -9,9 +9,15 @@ services:
       - LOG_LEVEL=debug
       - LOG_FORMAT=text
     
-    # Example: Mount local source code for development
+    # Example: Mount data directory, which must exist,
+		#   mkdir -p ./data && chown 1000:1000 ./data
     # volumes:
-    #   - ./:/app/src
+		#		garage-data:
+    #	    driver: local
+		# 	  driver_opts:
+		#		    o: bind
+		#		    type: none
+		#		    device: ./data
     
     # Example: Override ports
     # ports:
