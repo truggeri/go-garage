@@ -98,13 +98,18 @@ func (h *PageHandler) MaintenanceNew(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	vehicleID := r.URL.Query().Get("vehicle")
+	if vehicleID == "" {
+		vehicleID = r.URL.Query().Get("vehicle_id")
+	}
+
 	data := maintenanceNewPageData{
 		IsAuthenticated: true,
 		UserName:        account.Name,
 		ActiveNav:       "maintenance",
 		Vehicles:        vehicles,
 		VehicleNames:    buildVehicleNameMap(vehicles),
-		VehicleID:       r.URL.Query().Get("vehicle_id"),
+		VehicleID:       vehicleID,
 		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 	}
 

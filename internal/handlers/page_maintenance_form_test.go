@@ -104,6 +104,21 @@ func TestPageHandler_MaintenanceNew(t *testing.T) {
 		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
 		handler := newTestMaintenanceFormPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
 
+		req := httptest.NewRequest(http.MethodGet, "/maintenance/new?vehicle=v1", nil)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.MaintenanceNew(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, `selected`)
+	})
+
+	t.Run("pre-selects vehicle from vehicle_id fallback param", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
+		handler := newTestMaintenanceFormPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
+
 		req := httptest.NewRequest(http.MethodGet, "/maintenance/new?vehicle_id=v1", nil)
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
