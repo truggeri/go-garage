@@ -96,12 +96,14 @@ func CookieAuthGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Handle
 
 				refreshVerified, err := tokenMgr.ValidateToken(refreshCookie.Value)
 				if err != nil || refreshVerified.TokenKind != auth.RefreshTokenKind {
+					clearCookie(w, "refresh_token", r.TLS != nil)
 					http.Redirect(w, r, "/login", http.StatusSeeOther)
 					return
 				}
 
 				bundle, err := tokenMgr.RefreshAccessToken(refreshCookie.Value)
 				if err != nil {
+					clearCookie(w, "refresh_token", r.TLS != nil)
 					http.Redirect(w, r, "/login", http.StatusSeeOther)
 					return
 				}
@@ -142,4 +144,17 @@ func writeAuthError(w http.ResponseWriter, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte(`{"success":false,"error":{"code":"AUTHENTICATION_ERROR","message":"` + message + `"}}`))
+}
+
+// clearCookie expires a named cookie immediately by setting MaxAge to -1.
+func clearCookie(w http.ResponseWriter, name string, secure bool) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   secure,
+	})
 }

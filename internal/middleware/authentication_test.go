@@ -300,6 +300,15 @@ func TestCookieAuthGuard(t *testing.T) {
 
 		assert.Equal(t, http.StatusSeeOther, rec.Code)
 		assert.Equal(t, "/login", rec.Header().Get("Location"))
+
+		var clearedRefreshToken *http.Cookie
+		for _, c := range rec.Result().Cookies() {
+			if c.Name == "refresh_token" {
+				clearedRefreshToken = c
+			}
+		}
+		require.NotNil(t, clearedRefreshToken)
+		assert.Equal(t, -1, clearedRefreshToken.MaxAge)
 	})
 
 	t.Run("refreshes access token when access token cookie is absent and refresh token is valid", func(t *testing.T) {
