@@ -28,6 +28,34 @@
     <a href="/vehicles" class="btn btn-secondary">View All Vehicles</a>
 </div>
 
+{{if .ActiveVehicles}}
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">Active Vehicles</h2>
+    </div>
+<div class="vehicle-grid">
+    {{range .ActiveVehicles}}
+    <div class="vehicle-card card">
+        <div class="vehicle-card-header">
+            <h3 class="vehicle-card-title">{{.Year}} {{.Make}} {{.Model}}</h3>
+            <span class="vehicle-status vehicle-status-{{.Status}}">{{toTitle (toLower (print .Status))}}</span>
+        </div>
+        <div class="vehicle-card-body">
+            {{if .Color}}<p class="vehicle-detail"><span class="vehicle-detail-label">Color:</span> {{.Color}}</p>{{end}}
+            {{if .LicensePlate}}<p class="vehicle-detail"><span class="vehicle-detail-label">License Plate:</span> {{.LicensePlate}}</p>{{end}}
+            {{if .CurrentMileage}}<p class="vehicle-detail"><span class="vehicle-detail-label">Mileage:</span> {{formatMileagePtr .CurrentMileage}}</p>{{end}}
+        </div>
+        <div class="vehicle-card-actions">
+            <a href="/vehicles/{{.ID}}" class="btn btn-secondary btn-sm">View</a>
+            <a href="/vehicles/{{.ID}}/edit" class="btn btn-secondary btn-sm">Edit</a>
+            <a href="/maintenance/new?vehicle={{.ID}}" class="btn btn-secondary btn-sm">Add Record</a>
+        </div>
+    </div>
+    {{end}}
+</div>
+</div>
+{{end}}
+
 <div class="card">
     <div class="card-header">
         <h2 class="card-title">Recent Maintenance</h2>

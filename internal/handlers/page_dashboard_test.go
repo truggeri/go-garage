@@ -52,6 +52,31 @@ func TestPageHandler_Dashboard(t *testing.T) {
 		assert.Contains(t, body, "Oil Change")
 	})
 
+	t.Run("renders active vehicle cards on dashboard", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{
+			listResult: []*models.Vehicle{
+				{ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
+				{ID: "v2", UserID: "u1", Make: "Honda", Model: "Civic", Year: 2018, Status: models.VehicleStatusSold},
+			},
+		}
+		handler := newTestDashboardPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
+
+		req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.Dashboard(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		body := rec.Body.String()
+		// Active vehicle card should be present
+		assert.Contains(t, body, "2020 Ford Focus")
+		assert.Contains(t, body, "vehicle-card")
+		assert.Contains(t, body, `/maintenance/new?vehicle=v1`)
+		// Sold vehicle card should NOT be present
+		assert.NotContains(t, body, "2018 Honda Civic")
+	})
+
 	t.Run("returns 500 when account missing from context", func(t *testing.T) {
 		handler := newTestDashboardPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
 
