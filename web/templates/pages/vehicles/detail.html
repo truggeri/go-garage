@@ -127,7 +127,7 @@
                 </thead>
                 <tbody>
                     {{range .RecentMaintenance}}
-                    <tr>
+                    <tr class="table-row-link" data-href="/maintenance/{{.ID}}">
                         <td data-label="Service Type">{{.ServiceType}}</td>
                         <td data-label="Date">{{formatDate .ServiceDate}}</td>
                         <td data-label="Mileage">{{formatMileagePtr .MileageAtService}}</td>

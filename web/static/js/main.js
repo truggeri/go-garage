@@ -215,6 +215,28 @@
     }
 
     // ========================================
+    // Clickable Table Rows
+    // ========================================
+
+    /**
+     * Makes table rows with a data-href attribute clickable.
+     * Clicking anywhere on the row navigates to the URL in data-href,
+     * unless the click target is an interactive element (link, button, input).
+     */
+    function initClickableRows() {
+        var rows = document.querySelectorAll("tr[data-href]");
+        rows.forEach(function (row) {
+            row.addEventListener("click", function (e) {
+                // Don't navigate if clicking on a link, button, or input inside the row.
+                if (e.target.closest("a, button, input, select, textarea")) {
+                    return;
+                }
+                window.location.href = row.getAttribute("data-href");
+            });
+        });
+    }
+
+    // ========================================
     // Initialize on DOM Ready
     // ========================================
 
@@ -225,5 +247,6 @@
         initThemeToggle();
         initFormSubmitLoading();
         initDeleteButtons();
+        initClickableRows();
     });
 })();

@@ -50,6 +50,7 @@ func TestPageHandler_Dashboard(t *testing.T) {
 		assert.Contains(t, body, "Welcome back, testuser")
 		assert.Contains(t, body, "Ford")
 		assert.Contains(t, body, "Oil Change")
+		assert.Contains(t, body, `data-href="/maintenance/m1"`)
 	})
 
 	t.Run("returns 500 when account missing from context", func(t *testing.T) {

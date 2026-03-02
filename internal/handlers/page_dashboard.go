@@ -31,6 +31,7 @@ type dashboardPageData struct {
 
 // dashboardMaintenanceRow is a pre-processed row for the recent-maintenance table.
 type dashboardMaintenanceRow struct {
+	ID          string
 	VehicleName string
 	ServiceType string
 	ServiceDate time.Time
@@ -90,6 +91,7 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	rows := make([]dashboardMaintenanceRow, len(allMaintenance))
 	for i, rec := range allMaintenance {
 		rows[i] = dashboardMaintenanceRow{
+			ID:          rec.ID,
 			VehicleName: vehicleNames[rec.VehicleID],
 			ServiceType: rec.ServiceType,
 			ServiceDate: rec.ServiceDate,

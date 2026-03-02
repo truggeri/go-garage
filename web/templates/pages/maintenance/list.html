@@ -48,7 +48,7 @@
     </thead>
     <tbody>
         {{range .Records}}
-        <tr>
+        <tr class="table-row-link" data-href="/maintenance/{{.ID}}">
             <td data-label="Service Type">{{.ServiceType}}</td>
             <td data-label="Vehicle">{{index $.VehicleNames .VehicleID}}</td>
             <td data-label="Date">{{formatDate .ServiceDate}}</td>

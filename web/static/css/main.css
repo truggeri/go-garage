@@ -713,6 +713,10 @@ html[data-theme="dark"] .theme-toggle-moon { display: none; }
     background-color: var(--color-gray-50);
 }
 
+.table-row-link {
+    cursor: pointer;
+}
+
 /* ========================================
    Auth Pages
    ======================================== */
