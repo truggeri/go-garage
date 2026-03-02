@@ -27,6 +27,8 @@ type dashboardPageData struct {
 	TotalSpent float64
 	// RecentMaintenance holds the five most recent maintenance records.
 	RecentMaintenance []dashboardMaintenanceRow
+	// ActiveVehicles holds the user's active vehicles for displaying vehicle cards.
+	ActiveVehicles []*models.Vehicle
 }
 
 // dashboardMaintenanceRow is a pre-processed row for the recent-maintenance table.
@@ -97,6 +99,13 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	activeVehicles := make([]*models.Vehicle, 0, len(vehicles))
+	for _, v := range vehicles {
+		if v.Status == models.VehicleStatusActive {
+			activeVehicles = append(activeVehicles, v)
+		}
+	}
+
 	data := dashboardPageData{
 		IsAuthenticated:   true,
 		UserName:          account.Name,
@@ -105,6 +114,7 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		MaintenanceCount:  totalCount,
 		TotalSpent:        totalSpent,
 		RecentMaintenance: rows,
+		ActiveVehicles:    activeVehicles,
 	}
 
 	if err := h.engine.Render(w, "dashboard.html", "base", data); err != nil {
