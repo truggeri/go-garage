@@ -64,6 +64,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 	model := r.FormValue("model")
 	yearStr := r.FormValue("year")
 	vin := r.FormValue("vin")
+	displayName := r.FormValue("display_name")
 	color := r.FormValue("color")
 	licensePlate := r.FormValue("license_plate")
 	purchaseDateStr := r.FormValue("purchase_date")
@@ -88,6 +89,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 			Model:           model,
 			Year:            yearStr,
 			VIN:             vin,
+			DisplayName:     displayName,
 			Color:           color,
 			LicensePlate:    licensePlate,
 			PurchaseDate:    purchaseDateStr,
@@ -105,6 +107,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Apply form values to the fetched vehicle.
+	vehicle.DisplayName = strings.TrimSpace(displayName)
 	vehicle.VIN = strings.ToUpper(strings.TrimSpace(vin))
 	vehicle.Make = strings.TrimSpace(vehicleMake)
 	vehicle.Model = strings.TrimSpace(model)

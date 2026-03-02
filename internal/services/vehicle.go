@@ -42,6 +42,7 @@ type VehicleService interface {
 
 // VehicleUpdates contains the fields that can be updated for a vehicle
 type VehicleUpdates struct {
+	DisplayName    *string
 	VIN            *string
 	Make           *string
 	Model          *string
@@ -86,6 +87,9 @@ func (s *DefaultVehicleService) UpdateVehicle(ctx context.Context, id string, up
 	}
 
 	// Apply updates
+	if updates.DisplayName != nil {
+		vehicle.DisplayName = *updates.DisplayName
+	}
 	if updates.VIN != nil {
 		vehicle.VIN = *updates.VIN
 	}

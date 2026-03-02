@@ -138,6 +138,7 @@ type vehicleNewPageData struct {
 	Model           string
 	Year            string
 	VIN             string
+	DisplayName     string
 	Color           string
 	LicensePlate    string
 	PurchaseDate    string
@@ -184,6 +185,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	model := r.FormValue("model")
 	yearStr := r.FormValue("year")
 	vin := r.FormValue("vin")
+	displayName := r.FormValue("display_name")
 	color := r.FormValue("color")
 	licensePlate := r.FormValue("license_plate")
 	purchaseDateStr := r.FormValue("purchase_date")
@@ -207,6 +209,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 			Model:           model,
 			Year:            yearStr,
 			VIN:             vin,
+			DisplayName:     displayName,
 			Color:           color,
 			LicensePlate:    licensePlate,
 			PurchaseDate:    purchaseDateStr,
@@ -227,6 +230,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 
 	vehicle := &models.Vehicle{
 		UserID:          account.ID,
+		DisplayName:     strings.TrimSpace(displayName),
 		VIN:             strings.ToUpper(strings.TrimSpace(vin)),
 		Make:            strings.TrimSpace(vehicleMake),
 		Model:           strings.TrimSpace(model),
@@ -345,6 +349,9 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	title := fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model)
+	if vehicle.DisplayName != "" {
+		title = vehicle.DisplayName
+	}
 
 	data := vehicleDetailPageData{
 		IsAuthenticated:   true,

@@ -117,5 +117,8 @@ func vehicleName(v *models.Vehicle) string {
 	if v == nil {
 		return "Unknown"
 	}
+	if v.DisplayName != "" {
+		return v.DisplayName
+	}
 	return v.Make + " " + v.Model
 }

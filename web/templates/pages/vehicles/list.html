@@ -35,7 +35,7 @@
     {{range .Vehicles}}
     <div class="vehicle-card card">
         <div class="vehicle-card-header">
-            <h3 class="vehicle-card-title">{{.Year}} {{.Make}} {{.Model}}</h3>
+            <h3 class="vehicle-card-title">{{if .DisplayName}}{{.DisplayName}}{{else}}{{.Year}} {{.Make}} {{.Model}}{{end}}</h3>
             <span class="vehicle-status vehicle-status-{{.Status}}">{{toTitle (toLower (print .Status))}}</span>
         </div>
         <div class="vehicle-card-body">

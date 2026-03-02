@@ -16,6 +16,9 @@ func vehicleToResponseMap(v *models.Vehicle) map[string]interface{} {
 		"created_at": v.CreatedAt.Format(time.RFC3339),
 		"updated_at": v.UpdatedAt.Format(time.RFC3339),
 	}
+	if v.DisplayName != "" {
+		m["display_name"] = v.DisplayName
+	}
 	if v.Color != "" {
 		m["color"] = v.Color
 	}
