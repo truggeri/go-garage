@@ -77,6 +77,7 @@ func runMigrations(db *sql.DB) error {
 		CREATE TABLE IF NOT EXISTS vehicles (
 			id TEXT PRIMARY KEY,
 			user_id TEXT NOT NULL,
+			display_name TEXT,
 			vin TEXT NOT NULL UNIQUE,
 			make TEXT NOT NULL,
 			model TEXT NOT NULL,

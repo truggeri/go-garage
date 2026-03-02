@@ -2,7 +2,7 @@
 
 {{define "content"}}
 <div class="page-header">
-    <h1>{{.Vehicle.Year}} {{.Vehicle.Make}} {{.Vehicle.Model}}</h1>
+    <h1>{{.VehicleTitle}}</h1>
     <div class="page-header-actions">
         <a href="/vehicles/{{.Vehicle.ID}}/edit" class="btn btn-primary">Edit Vehicle</a>
         <button type="button" class="btn btn-danger"
@@ -28,6 +28,12 @@
             </div>
             <div class="card-body">
                 <dl class="detail-list">
+                    {{if .Vehicle.DisplayName}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Display Name</dt>
+                        <dd class="detail-value">{{.Vehicle.DisplayName}}</dd>
+                    </div>
+                    {{end}}
                     <div class="detail-item">
                         <dt class="detail-label">Make</dt>
                         <dd class="detail-value">{{.Vehicle.Make}}</dd>

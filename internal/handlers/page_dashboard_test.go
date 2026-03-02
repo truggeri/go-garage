@@ -93,3 +93,19 @@ func TestPageHandler_Dashboard(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	})
 }
+
+func TestVehicleName(t *testing.T) {
+	t.Run("returns display name when present", func(t *testing.T) {
+		v := &models.Vehicle{Make: "Ford", Model: "Focus", DisplayName: "My Daily Driver"}
+		assert.Equal(t, "My Daily Driver", vehicleName(v))
+	})
+
+	t.Run("returns make and model when no display name", func(t *testing.T) {
+		v := &models.Vehicle{Make: "Ford", Model: "Focus"}
+		assert.Equal(t, "Ford Focus", vehicleName(v))
+	})
+
+	t.Run("returns Unknown for nil vehicle", func(t *testing.T) {
+		assert.Equal(t, "Unknown", vehicleName(nil))
+	})
+}

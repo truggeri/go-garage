@@ -20,6 +20,7 @@ const (
 type Vehicle struct {
 	ID              string
 	UserID          string
+	DisplayName     string
 	VIN             string
 	Make            string
 	Model           string

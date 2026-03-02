@@ -97,6 +97,7 @@ type vehicleEditPageData struct {
 	Model           string
 	Year            string
 	VIN             string
+	DisplayName     string
 	Color           string
 	LicensePlate    string
 	PurchaseDate    string
@@ -118,6 +119,7 @@ func vehicleEditPageDataFromVehicle(account *middleware.AccountInfo, v *models.V
 		Model:           v.Model,
 		Year:            fmt.Sprintf("%d", v.Year),
 		VIN:             v.VIN,
+		DisplayName:     v.DisplayName,
 		Color:           v.Color,
 		LicensePlate:    v.LicensePlate,
 		Notes:           v.Notes,

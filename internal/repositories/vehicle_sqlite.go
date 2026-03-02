@@ -39,15 +39,16 @@ func (r *SQLiteVehicleRepository) Create(ctx context.Context, vehicle *models.Ve
 
 	query := `
 		INSERT INTO vehicles (
-			id, user_id, vin, make, model, year, color, license_plate,
+			id, user_id, display_name, vin, make, model, year, color, license_plate,
 			purchase_date, purchase_price, purchase_mileage, current_mileage,
 			status, notes, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
 		vehicle.ID,
 		vehicle.UserID,
+		vehicle.DisplayName,
 		vehicle.VIN,
 		vehicle.Make,
 		vehicle.Model,
@@ -82,7 +83,7 @@ func (r *SQLiteVehicleRepository) Create(ctx context.Context, vehicle *models.Ve
 // FindByID retrieves a vehicle by its ID
 func (r *SQLiteVehicleRepository) FindByID(ctx context.Context, id string) (*models.Vehicle, error) {
 	query := `
-		SELECT id, user_id, vin, make, model, year, color, license_plate,
+		SELECT id, user_id, display_name, vin, make, model, year, color, license_plate,
 		       purchase_date, purchase_price, purchase_mileage, current_mileage,
 		       status, notes, created_at, updated_at
 		FROM vehicles
@@ -90,13 +91,14 @@ func (r *SQLiteVehicleRepository) FindByID(ctx context.Context, id string) (*mod
 	`
 
 	vehicle := &models.Vehicle{}
-	var purchaseDate, color, licensePlate, notes sql.NullString
+	var displayName, purchaseDate, color, licensePlate, notes sql.NullString
 	var purchasePrice sql.NullFloat64
 	var purchaseMileage, currentMileage sql.NullInt64
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&vehicle.ID,
 		&vehicle.UserID,
+		&displayName,
 		&vehicle.VIN,
 		&vehicle.Make,
 		&vehicle.Model,
@@ -121,6 +123,9 @@ func (r *SQLiteVehicleRepository) FindByID(ctx context.Context, id string) (*mod
 	}
 
 	// Handle nullable fields
+	if displayName.Valid {
+		vehicle.DisplayName = displayName.String
+	}
 	if color.Valid {
 		vehicle.Color = color.String
 	}
@@ -160,7 +165,7 @@ func (r *SQLiteVehicleRepository) FindByID(ctx context.Context, id string) (*mod
 // FindByUserID retrieves all vehicles for a specific user
 func (r *SQLiteVehicleRepository) FindByUserID(ctx context.Context, userID string) ([]*models.Vehicle, error) {
 	query := `
-		SELECT id, user_id, vin, make, model, year, color, license_plate,
+		SELECT id, user_id, display_name, vin, make, model, year, color, license_plate,
 		       purchase_date, purchase_price, purchase_mileage, current_mileage,
 		       status, notes, created_at, updated_at
 		FROM vehicles
@@ -180,7 +185,7 @@ func (r *SQLiteVehicleRepository) FindByUserID(ctx context.Context, userID strin
 // FindByVIN retrieves a vehicle by its VIN
 func (r *SQLiteVehicleRepository) FindByVIN(ctx context.Context, vin string) (*models.Vehicle, error) {
 	query := `
-		SELECT id, user_id, vin, make, model, year, color, license_plate,
+		SELECT id, user_id, display_name, vin, make, model, year, color, license_plate,
 		       purchase_date, purchase_price, purchase_mileage, current_mileage,
 		       status, notes, created_at, updated_at
 		FROM vehicles
@@ -188,13 +193,14 @@ func (r *SQLiteVehicleRepository) FindByVIN(ctx context.Context, vin string) (*m
 	`
 
 	vehicle := &models.Vehicle{}
-	var purchaseDate, color, licensePlate, notes sql.NullString
+	var displayName, purchaseDate, color, licensePlate, notes sql.NullString
 	var purchasePrice sql.NullFloat64
 	var purchaseMileage, currentMileage sql.NullInt64
 
 	err := r.db.QueryRowContext(ctx, query, vin).Scan(
 		&vehicle.ID,
 		&vehicle.UserID,
+		&displayName,
 		&vehicle.VIN,
 		&vehicle.Make,
 		&vehicle.Model,
@@ -219,6 +225,9 @@ func (r *SQLiteVehicleRepository) FindByVIN(ctx context.Context, vin string) (*m
 	}
 
 	// Handle nullable fields
+	if displayName.Valid {
+		vehicle.DisplayName = displayName.String
+	}
 	if color.Valid {
 		vehicle.Color = color.String
 	}
@@ -265,7 +274,7 @@ func (r *SQLiteVehicleRepository) Update(ctx context.Context, vehicle *models.Ve
 
 	query := `
 		UPDATE vehicles
-		SET user_id = ?, vin = ?, make = ?, model = ?, year = ?, 
+		SET user_id = ?, display_name = ?, vin = ?, make = ?, model = ?, year = ?, 
 		    color = ?, license_plate = ?, purchase_date = ?, 
 		    purchase_price = ?, purchase_mileage = ?, current_mileage = ?,
 		    status = ?, notes = ?, updated_at = ?
@@ -274,6 +283,7 @@ func (r *SQLiteVehicleRepository) Update(ctx context.Context, vehicle *models.Ve
 
 	result, err := r.db.ExecContext(ctx, query,
 		vehicle.UserID,
+		vehicle.DisplayName,
 		vehicle.VIN,
 		vehicle.Make,
 		vehicle.Model,
@@ -338,7 +348,7 @@ func (r *SQLiteVehicleRepository) Delete(ctx context.Context, id string) error {
 // List retrieves vehicles with optional filters and pagination
 func (r *SQLiteVehicleRepository) List(ctx context.Context, filters VehicleFilters, pagination PaginationParams) ([]*models.Vehicle, error) {
 	query := `
-		SELECT id, user_id, vin, make, model, year, color, license_plate,
+		SELECT id, user_id, display_name, vin, make, model, year, color, license_plate,
 		       purchase_date, purchase_price, purchase_mileage, current_mileage,
 		       status, notes, created_at, updated_at
 		FROM vehicles
@@ -399,13 +409,14 @@ func (r *SQLiteVehicleRepository) scanVehicles(rows *sql.Rows) ([]*models.Vehicl
 
 	for rows.Next() {
 		vehicle := &models.Vehicle{}
-		var purchaseDate, color, licensePlate, notes sql.NullString
+		var displayName, purchaseDate, color, licensePlate, notes sql.NullString
 		var purchasePrice sql.NullFloat64
 		var purchaseMileage, currentMileage sql.NullInt64
 
 		err := rows.Scan(
 			&vehicle.ID,
 			&vehicle.UserID,
+			&displayName,
 			&vehicle.VIN,
 			&vehicle.Make,
 			&vehicle.Model,
@@ -427,6 +438,9 @@ func (r *SQLiteVehicleRepository) scanVehicles(rows *sql.Rows) ([]*models.Vehicl
 		}
 
 		// Handle nullable fields
+		if displayName.Valid {
+			vehicle.DisplayName = displayName.String
+		}
 		if color.Valid {
 			vehicle.Color = color.String
 		}

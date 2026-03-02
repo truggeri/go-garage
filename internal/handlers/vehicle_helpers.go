@@ -87,6 +87,9 @@ func buildNewVehicleRecord(d map[string]interface{}, ownerID string) (*models.Ve
 		Make: makeStr, Model: modelStr, Year: int(yearNum), Status: st, PurchaseDate: pdt,
 	}
 
+	if dn, ok := d["display_name"].(string); ok {
+		rec.DisplayName = dn
+	}
 	if c, ok := d["color"].(string); ok {
 		rec.Color = c
 	}
@@ -114,6 +117,9 @@ func buildNewVehicleRecord(d map[string]interface{}, ownerID string) (*models.Ve
 // extractVehicleChanges extracts vehicle update fields from the input data map.
 func extractVehicleChanges(d map[string]interface{}) services.VehicleUpdates {
 	var u services.VehicleUpdates
+	if v, ok := d["display_name"].(string); ok {
+		u.DisplayName = &v
+	}
 	if v, ok := d["vin"].(string); ok && v != "" {
 		s := strings.ToUpper(strings.TrimSpace(v))
 		u.VIN = &s
