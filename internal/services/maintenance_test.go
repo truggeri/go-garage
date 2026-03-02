@@ -347,3 +347,100 @@ func TestMaintenanceService_DeleteMaintenance(t *testing.T) {
 		assert.ErrorAs(t, err, &notFoundErr)
 	})
 }
+
+func TestMaintenanceService_ListMaintenance(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("lists maintenance records with filters and pagination", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		record1 := &models.MaintenanceRecord{
+			ID:          "record-1",
+			VehicleID:   "vehicle-123",
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		}
+		maintenanceRepo.listResult = []*models.MaintenanceRecord{record1}
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+
+		filters := repositories.MaintenanceFilters{}
+		pagination := repositories.PaginationParams{Limit: 10, Offset: 0}
+
+		records, err := service.ListMaintenance(ctx, filters, pagination)
+		require.NoError(t, err)
+		assert.Len(t, records, 1)
+	})
+}
+
+func TestMaintenanceService_CountMaintenance(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("counts maintenance records successfully", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		maintenanceRepo.records["record-1"] = &models.MaintenanceRecord{
+			ID:          "record-1",
+			VehicleID:   "vehicle-123",
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		}
+		maintenanceRepo.records["record-2"] = &models.MaintenanceRecord{
+			ID:          "record-2",
+			VehicleID:   "vehicle-123",
+			ServiceType: "Tire Rotation",
+			ServiceDate: time.Now().Add(-48 * time.Hour),
+		}
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+
+		count, err := service.CountMaintenance(ctx, repositories.MaintenanceFilters{})
+		require.NoError(t, err)
+		assert.Equal(t, 2, count)
+	})
+}
+
+func TestMaintenanceService_UpdateMaintenance_AllFields(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("updates mileage and provider fields", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		existingRecord := &models.MaintenanceRecord{
+			ID:          "record-123",
+			VehicleID:   "vehicle-123",
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		}
+		maintenanceRepo.records[existingRecord.ID] = existingRecord
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+
+		newMileage := 75000
+		newProvider := "New Provider"
+		updates := MaintenanceUpdates{
+			MileageAtService: &newMileage,
+			ServiceProvider:  &newProvider,
+		}
+
+		updatedRecord, err := service.UpdateMaintenance(ctx, "record-123", updates)
+		require.NoError(t, err)
+		assert.Equal(t, 75000, *updatedRecord.MileageAtService)
+		assert.Equal(t, "New Provider", updatedRecord.ServiceProvider)
+		assert.Equal(t, "Oil Change", updatedRecord.ServiceType) // unchanged
+	})
+
+	t.Run("returns error on update failure", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		existingRecord := &models.MaintenanceRecord{
+			ID:          "record-123",
+			VehicleID:   "vehicle-123",
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		}
+		maintenanceRepo.records[existingRecord.ID] = existingRecord
+		maintenanceRepo.updateErr = models.NewDatabaseError("update", assert.AnError)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+
+		_, err := service.UpdateMaintenance(ctx, "record-123", MaintenanceUpdates{})
+		assert.Error(t, err)
+	})
+}

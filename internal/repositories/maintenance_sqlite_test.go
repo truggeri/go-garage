@@ -384,6 +384,122 @@ func TestMaintenanceRepository_Delete(t *testing.T) {
 	})
 }
 
+func TestMaintenanceRepository_Update_ValidationError(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	userRepo := NewSQLiteUserRepository(db)
+	vehicleRepo := NewSQLiteVehicleRepository(db)
+	maintenanceRepo := NewSQLiteMaintenanceRepository(db)
+	ctx := context.Background()
+
+	user := &models.User{
+		Username:     "updatemaintvalowner",
+		Email:        "updatemaintval@example.com",
+		PasswordHash: "hashed_password",
+	}
+	err := userRepo.Create(ctx, user)
+	require.NoError(t, err)
+
+	vehicle := &models.Vehicle{
+		UserID: user.ID,
+		VIN:    "ZHGBH41JXMN109501",
+		Make:   "Honda",
+		Model:  "Civic",
+		Year:   2020,
+		Status: models.VehicleStatusActive,
+	}
+	err = vehicleRepo.Create(ctx, vehicle)
+	require.NoError(t, err)
+
+	t.Run("update with validation error", func(t *testing.T) {
+		record := &models.MaintenanceRecord{
+			VehicleID:   vehicle.ID,
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		}
+
+		err := maintenanceRepo.Create(ctx, record)
+		require.NoError(t, err)
+
+		record.ServiceType = ""
+		err = maintenanceRepo.Update(ctx, record)
+		require.Error(t, err)
+		assert.IsType(t, &models.ValidationError{}, err)
+	})
+}
+
+func TestMaintenanceRepository_Count(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	userRepo := NewSQLiteUserRepository(db)
+	vehicleRepo := NewSQLiteVehicleRepository(db)
+	maintenanceRepo := NewSQLiteMaintenanceRepository(db)
+	ctx := context.Background()
+
+	user := &models.User{
+		Username:     "countmaintowner",
+		Email:        "countmaint@example.com",
+		PasswordHash: "hashed_password",
+	}
+	err := userRepo.Create(ctx, user)
+	require.NoError(t, err)
+
+	vehicle := &models.Vehicle{
+		UserID: user.ID,
+		VIN:    "ZHGBH41JXMN109502",
+		Make:   "Honda",
+		Model:  "Civic",
+		Year:   2020,
+		Status: models.VehicleStatusActive,
+	}
+	err = vehicleRepo.Create(ctx, vehicle)
+	require.NoError(t, err)
+
+	records := []*models.MaintenanceRecord{
+		{
+			VehicleID:   vehicle.ID,
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		},
+		{
+			VehicleID:   vehicle.ID,
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-48 * time.Hour),
+		},
+		{
+			VehicleID:   vehicle.ID,
+			ServiceType: "Tire Rotation",
+			ServiceDate: time.Now().Add(-72 * time.Hour),
+		},
+	}
+
+	for _, r := range records {
+		err := maintenanceRepo.Create(ctx, r)
+		require.NoError(t, err)
+	}
+
+	t.Run("count all records", func(t *testing.T) {
+		count, err := maintenanceRepo.Count(ctx, MaintenanceFilters{})
+		require.NoError(t, err)
+		assert.GreaterOrEqual(t, count, 3)
+	})
+
+	t.Run("count with vehicle ID filter", func(t *testing.T) {
+		count, err := maintenanceRepo.Count(ctx, MaintenanceFilters{VehicleID: &vehicle.ID})
+		require.NoError(t, err)
+		assert.GreaterOrEqual(t, count, 3)
+	})
+
+	t.Run("count with service type filter", func(t *testing.T) {
+		serviceType := "Oil Change"
+		count, err := maintenanceRepo.Count(ctx, MaintenanceFilters{ServiceType: &serviceType})
+		require.NoError(t, err)
+		assert.GreaterOrEqual(t, count, 2)
+	})
+}
+
 func TestMaintenanceRepository_List(t *testing.T) {
 	db, cleanup := setupTestDB(t)
 	defer cleanup()
@@ -457,6 +573,24 @@ func TestMaintenanceRepository_List(t *testing.T) {
 		result, err := maintenanceRepo.List(ctx, MaintenanceFilters{}, PaginationParams{Limit: 2})
 		require.NoError(t, err)
 		assert.LessOrEqual(t, len(result), 2)
+	})
+
+	t.Run("filter by vehicle ID", func(t *testing.T) {
+		result, err := maintenanceRepo.List(ctx, MaintenanceFilters{VehicleID: &vehicle.ID}, PaginationParams{})
+		require.NoError(t, err)
+		assert.GreaterOrEqual(t, len(result), 3)
+		for _, r := range result {
+			assert.Equal(t, vehicle.ID, r.VehicleID)
+		}
+	})
+
+	t.Run("with offset pagination", func(t *testing.T) {
+		all, err := maintenanceRepo.List(ctx, MaintenanceFilters{}, PaginationParams{})
+		require.NoError(t, err)
+
+		result, err := maintenanceRepo.List(ctx, MaintenanceFilters{}, PaginationParams{Limit: 10, Offset: len(all)})
+		require.NoError(t, err)
+		assert.Empty(t, result)
 	})
 }
 

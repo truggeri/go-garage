@@ -373,6 +373,203 @@ func TestVehicleService_ListVehicles(t *testing.T) {
 	})
 }
 
+func TestVehicleService_CountVehicles(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("counts vehicles successfully", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		repo.vehicles["vehicle-1"] = &models.Vehicle{
+			ID:     "vehicle-1",
+			UserID: "user-123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Civic",
+			Year:   2021,
+			Status: models.VehicleStatusActive,
+		}
+		repo.vehicles["vehicle-2"] = &models.Vehicle{
+			ID:     "vehicle-2",
+			UserID: "user-123",
+			VIN:    "2HGBH41JXMN109187",
+			Make:   "Toyota",
+			Model:  "Camry",
+			Year:   2020,
+			Status: models.VehicleStatusActive,
+		}
+		service := NewVehicleService(repo)
+
+		count, err := service.CountVehicles(ctx, repositories.VehicleFilters{})
+		require.NoError(t, err)
+		assert.Equal(t, 2, count)
+	})
+}
+
+func TestVehicleService_DeleteVehicle(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("deletes vehicle successfully", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		repo.vehicles["vehicle-123"] = &models.Vehicle{
+			ID:     "vehicle-123",
+			UserID: "user-123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Civic",
+			Year:   2021,
+			Status: models.VehicleStatusActive,
+		}
+		service := NewVehicleService(repo)
+
+		err := service.DeleteVehicle(ctx, "vehicle-123")
+		require.NoError(t, err)
+
+		_, exists := repo.vehicles["vehicle-123"]
+		assert.False(t, exists)
+	})
+
+	t.Run("returns not found for non-existent vehicle", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		service := NewVehicleService(repo)
+
+		err := service.DeleteVehicle(ctx, "non-existent")
+		assert.Error(t, err)
+
+		var notFoundErr *models.NotFoundError
+		assert.ErrorAs(t, err, &notFoundErr)
+	})
+
+	t.Run("returns error on repository failure", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		repo.deleteErr = models.NewDatabaseError("delete", assert.AnError)
+		service := NewVehicleService(repo)
+
+		err := service.DeleteVehicle(ctx, "vehicle-123")
+		assert.Error(t, err)
+	})
+}
+
+func TestVehicleService_SaveVehicle(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("saves vehicle successfully", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		repo.vehicles["vehicle-123"] = &models.Vehicle{
+			ID:     "vehicle-123",
+			UserID: "user-123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Civic",
+			Year:   2021,
+			Status: models.VehicleStatusActive,
+		}
+		service := NewVehicleService(repo)
+
+		vehicle := &models.Vehicle{
+			ID:     "vehicle-123",
+			UserID: "user-123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Accord",
+			Year:   2022,
+			Color:  "Blue",
+			Status: models.VehicleStatusActive,
+		}
+
+		err := service.SaveVehicle(ctx, vehicle)
+		require.NoError(t, err)
+		assert.Equal(t, "Accord", repo.vehicles["vehicle-123"].Model)
+	})
+
+	t.Run("returns not found for non-existent vehicle", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		service := NewVehicleService(repo)
+
+		vehicle := &models.Vehicle{
+			ID:     "non-existent",
+			UserID: "user-123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Civic",
+			Year:   2021,
+			Status: models.VehicleStatusActive,
+		}
+
+		err := service.SaveVehicle(ctx, vehicle)
+		assert.Error(t, err)
+
+		var notFoundErr *models.NotFoundError
+		assert.ErrorAs(t, err, &notFoundErr)
+	})
+}
+
+func TestVehicleService_UpdateVehicle_AllFields(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("updates all vehicle fields", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		existingVehicle := &models.Vehicle{
+			ID:     "vehicle-123",
+			UserID: "user-123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Civic",
+			Year:   2021,
+			Status: models.VehicleStatusActive,
+		}
+		repo.vehicles[existingVehicle.ID] = existingVehicle
+		service := NewVehicleService(repo)
+
+		newVIN := "2HGBH41JXMN109187"
+		newMake := "Toyota"
+		newModel := "Camry"
+		newYear := 2022
+		newColor := "Red"
+		newPlate := "NEW123"
+		newMileage := 25000
+		newNotes := "Updated notes"
+		updates := VehicleUpdates{
+			VIN:            &newVIN,
+			Make:           &newMake,
+			Model:          &newModel,
+			Year:           &newYear,
+			Color:          &newColor,
+			LicensePlate:   &newPlate,
+			CurrentMileage: &newMileage,
+			Notes:          &newNotes,
+		}
+
+		updatedVehicle, err := service.UpdateVehicle(ctx, "vehicle-123", updates)
+		require.NoError(t, err)
+		assert.Equal(t, "2HGBH41JXMN109187", updatedVehicle.VIN)
+		assert.Equal(t, "Toyota", updatedVehicle.Make)
+		assert.Equal(t, "Camry", updatedVehicle.Model)
+		assert.Equal(t, 2022, updatedVehicle.Year)
+		assert.Equal(t, "Red", updatedVehicle.Color)
+		assert.Equal(t, "NEW123", updatedVehicle.LicensePlate)
+		assert.Equal(t, 25000, *updatedVehicle.CurrentMileage)
+		assert.Equal(t, "Updated notes", updatedVehicle.Notes)
+	})
+
+	t.Run("returns error on update failure", func(t *testing.T) {
+		repo := newMockVehicleRepository()
+		existingVehicle := &models.Vehicle{
+			ID:     "vehicle-123",
+			UserID: "user-123",
+			VIN:    "1HGBH41JXMN109186",
+			Make:   "Honda",
+			Model:  "Civic",
+			Year:   2021,
+			Status: models.VehicleStatusActive,
+		}
+		repo.vehicles[existingVehicle.ID] = existingVehicle
+		repo.updateErr = models.NewDatabaseError("update", assert.AnError)
+		service := NewVehicleService(repo)
+
+		_, err := service.UpdateVehicle(ctx, "vehicle-123", VehicleUpdates{})
+		assert.Error(t, err)
+	})
+}
+
 func TestVehicleService_VerifyOwnership(t *testing.T) {
 	ctx := context.Background()
 
