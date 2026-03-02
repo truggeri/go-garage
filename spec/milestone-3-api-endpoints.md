@@ -47,7 +47,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 
 - [ ] Create JWT token generation
 - [ ] Create JWT token validation
-- [ ] Implement token refresh mechanism
+- [x] Implement token refresh mechanism (web-based: PR #39)
 - [ ] Set appropriate token expiration
 - [ ] Store claims (user ID, username, roles)
 

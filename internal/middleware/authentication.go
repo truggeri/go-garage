@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/truggeri/go-garage/internal/auth"
 )
@@ -67,31 +68,69 @@ func AuthenticationGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Ha
 }
 
 // CookieAuthGuard creates middleware that validates JWT tokens from the access_token cookie.
+// When the access token is missing or expired, it attempts to refresh using the refresh_token cookie.
 // On failure it redirects to the login page rather than returning a JSON error response.
 // It is intended for browser-facing web page routes.
 func CookieAuthGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			cookie, err := r.Cookie("access_token")
-			if err != nil {
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
+			var acctInfo *AccountInfo
+
+			// Try access token first
+			if cookie, err := r.Cookie("access_token"); err == nil {
+				if verified, err := tokenMgr.ValidateToken(cookie.Value); err == nil && verified.TokenKind == auth.AccessTokenKind {
+					acctInfo = &AccountInfo{
+						ID:   verified.AccountID,
+						Name: verified.AccountName,
+					}
+				}
 			}
 
-			verified, err := tokenMgr.ValidateToken(cookie.Value)
-			if err != nil {
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
-			}
+			// If access token is missing or invalid, try to refresh using the refresh_token cookie
+			if acctInfo == nil {
+				refreshCookie, err := r.Cookie("refresh_token")
+				if err != nil {
+					http.Redirect(w, r, "/login", http.StatusSeeOther)
+					return
+				}
 
-			if verified.TokenKind != auth.AccessTokenKind {
-				http.Redirect(w, r, "/login", http.StatusSeeOther)
-				return
-			}
+				refreshVerified, err := tokenMgr.ValidateToken(refreshCookie.Value)
+				if err != nil || refreshVerified.TokenKind != auth.RefreshTokenKind {
+					clearCookie(w, "refresh_token", r.TLS != nil)
+					http.Redirect(w, r, "/login", http.StatusSeeOther)
+					return
+				}
 
-			acctInfo := &AccountInfo{
-				ID:   verified.AccountID,
-				Name: verified.AccountName,
+				bundle, err := tokenMgr.RefreshAccessToken(refreshCookie.Value)
+				if err != nil {
+					clearCookie(w, "refresh_token", r.TLS != nil)
+					http.Redirect(w, r, "/login", http.StatusSeeOther)
+					return
+				}
+
+				http.SetCookie(w, &http.Cookie{
+					Name:     "access_token",
+					Value:    bundle.AccessToken,
+					Path:     "/",
+					MaxAge:   int(time.Until(bundle.AccessExpiresAt).Seconds()),
+					HttpOnly: true,
+					SameSite: http.SameSiteStrictMode,
+					Secure:   r.TLS != nil,
+				})
+				http.SetCookie(w, &http.Cookie{
+					Name:     "refresh_token",
+					Value:    bundle.RefreshToken,
+					Path:     "/",
+					MaxAge:   int(time.Until(bundle.RefreshExpiresAt).Seconds()),
+					HttpOnly: true,
+					SameSite: http.SameSiteStrictMode,
+					Secure:   r.TLS != nil,
+				})
+
+				acctInfo = &AccountInfo{
+					ID:   refreshVerified.AccountID,
+					Name: refreshVerified.AccountName,
+				}
 			}
 
 			enrichedCtx := context.WithValue(r.Context(), AccountContextKey, acctInfo)
@@ -105,4 +144,17 @@ func writeAuthError(w http.ResponseWriter, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusUnauthorized)
 	w.Write([]byte(`{"success":false,"error":{"code":"AUTHENTICATION_ERROR","message":"` + message + `"}}`))
+}
+
+// clearCookie expires a named cookie immediately by setting MaxAge to -1.
+func clearCookie(w http.ResponseWriter, name string, secure bool) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     name,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
+		Secure:   secure,
+	})
 }
