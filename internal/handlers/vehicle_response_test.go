@@ -52,6 +52,7 @@ func TestVehicleToResponseMap(t *testing.T) {
 			Model:           "Focus",
 			Year:            2020,
 			Status:          models.VehicleStatusActive,
+			DisplayName:     "My Daily Driver",
 			Color:           "Blue",
 			LicensePlate:    "ABC-1234",
 			PurchaseDate:    &purchaseDate,
@@ -63,6 +64,7 @@ func TestVehicleToResponseMap(t *testing.T) {
 			UpdatedAt:       baseTime,
 		}
 		m := vehicleToResponseMap(vehicle)
+		assert.Equal(t, "My Daily Driver", m["display_name"])
 		assert.Equal(t, "Blue", m["color"])
 		assert.Equal(t, "ABC-1234", m["license_plate"])
 		assert.Equal(t, "2019-03-10", m["purchase_date"])
@@ -85,6 +87,7 @@ func TestVehicleToResponseMap(t *testing.T) {
 			UpdatedAt: baseTime,
 		}
 		m := vehicleToResponseMap(vehicle)
+		_, hasDisplayName := m["display_name"]
 		_, hasColor := m["color"]
 		_, hasLicensePlate := m["license_plate"]
 		_, hasPurchaseDate := m["purchase_date"]
@@ -93,6 +96,7 @@ func TestVehicleToResponseMap(t *testing.T) {
 		_, hasCurrentMileage := m["current_mileage"]
 		_, hasNotes := m["notes"]
 
+		assert.False(t, hasDisplayName)
 		assert.False(t, hasColor)
 		assert.False(t, hasLicensePlate)
 		assert.False(t, hasPurchaseDate)

@@ -176,6 +176,26 @@ func TestPageHandler_VehicleList(t *testing.T) {
 		body := rec.Body.String()
 		assert.Contains(t, body, "Vehicle added successfully")
 	})
+
+	t.Run("uses display name in vehicle card when present", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{
+			countResult: 1,
+			listResult: []*models.Vehicle{
+				{ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020, DisplayName: "My Daily Driver", Status: models.VehicleStatusActive},
+			},
+		}
+		handler := newTestVehicleListPageHandler(t, vehicleStub)
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles", nil)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleList(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "My Daily Driver")
+	})
 }
 
 func TestPageHandler_VehicleNew(t *testing.T) {
@@ -319,6 +339,7 @@ func TestPageHandler_VehicleCreate(t *testing.T) {
 
 		form := validForm()
 		form.Set("vin", "1HGBH41JXMN109186")
+		form.Set("display_name", "My Daily Driver")
 		form.Set("color", "Blue")
 		form.Set("license_plate", "ABC-1234")
 		form.Set("purchase_date", "2021-06-15")
@@ -408,5 +429,26 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Vehicle updated successfully")
+	})
+
+	t.Run("uses display name as title when present", func(t *testing.T) {
+		vehicleWithDisplayName := &models.Vehicle{
+			ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020,
+			DisplayName: "My Daily Driver",
+			Status:      models.VehicleStatusActive, CurrentMileage: &mileage,
+		}
+		handler := newTestVehicleDetailPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
+
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1", nil)
+		req = addAuthContext(req, "u1", "testuser")
+		req = addResourceContext(req, vehicleWithDisplayName)
+		rec := httptest.NewRecorder()
+
+		handler.VehicleDetail(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "My Daily Driver")
+		assert.Contains(t, body, "Display Name")
 	})
 }
