@@ -61,7 +61,7 @@
         <h2 class="card-title">Recent Maintenance</h2>
     </div>
     {{if .RecentMaintenance}}
-    <table class="table table-responsive">
+    <table class="table table-responsive table-clickable">
         <thead>
             <tr>
                 <th>Vehicle</th>
@@ -73,10 +73,10 @@
         <tbody>
             {{range .RecentMaintenance}}
             <tr>
-                <td data-label="Vehicle">{{.VehicleName}}</td>
-                <td data-label="Service Type">{{.ServiceType}}</td>
-                <td data-label="Date">{{formatDate .ServiceDate}}</td>
-                <td data-label="Cost">{{formatCurrencyPtr .Cost}}</td>
+                <td data-label="Vehicle"><a href="/maintenance/{{.ID}}">{{.VehicleName}}</a></td>
+                <td data-label="Service Type"><a href="/maintenance/{{.ID}}">{{.ServiceType}}</a></td>
+                <td data-label="Date"><a href="/maintenance/{{.ID}}">{{formatDate .ServiceDate}}</a></td>
+                <td data-label="Cost"><a href="/maintenance/{{.ID}}">{{formatCurrencyPtr .Cost}}</a></td>
             </tr>
             {{end}}
         </tbody>
