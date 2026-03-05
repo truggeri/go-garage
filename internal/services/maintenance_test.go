@@ -293,10 +293,10 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 
 		updatedRecord, err := service.UpdateMaintenance(ctx, "record-123", updates)
 		require.NoError(t, err)
-		assert.Equal(t, models.ServiceTypeOilChange, updatedRecord.ServiceType)     // unchanged
-		assert.Equal(t, "Quick Lube", updatedRecord.ServiceProvider) // unchanged
-		assert.Equal(t, 50000, *updatedRecord.MileageAtService)      // unchanged
-		assert.Equal(t, "Used synthetic oil", updatedRecord.Notes)   // updated
+		assert.Equal(t, models.ServiceTypeOilChange, updatedRecord.ServiceType) // unchanged
+		assert.Equal(t, "Quick Lube", updatedRecord.ServiceProvider)            // unchanged
+		assert.Equal(t, 50000, *updatedRecord.MileageAtService)                 // unchanged
+		assert.Equal(t, "Used synthetic oil", updatedRecord.Notes)              // updated
 	})
 
 	t.Run("returns not found for non-existent record", func(t *testing.T) {

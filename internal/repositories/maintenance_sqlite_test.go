@@ -221,10 +221,10 @@ func TestMaintenanceRepository_FindByVehicleID(t *testing.T) {
 
 		// Create record for vehicle2
 		record3 := &models.MaintenanceRecord{
-			VehicleID:   vehicle2.ID,
-			ServiceType: models.ServiceTypeOther,
+			VehicleID:         vehicle2.ID,
+			ServiceType:       models.ServiceTypeOther,
 			CustomServiceType: "Annual Inspection",
-			ServiceDate: time.Now().Add(-72 * time.Hour),
+			ServiceDate:       time.Now().Add(-72 * time.Hour),
 		}
 		err = maintenanceRepo.Create(ctx, record3)
 		require.NoError(t, err)
