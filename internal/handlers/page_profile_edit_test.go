@@ -19,7 +19,7 @@ func newTestProfileEditPageHandler(
 ) *PageHandler {
 	t.Helper()
 	engine := templateengine.NewEngine("../../web/templates", true)
-	return NewPageHandler(engine, &mockAuthService{}, &stubVehicleSvc{}, &stubMaintenanceSvc{}, userSvc)
+	return NewPageHandler(engine, &mockAuthService{}, &stubVehicleSvc{}, &stubMaintenanceSvc{}, userSvc, nil)
 }
 
 func TestPageHandler_ProfileEdit(t *testing.T) {

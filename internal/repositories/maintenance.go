@@ -34,4 +34,8 @@ type MaintenanceRepository interface {
 
 	// Count returns the total number of maintenance records matching the filters
 	Count(ctx context.Context, filters MaintenanceFilters) (int, error)
+
+	// SumCostByVehicleID returns the sum of all maintenance costs for a specific vehicle.
+	// Returns nil if there are no records with a cost for the vehicle.
+	SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error)
 }

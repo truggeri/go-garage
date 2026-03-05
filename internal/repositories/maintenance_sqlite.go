@@ -272,6 +272,24 @@ func (r *SQLiteMaintenanceRepository) Count(ctx context.Context, filters Mainten
 	return count, nil
 }
 
+// SumCostByVehicleID returns the sum of all maintenance costs for a specific vehicle.
+// Returns nil if there are no records with a cost for the vehicle.
+func (r *SQLiteMaintenanceRepository) SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error) {
+	query := `SELECT SUM(cost) FROM maintenance_records WHERE vehicle_id = ? AND cost IS NOT NULL`
+
+	var total sql.NullFloat64
+	err := r.db.QueryRowContext(ctx, query, vehicleID).Scan(&total)
+	if err != nil {
+		return nil, models.NewDatabaseError("sum cost by vehicle ID", err)
+	}
+
+	if !total.Valid {
+		return nil, nil
+	}
+
+	return &total.Float64, nil
+}
+
 // scanMaintenanceRecords is a helper method to scan multiple maintenance record rows
 func (r *SQLiteMaintenanceRepository) scanMaintenanceRecords(rows *sql.Rows) ([]*models.MaintenanceRecord, error) {
 	records := []*models.MaintenanceRecord{}
