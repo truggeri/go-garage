@@ -49,7 +49,7 @@
                     {{if .Vehicle.VIN}}
                     <div class="detail-item">
                         <dt class="detail-label">VIN</dt>
-                        <dd class="detail-value">{{.Vehicle.VIN}}</dd>
+                        <dd class="detail-value">{{.Vehicle.VIN}} <a href="https://www.nhtsa.gov/recalls?vymm={{.Vehicle.VIN}}" target="_blank" rel="noopener noreferrer" title="Check NHTSA recalls">🔍</a></dd>
                     </div>
                     {{end}}
                     {{if .Vehicle.Color}}
