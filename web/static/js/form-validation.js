@@ -293,10 +293,11 @@
 
             // Validate all fields on submit
             form.addEventListener("submit", function (e) {
+                var currentFields = getValidatableFields(form);
                 var isValid = true;
                 var firstInvalid = null;
 
-                fields.forEach(function (field) {
+                currentFields.forEach(function (field) {
                     if (!validateAndShow(field)) {
                         isValid = false;
                         if (!firstInvalid) {
