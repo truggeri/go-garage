@@ -1,11 +1,9 @@
 package handlers
 
 import (
-	"errors"
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 )
@@ -42,28 +40,9 @@ func (h *PageHandler) FuelDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	vars := mux.Vars(r)
-	recordID := vars["id"]
-
-	record, err := h.fuelService.GetFuelRecord(r.Context(), recordID)
+	record, vehicle, err := h.getFuelRecordAndVehicle(r)
 	if err != nil {
-		var notFound *models.NotFoundError
-		if errors.As(err, &notFound) {
-			http.Error(w, "Not Found", http.StatusNotFound)
-			return
-		}
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	vehicle, err := h.vehicleService.GetVehicle(r.Context(), record.VehicleID)
-	if err != nil {
-		var notFound *models.NotFoundError
-		if errors.As(err, &notFound) {
-			http.Error(w, "Not Found", http.StatusNotFound)
-			return
-		}
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		writeFuelRecordError(w, err)
 		return
 	}
 
