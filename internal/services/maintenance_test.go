@@ -459,3 +459,140 @@ func TestMaintenanceService_UpdateMaintenance_AllFields(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+// mockMetricsRepository is a mock implementation of MetricsRepository for testing
+type mockMetricsRepository struct {
+	metrics   map[string]*models.VehicleMetrics
+	upsertErr error
+}
+
+func newMockMetricsRepository() *mockMetricsRepository {
+	return &mockMetricsRepository{
+		metrics: make(map[string]*models.VehicleMetrics),
+	}
+}
+
+func (m *mockMetricsRepository) Upsert(ctx context.Context, metrics *models.VehicleMetrics) error {
+	if m.upsertErr != nil {
+		return m.upsertErr
+	}
+	m.metrics[metrics.VehicleID] = metrics
+	return nil
+}
+
+func (m *mockMetricsRepository) GetByVehicleID(ctx context.Context, vehicleID string) (*models.VehicleMetrics, error) {
+	metrics, exists := m.metrics[vehicleID]
+	if !exists {
+		return nil, nil
+	}
+	return metrics, nil
+}
+
+func (m *mockMetricsRepository) SumTotalSpentByVehicleIDs(ctx context.Context, vehicleIDs []string) (float64, error) {
+	var total float64
+	for _, id := range vehicleIDs {
+		if metrics, ok := m.metrics[id]; ok && metrics.TotalSpent != nil {
+			total += *metrics.TotalSpent
+		}
+	}
+	return total, nil
+}
+
+func TestMaintenanceService_MetricsRecalculation(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("recalculates metrics on create", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		metricsRepo := newMockMetricsRepository()
+		vehicleRepo.vehicles["vehicle-123"] = &models.Vehicle{
+			ID: "vehicle-123", UserID: "user-123", VIN: "1HGBH41JXMN109186",
+			Make: "Honda", Model: "Civic", Year: 2021, Status: models.VehicleStatusActive,
+		}
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, metricsRepo)
+
+		cost := 89.99
+		record := &models.MaintenanceRecord{
+			VehicleID:   "vehicle-123",
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+			Cost:        &cost,
+		}
+
+		err := service.CreateMaintenance(ctx, record)
+		require.NoError(t, err)
+
+		// Verify metrics were updated
+		metrics, ok := metricsRepo.metrics["vehicle-123"]
+		require.True(t, ok)
+		require.NotNil(t, metrics.TotalSpent)
+		assert.Equal(t, 89.99, *metrics.TotalSpent)
+	})
+
+	t.Run("recalculates metrics on update", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		metricsRepo := newMockMetricsRepository()
+		cost := 50.00
+		existingRecord := &models.MaintenanceRecord{
+			ID: "record-123", VehicleID: "vehicle-123",
+			ServiceType: "Oil Change", ServiceDate: time.Now().Add(-24 * time.Hour),
+			Cost: &cost,
+		}
+		maintenanceRepo.records[existingRecord.ID] = existingRecord
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, metricsRepo)
+
+		newCost := 100.00
+		updates := MaintenanceUpdates{Cost: &newCost}
+		_, err := service.UpdateMaintenance(ctx, "record-123", updates)
+		require.NoError(t, err)
+
+		// Verify metrics were updated
+		metrics, ok := metricsRepo.metrics["vehicle-123"]
+		require.True(t, ok)
+		require.NotNil(t, metrics.TotalSpent)
+		assert.Equal(t, 100.00, *metrics.TotalSpent)
+	})
+
+	t.Run("recalculates metrics on delete", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		metricsRepo := newMockMetricsRepository()
+		cost := 75.00
+		existingRecord := &models.MaintenanceRecord{
+			ID: "record-123", VehicleID: "vehicle-123",
+			ServiceType: "Oil Change", ServiceDate: time.Now().Add(-24 * time.Hour),
+			Cost: &cost,
+		}
+		maintenanceRepo.records[existingRecord.ID] = existingRecord
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, metricsRepo)
+
+		err := service.DeleteMaintenance(ctx, "record-123")
+		require.NoError(t, err)
+
+		// Verify metrics were updated (should be nil since no more records)
+		metrics, ok := metricsRepo.metrics["vehicle-123"]
+		require.True(t, ok)
+		assert.Nil(t, metrics.TotalSpent)
+	})
+
+	t.Run("handles nil metrics repo gracefully", func(t *testing.T) {
+		maintenanceRepo := newMockMaintenanceRepository()
+		vehicleRepo := newMockVehicleRepository()
+		vehicleRepo.vehicles["vehicle-123"] = &models.Vehicle{
+			ID: "vehicle-123", UserID: "user-123", VIN: "1HGBH41JXMN109186",
+			Make: "Honda", Model: "Civic", Year: 2021, Status: models.VehicleStatusActive,
+		}
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
+
+		record := &models.MaintenanceRecord{
+			VehicleID:   "vehicle-123",
+			ServiceType: "Oil Change",
+			ServiceDate: time.Now().Add(-24 * time.Hour),
+		}
+
+		// Should not panic even with nil metricsRepo
+		err := service.CreateMaintenance(ctx, record)
+		require.NoError(t, err)
+	})
+}
