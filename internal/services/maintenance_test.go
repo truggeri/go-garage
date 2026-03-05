@@ -102,6 +102,21 @@ func (m *mockMaintenanceRepository) Count(ctx context.Context, filters repositor
 	return len(m.records), nil
 }
 
+func (m *mockMaintenanceRepository) SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error) {
+	var total float64
+	var hasCost bool
+	for _, r := range m.records {
+		if r.VehicleID == vehicleID && r.Cost != nil {
+			total += *r.Cost
+			hasCost = true
+		}
+	}
+	if !hasCost {
+		return nil, nil
+	}
+	return &total, nil
+}
+
 func TestMaintenanceService_CreateMaintenance(t *testing.T) {
 	ctx := context.Background()
 
@@ -117,7 +132,7 @@ func TestMaintenanceService_CreateMaintenance(t *testing.T) {
 			Year:   2021,
 			Status: models.VehicleStatusActive,
 		}
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		record := &models.MaintenanceRecord{
 			VehicleID:   "vehicle-123",
@@ -133,7 +148,7 @@ func TestMaintenanceService_CreateMaintenance(t *testing.T) {
 	t.Run("returns error for non-existent vehicle", func(t *testing.T) {
 		maintenanceRepo := newMockMaintenanceRepository()
 		vehicleRepo := newMockVehicleRepository()
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		record := &models.MaintenanceRecord{
 			VehicleID:   "non-existent-vehicle",
@@ -162,7 +177,7 @@ func TestMaintenanceService_GetMaintenance(t *testing.T) {
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		record, err := service.GetMaintenance(ctx, "record-123")
 		require.NoError(t, err)
@@ -172,7 +187,7 @@ func TestMaintenanceService_GetMaintenance(t *testing.T) {
 	t.Run("returns not found error for non-existent record", func(t *testing.T) {
 		maintenanceRepo := newMockMaintenanceRepository()
 		vehicleRepo := newMockVehicleRepository()
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		_, err := service.GetMaintenance(ctx, "non-existent")
 		assert.Error(t, err)
@@ -202,7 +217,7 @@ func TestMaintenanceService_GetVehicleMaintenance(t *testing.T) {
 		}
 		maintenanceRepo.records[record1.ID] = record1
 		maintenanceRepo.records[record2.ID] = record2
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		records, err := service.GetVehicleMaintenance(ctx, "vehicle-123")
 		require.NoError(t, err)
@@ -212,7 +227,7 @@ func TestMaintenanceService_GetVehicleMaintenance(t *testing.T) {
 	t.Run("returns empty slice for vehicle with no records", func(t *testing.T) {
 		maintenanceRepo := newMockMaintenanceRepository()
 		vehicleRepo := newMockVehicleRepository()
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		records, err := service.GetVehicleMaintenance(ctx, "vehicle-with-no-records")
 		require.NoError(t, err)
@@ -233,7 +248,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		newServiceType := "Synthetic Oil Change"
 		newCost := 89.99
@@ -258,7 +273,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		newServiceDate := time.Now().Add(-48 * time.Hour)
 		updates := MaintenanceUpdates{
@@ -284,7 +299,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 			ServiceProvider:  "Quick Lube",
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		newNotes := "Used synthetic oil"
 		updates := MaintenanceUpdates{
@@ -302,7 +317,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 	t.Run("returns not found for non-existent record", func(t *testing.T) {
 		maintenanceRepo := newMockMaintenanceRepository()
 		vehicleRepo := newMockVehicleRepository()
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		_, err := service.UpdateMaintenance(ctx, "non-existent", MaintenanceUpdates{})
 		assert.Error(t, err)
@@ -325,7 +340,7 @@ func TestMaintenanceService_DeleteMaintenance(t *testing.T) {
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		err := service.DeleteMaintenance(ctx, "record-123")
 		require.NoError(t, err)
@@ -338,7 +353,7 @@ func TestMaintenanceService_DeleteMaintenance(t *testing.T) {
 	t.Run("returns not found for non-existent record", func(t *testing.T) {
 		maintenanceRepo := newMockMaintenanceRepository()
 		vehicleRepo := newMockVehicleRepository()
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		err := service.DeleteMaintenance(ctx, "non-existent")
 		assert.Error(t, err)
@@ -361,7 +376,7 @@ func TestMaintenanceService_ListMaintenance(t *testing.T) {
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.listResult = []*models.MaintenanceRecord{record1}
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		filters := repositories.MaintenanceFilters{}
 		pagination := repositories.PaginationParams{Limit: 10, Offset: 0}
@@ -390,7 +405,7 @@ func TestMaintenanceService_CountMaintenance(t *testing.T) {
 			ServiceType: "Tire Rotation",
 			ServiceDate: time.Now().Add(-48 * time.Hour),
 		}
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		count, err := service.CountMaintenance(ctx, repositories.MaintenanceFilters{})
 		require.NoError(t, err)
@@ -411,7 +426,7 @@ func TestMaintenanceService_UpdateMaintenance_AllFields(t *testing.T) {
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		newMileage := 75000
 		newProvider := "New Provider"
@@ -438,7 +453,7 @@ func TestMaintenanceService_UpdateMaintenance_AllFields(t *testing.T) {
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
 		maintenanceRepo.updateErr = models.NewDatabaseError("update", assert.AnError)
-		service := NewMaintenanceService(maintenanceRepo, vehicleRepo)
+		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
 
 		_, err := service.UpdateMaintenance(ctx, "record-123", MaintenanceUpdates{})
 		assert.Error(t, err)

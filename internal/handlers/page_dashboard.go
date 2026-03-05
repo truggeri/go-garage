@@ -58,24 +58,28 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 
 	// Build a name lookup map and collect all maintenance records.
 	vehicleNames := make(map[string]string, len(vehicles))
-	for _, v := range vehicles {
+	vehicleIDs := make([]string, len(vehicles))
+	for i, v := range vehicles {
 		vehicleNames[v.ID] = vehicleName(v)
+		vehicleIDs[i] = v.ID
+	}
+
+	// Read total spent from pre-computed metrics.
+	totalSpent := 0.0
+	if h.metricsRepo != nil && len(vehicleIDs) > 0 {
+		if sum, err := h.metricsRepo.SumTotalSpentByVehicleIDs(r.Context(), vehicleIDs); err == nil {
+			totalSpent = sum
+		}
 	}
 
 	var allMaintenance []*models.MaintenanceRecord
-	totalSpent := 0.0
 	for _, v := range vehicles {
 		records, svcErr := h.maintenanceService.GetVehicleMaintenance(r.Context(), v.ID)
 		if svcErr != nil {
 			// Best-effort: skip this vehicle's records rather than failing the whole dashboard.
 			continue
 		}
-		for _, rec := range records {
-			allMaintenance = append(allMaintenance, rec)
-			if rec.Cost != nil {
-				totalSpent += *rec.Cost
-			}
-		}
+		allMaintenance = append(allMaintenance, records...)
 	}
 
 	// Sort by most-recent service date first.

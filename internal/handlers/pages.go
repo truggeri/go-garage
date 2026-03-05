@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"github.com/truggeri/go-garage/internal/repositories"
 	"github.com/truggeri/go-garage/internal/services"
 	"github.com/truggeri/go-garage/internal/templateengine"
 )
@@ -12,6 +13,7 @@ type PageHandler struct {
 	vehicleService     services.VehicleService
 	maintenanceService services.MaintenanceService
 	userService        services.UserService
+	metricsRepo        repositories.MetricsRepository
 }
 
 // NewPageHandler creates a new PageHandler with the given template engine and services.
@@ -21,6 +23,7 @@ func NewPageHandler(
 	vehicleSvc services.VehicleService,
 	maintenanceSvc services.MaintenanceService,
 	userSvc services.UserService,
+	metricsRepo repositories.MetricsRepository,
 ) *PageHandler {
 	return &PageHandler{
 		engine:             engine,
@@ -28,6 +31,7 @@ func NewPageHandler(
 		vehicleService:     vehicleSvc,
 		maintenanceService: maintenanceSvc,
 		userService:        userSvc,
+		metricsRepo:        metricsRepo,
 	}
 }
 

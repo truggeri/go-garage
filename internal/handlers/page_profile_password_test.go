@@ -18,7 +18,7 @@ func newTestChangePasswordPageHandler(
 ) *PageHandler {
 	t.Helper()
 	engine := templateengine.NewEngine("../../web/templates", true)
-	return NewPageHandler(engine, &mockAuthService{}, &stubVehicleSvc{}, &stubMaintenanceSvc{}, userSvc)
+	return NewPageHandler(engine, &mockAuthService{}, &stubVehicleSvc{}, &stubMaintenanceSvc{}, userSvc, nil)
 }
 
 func TestPageHandler_ChangePassword(t *testing.T) {
