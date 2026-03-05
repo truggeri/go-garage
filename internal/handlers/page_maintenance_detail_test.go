@@ -28,7 +28,7 @@ func TestPageHandler_MaintenanceDetail(t *testing.T) {
 	mileage := 30000
 
 	baseRecord := &models.MaintenanceRecord{
-		ID: "m1", VehicleID: "v1", ServiceType: "Oil Change",
+		ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange,
 		ServiceDate: serviceDate, Cost: &cost, MileageAtService: &mileage,
 		ServiceProvider: "Quick Lube", Notes: "Used synthetic oil",
 	}

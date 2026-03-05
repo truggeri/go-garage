@@ -30,7 +30,7 @@ func TestPageHandler_MaintenanceEdit(t *testing.T) {
 	mileage := 30000
 
 	baseRecord := &models.MaintenanceRecord{
-		ID: "m1", VehicleID: "v1", ServiceType: "Oil Change",
+		ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange,
 		ServiceDate: serviceDate, Cost: &cost, MileageAtService: &mileage,
 		ServiceProvider: "Quick Lube", Notes: "Used synthetic oil",
 	}
@@ -128,7 +128,7 @@ func TestPageHandler_MaintenanceUpdate(t *testing.T) {
 	mileage := 30000
 
 	baseRecord := &models.MaintenanceRecord{
-		ID: "m1", VehicleID: "v1", ServiceType: "Oil Change",
+		ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange,
 		ServiceDate: serviceDate, Cost: &cost, MileageAtService: &mileage,
 		ServiceProvider: "Quick Lube",
 	}
@@ -145,7 +145,7 @@ func TestPageHandler_MaintenanceUpdate(t *testing.T) {
 	}
 
 	validForm := url.Values{
-		"service_type": {"Synthetic Oil Change"},
+		"service_type": {"brakes"},
 		"service_date": {"2024-06-15"},
 	}
 
@@ -171,7 +171,7 @@ func TestPageHandler_MaintenanceUpdate(t *testing.T) {
 		handler := newTestMaintenanceEditPageHandler(t, vehicleStub, maintenanceStub)
 
 		form := url.Values{
-			"service_type": {"Oil Change"},
+			"service_type": {"oil_change"},
 			"service_date": {"not-a-date"},
 		}
 		req := postForm(form)
@@ -210,7 +210,7 @@ func TestPageHandler_MaintenanceUpdate(t *testing.T) {
 		handler := newTestMaintenanceEditPageHandler(t, vehicleStub, maintenanceStub)
 
 		form := url.Values{
-			"service_type":       {"Brake Inspection"},
+			"service_type":       {"brakes"},
 			"service_date":       {""},
 			"mileage_at_service": {"50000"},
 			"cost":               {"120.50"},
@@ -225,7 +225,7 @@ func TestPageHandler_MaintenanceUpdate(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 		body := rec.Body.String()
-		assert.Contains(t, body, "Brake Inspection")
+		assert.Contains(t, body, "Brakes")
 		assert.Contains(t, body, "50000")
 		assert.Contains(t, body, "120.50")
 		assert.Contains(t, body, "Auto Shop")
@@ -299,7 +299,7 @@ func TestPageHandler_MaintenanceUpdate(t *testing.T) {
 		handler := newTestMaintenanceEditPageHandler(t, vehicleStub, maintenanceStub)
 
 		form := url.Values{
-			"service_type":       {"Synthetic Oil Change"},
+			"service_type":       {"oil_change"},
 			"service_date":       {"2024-06-15"},
 			"mileage_at_service": {"50000"},
 			"cost":               {"79.99"},

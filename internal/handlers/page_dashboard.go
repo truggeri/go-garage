@@ -95,7 +95,7 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 		rows[i] = dashboardMaintenanceRow{
 			ID:          rec.ID,
 			VehicleName: vehicleNames[rec.VehicleID],
-			ServiceType: rec.ServiceType,
+			ServiceType: rec.DisplayServiceType(),
 			ServiceDate: rec.ServiceDate,
 			Cost:        rec.Cost,
 		}

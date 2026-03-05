@@ -182,6 +182,14 @@ func ValidateMaintenanceRecord(m *MaintenanceRecord) error {
 		return NewValidationError("service_type", "service type is required")
 	}
 
+	if !IsValidServiceType(m.ServiceType) {
+		return NewValidationError("service_type", "invalid service type")
+	}
+
+	if m.ServiceType == ServiceTypeOther && m.CustomServiceType == "" {
+		return NewValidationError("custom_service_type", "custom service type is required when service type is 'Other'")
+	}
+
 	if m.ServiceDate.IsZero() {
 		return NewValidationError("service_date", "service date is required")
 	}

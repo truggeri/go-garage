@@ -90,7 +90,7 @@ func fetchAllUserMaintenanceRecords(
 		lower := strings.ToLower(serviceType)
 		filtered := make([]*models.MaintenanceRecord, 0, len(all))
 		for _, rec := range all {
-			if strings.Contains(strings.ToLower(rec.ServiceType), lower) {
+			if strings.Contains(strings.ToLower(string(rec.ServiceType)), lower) {
 				filtered = append(filtered, rec)
 			}
 		}
