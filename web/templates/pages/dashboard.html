@@ -37,7 +37,7 @@
     {{range .ActiveVehicles}}
     <div class="vehicle-card card">
         <div class="vehicle-card-header">
-            <h3 class="vehicle-card-title">{{.Year}} {{.Make}} {{.Model}}</h3>
+            <h3 class="vehicle-card-title"><a href="/vehicles/{{.ID}}" class="vehicle-card-link">{{.Year}} {{.Make}} {{.Model}}</a></h3>
             <span class="vehicle-status vehicle-status-{{.Status}}">{{toTitle (toLower (print .Status))}}</span>
         </div>
         <div class="vehicle-card-body">
@@ -46,7 +46,6 @@
             {{if .CurrentMileage}}<p class="vehicle-detail"><span class="vehicle-detail-label">Mileage:</span> {{formatMileagePtr .CurrentMileage}}</p>{{end}}
         </div>
         <div class="vehicle-card-actions">
-            <a href="/vehicles/{{.ID}}" class="btn btn-secondary btn-sm">View</a>
             <a href="/vehicles/{{.ID}}/edit" class="btn btn-secondary btn-sm">Edit</a>
             <a href="/maintenance/new?vehicle={{.ID}}" class="btn btn-secondary btn-sm">Add Record</a>
         </div>
