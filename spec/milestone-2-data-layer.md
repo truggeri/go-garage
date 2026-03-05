@@ -55,6 +55,26 @@ Define the MaintenanceRecord struct:
 - [x] Created at timestamp (PR #26)
 - [x] Updated at timestamp (PR #26)
 
+#### Fuel Record Model
+
+Define the FuelRecord struct:
+
+- [x] ID (PR #TBD)
+- [x] Vehicle ID (foreign key) (PR #TBD)
+- [x] Fill date (datetime) (PR #TBD)
+- [x] Odometer reading (required) (PR #TBD)
+- [x] Cost per unit/gallon (required) (PR #TBD)
+- [x] Volume of fuel / gallons (required) (PR #TBD)
+- [x] Fuel type (optional) (PR #TBD)
+- [x] City driving percentage 0-100 (optional) (PR #TBD)
+- [x] Location (optional) (PR #TBD)
+- [x] Brand (optional) (PR #TBD)
+- [x] Notes (optional) (PR #TBD)
+- [x] Vehicle reported MPG (optional) (PR #TBD)
+- [x] Partial fuel up boolean (optional) (PR #TBD)
+- [x] Created at timestamp (PR #TBD)
+- [x] Updated at timestamp (PR #TBD)
+
 #### User Model
 
 Define the User struct:
@@ -74,11 +94,11 @@ Define the User struct:
 - [x] Create users table migration (PR #24)
 - [x] Create vehicles table migration (PR #24)
 - [x] Create maintenance_records table migration (PR #24)
+- [x] Create fuel_records table migration (PR #TBD)
 - [x] Add indexes for foreign keys (PR #24)
 - [x] Add indexes for frequently queried fields (VIN, email, username) (PR #24)
 - [x] Add unique constraints where needed (PR #24)
-
-### 4. Repository Interface Design
+- [x] Add indexes for fuel_records (vehicle_id, fill_date) (PR #TBD)### 4. Repository Interface Design
 
 Create repository interfaces for:
 
@@ -107,11 +127,21 @@ Create repository interfaces for:
   - Update(user)
   - Delete(id)
 
+- [x] FuelRepository interface (PR #TBD)
+  - Create(record)
+  - FindByID(id)
+  - FindByVehicleID(vehicleID)
+  - Update(record)
+  - Delete(id)
+  - List(filters, pagination)
+  - Count(filters)
+
 ### 5. Repository Implementation
 
 - [x] Implement SQLite repository for vehicles (PR #26)
 - [x] Implement SQLite repository for maintenance records (PR #26)
 - [x] Implement SQLite repository for users (PR #26)
+- [x] Implement SQLite repository for fuel records (PR #TBD)
 - [x] Use prepared statements for all queries (PR #26)
 - [x] Implement transaction support (PR #26 - via SQLite connection)
 - [x] Add context support for cancellation (PR #26)

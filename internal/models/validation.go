@@ -172,6 +172,39 @@ func ValidateVehicle(v *Vehicle) error {
 	return nil
 }
 
+// ValidateFuelRecord validates a FuelRecord model
+func ValidateFuelRecord(f *FuelRecord) error {
+	if f.VehicleID == "" {
+		return NewValidationError("vehicle_id", "vehicle ID is required")
+	}
+
+	if f.FillDate.IsZero() {
+		return NewValidationError("fill_date", "fill date is required")
+	}
+
+	if f.FillDate.After(time.Now()) {
+		return NewValidationError("fill_date", "fill date cannot be in the future")
+	}
+
+	if f.Odometer < 0 {
+		return NewValidationError("odometer", "odometer must be 0 or greater")
+	}
+
+	if f.CostPerUnit < 0 {
+		return NewValidationError("cost_per_unit", "cost per unit cannot be negative")
+	}
+
+	if f.Volume <= 0 {
+		return NewValidationError("volume", "volume must be greater than 0")
+	}
+
+	if f.CityDrivingPct != nil && (*f.CityDrivingPct < 0 || *f.CityDrivingPct > 100) {
+		return NewValidationError("city_driving_pct", "city driving percentage must be between 0 and 100")
+	}
+
+	return nil
+}
+
 // ValidateMaintenanceRecord validates a MaintenanceRecord model
 func ValidateMaintenanceRecord(m *MaintenanceRecord) error {
 	if m.VehicleID == "" {

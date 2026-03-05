@@ -1,0 +1,143 @@
+{{define "title"}}Fuel Record - {{.VehicleTitle}} - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>Fuel Record</h1>
+    <div class="page-header-actions">
+        <a href="/fuel/{{.Record.ID}}/edit" class="btn btn-primary">Edit Record</a>
+        <button type="button" class="btn btn-danger"
+                data-confirm-delete="delete-form"
+                data-confirm-message="Are you sure you want to delete this fuel record? This action cannot be undone.">Delete</button>
+    </div>
+</div>
+
+{{if .Flash}}
+{{range .Flash}}
+<div class="flash flash-{{.Type}}" role="alert">
+    <span class="flash-text">{{.Message}}</span>
+</div>
+{{end}}
+{{end}}
+
+<div class="detail-layout">
+    <div class="detail-main">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Fill-Up Details</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Fill Date</dt>
+                        <dd class="detail-value">{{formatDate .Record.FillDate}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Odometer</dt>
+                        <dd class="detail-value">{{formatMileage .Record.Odometer}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Volume</dt>
+                        <dd class="detail-value">{{printf "%.3f gallons" .Record.Volume}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Cost per Gallon</dt>
+                        <dd class="detail-value">{{printf "$%.3f" .Record.CostPerUnit}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Total Cost</dt>
+                        <dd class="detail-value">{{.TotalCost}}</dd>
+                    </div>
+                    {{if .Record.FuelType}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Fuel Type</dt>
+                        <dd class="detail-value">{{.Record.FuelType}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.Brand}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Brand</dt>
+                        <dd class="detail-value">{{.Record.Brand}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.Location}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Location</dt>
+                        <dd class="detail-value">{{.Record.Location}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .CityDrivingPctStr}}
+                    <div class="detail-item">
+                        <dt class="detail-label">City Driving %</dt>
+                        <dd class="detail-value">{{.CityDrivingPctStr}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .ReportedMPGStr}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Reported MPG</dt>
+                        <dd class="detail-value">{{.ReportedMPGStr}}</dd>
+                    </div>
+                    {{end}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Partial Fill-Up</dt>
+                        <dd class="detail-value">{{if .Record.PartialFuelUp}}Yes{{else}}No{{end}}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+
+        {{if .Record.Notes}}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Notes</h2>
+            </div>
+            <div class="card-body">
+                <p class="detail-notes">{{.Record.Notes}}</p>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <div class="detail-sidebar">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Vehicle</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Make</dt>
+                        <dd class="detail-value">{{.Vehicle.Make}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Model</dt>
+                        <dd class="detail-value">{{.Vehicle.Model}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Year</dt>
+                        <dd class="detail-value">{{.Vehicle.Year}}</dd>
+                    </div>
+                </dl>
+                <a href="/vehicles/{{.Vehicle.ID}}" class="btn btn-secondary btn-block">View Vehicle</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="action-list">
+                    <a href="/fuel/{{.Record.ID}}/edit" class="btn btn-primary btn-block">Edit Record</a>
+                    <a href="/fuel?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">All Records for Vehicle</a>
+                    <a href="/fuel/new?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">Add Fuel Record</a>
+                    <a href="/fuel" class="btn btn-secondary btn-block">Back to Fuel Records</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="delete-form" method="POST" action="/fuel/{{.Record.ID}}/delete" style="display: none;">
+    <input type="hidden" name="_method" value="DELETE">
+</form>
+{{end}}

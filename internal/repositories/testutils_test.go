@@ -144,5 +144,40 @@ func runMigrations(db *sql.DB) error {
 		return err
 	}
 
+	// Create fuel_records table
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS fuel_records (
+			id TEXT PRIMARY KEY,
+			vehicle_id TEXT NOT NULL,
+			fill_date DATETIME NOT NULL,
+			odometer INTEGER NOT NULL,
+			cost_per_unit REAL NOT NULL,
+			volume REAL NOT NULL,
+			fuel_type TEXT,
+			city_driving_pct INTEGER,
+			location TEXT,
+			brand TEXT,
+			notes TEXT,
+			reported_mpg REAL,
+			partial BOOLEAN NOT NULL DEFAULT 0,
+			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+		)
+	`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`CREATE INDEX IF NOT EXISTS idx_fuel_vehicle_id ON fuel_records(vehicle_id)`)
+	if err != nil {
+		return err
+	}
+
+	_, err = db.Exec(`CREATE INDEX IF NOT EXISTS idx_fuel_fill_date ON fuel_records(fill_date)`)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

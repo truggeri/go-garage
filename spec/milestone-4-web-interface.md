@@ -191,7 +191,48 @@ web/static/
 - [x] Update validation (PR #88)
 - [x] Save and cancel buttons (PR #88)
 
-### 7. User Profile Pages
+### 7. Fuel Management Pages
+
+#### Fuel List Page
+
+- [x] Display all fuel records (PR #TBD)
+- [x] Filter by vehicle (PR #TBD)
+- [x] Pagination (PR #TBD)
+- [x] "Add New Record" button (PR #TBD)
+- [x] Actions per record (view, edit) (PR #TBD)
+
+#### Add Fuel Record Page
+
+- [x] Select vehicle dropdown (PR #TBD)
+- [x] Fill date picker (PR #TBD)
+- [x] Odometer input (PR #TBD)
+- [x] Volume (gallons) input (PR #TBD)
+- [x] Cost per gallon input (PR #TBD)
+- [x] Fuel type input (optional) (PR #TBD)
+- [x] Brand input (optional) (PR #TBD)
+- [x] Location input (optional) (PR #TBD)
+- [x] City driving % input (optional) (PR #TBD)
+- [x] Reported MPG input (optional) (PR #TBD)
+- [x] Partial fill-up checkbox (optional) (PR #TBD)
+- [x] Notes textarea (PR #TBD)
+- [x] Form validation (PR #TBD)
+
+#### Fuel Record Detail Page
+
+- [x] Display all fuel record fields (PR #TBD)
+- [x] Show computed total cost (PR #TBD)
+- [x] Show associated vehicle info (PR #TBD)
+- [x] Edit and delete buttons (PR #TBD)
+- [x] Quick Actions sidebar (PR #TBD)
+
+#### Edit Fuel Record Page
+
+- [x] Pre-populated form with current data (PR #TBD)
+- [x] Same fields as add page (PR #TBD)
+- [x] Update validation (PR #TBD)
+- [x] Save and cancel buttons (PR #TBD)
+
+### 8. User Profile Pages
 
 #### View Profile
 
