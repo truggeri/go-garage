@@ -1,0 +1,184 @@
+{{define "title"}}Add Fuel Record - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>Add Fuel Record</h1>
+    <a href="/fuel" class="btn btn-secondary">Cancel</a>
+</div>
+
+{{if .Errors.general}}
+<div class="flash flash-error" role="alert">
+    <span class="flash-text">{{.Errors.general}}</span>
+</div>
+{{end}}
+
+{{if .Vehicles}}
+<div class="card">
+    <form method="POST" action="/fuel/new" novalidate>
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div class="form-section">
+            <h2 class="form-section-title">Fill-Up Details</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="vehicle_id">Vehicle <span class="required" aria-hidden="true">*</span></label>
+                <select class="form-input{{if .Errors.vehicle_id}} is-invalid{{end}}"
+                        id="vehicle_id" name="vehicle_id"
+                        required
+                        {{if .Errors.vehicle_id}}aria-invalid="true" {{end}}aria-describedby="vehicle-error">
+                    <option value="">Select a vehicle</option>
+                    {{range .Vehicles}}
+                    <option value="{{.ID}}"{{if eq $.VehicleID .ID}} selected{{end}}>{{index $.VehicleNames .ID}}</option>
+                    {{end}}
+                </select>
+                {{if .Errors.vehicle_id}}
+                <p class="form-error" id="vehicle-error">{{.Errors.vehicle_id}}</p>
+                {{end}}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="fill_date">Fill Date <span class="required" aria-hidden="true">*</span></label>
+                    <input class="form-input{{if .Errors.fill_date}} is-invalid{{end}}"
+                           type="date" id="fill_date" name="fill_date"
+                           value="{{.FillDate}}"
+                           required
+                           {{if .Errors.fill_date}}aria-invalid="true" {{end}}aria-describedby="fill-date-error">
+                    {{if .Errors.fill_date}}
+                    <p class="form-error" id="fill-date-error">{{.Errors.fill_date}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="odometer">Odometer (miles) <span class="required" aria-hidden="true">*</span></label>
+                    <input class="form-input{{if .Errors.odometer}} is-invalid{{end}}"
+                           type="number" id="odometer" name="odometer"
+                           value="{{.Odometer}}"
+                           min="0" required
+                           placeholder="e.g. 50000"
+                           {{if .Errors.odometer}}aria-invalid="true" {{end}}aria-describedby="odometer-error">
+                    {{if .Errors.odometer}}
+                    <p class="form-error" id="odometer-error">{{.Errors.odometer}}</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="volume">Volume (gallons) <span class="required" aria-hidden="true">*</span></label>
+                    <input class="form-input{{if .Errors.volume}} is-invalid{{end}}"
+                           type="number" id="volume" name="volume"
+                           value="{{.Volume}}"
+                           min="0.001" step="0.001" required
+                           placeholder="e.g. 12.500"
+                           {{if .Errors.volume}}aria-invalid="true" {{end}}aria-describedby="volume-error">
+                    {{if .Errors.volume}}
+                    <p class="form-error" id="volume-error">{{.Errors.volume}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="cost_per_unit">Cost per Gallon <span class="required" aria-hidden="true">*</span></label>
+                    <input class="form-input{{if .Errors.cost_per_unit}} is-invalid{{end}}"
+                           type="number" id="cost_per_unit" name="cost_per_unit"
+                           value="{{.CostPerUnit}}"
+                           min="0" step="0.001" required
+                           placeholder="e.g. 3.459"
+                           {{if .Errors.cost_per_unit}}aria-invalid="true" {{end}}aria-describedby="cost-per-unit-error">
+                    {{if .Errors.cost_per_unit}}
+                    <p class="form-error" id="cost-per-unit-error">{{.Errors.cost_per_unit}}</p>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-section-title">Optional Details</h2>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="fuel_type">Fuel Type</label>
+                    <input class="form-input"
+                           type="text" id="fuel_type" name="fuel_type"
+                           value="{{.FuelType}}"
+                           placeholder="e.g. Regular, Premium, Diesel">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="brand">Brand</label>
+                    <input class="form-input"
+                           type="text" id="brand" name="brand"
+                           value="{{.Brand}}"
+                           placeholder="e.g. Shell, BP, Chevron">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label" for="location">Location</label>
+                    <input class="form-input"
+                           type="text" id="location" name="location"
+                           value="{{.Location}}"
+                           placeholder="e.g. Shell on Main St">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="city_driving_pct">City Driving %</label>
+                    <input class="form-input{{if .Errors.city_driving_pct}} is-invalid{{end}}"
+                           type="number" id="city_driving_pct" name="city_driving_pct"
+                           value="{{.CityDrivingPct}}"
+                           min="0" max="100"
+                           placeholder="e.g. 60"
+                           aria-describedby="city-driving-pct-error">
+                    {{if .Errors.city_driving_pct}}
+                    <p class="form-error" id="city-driving-pct-error">{{.Errors.city_driving_pct}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="reported_mpg">Reported MPG</label>
+                    <input class="form-input{{if .Errors.reported_mpg}} is-invalid{{end}}"
+                           type="number" id="reported_mpg" name="reported_mpg"
+                           value="{{.ReportedMPG}}"
+                           min="0" step="0.1"
+                           placeholder="e.g. 32.5"
+                           aria-describedby="reported-mpg-error">
+                    {{if .Errors.reported_mpg}}
+                    <p class="form-error" id="reported-mpg-error">{{.Errors.reported_mpg}}</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label checkbox-label">
+                    <input type="checkbox" id="partial_fuel_up" name="partial_fuel_up"{{if .PartialFuelUp}} checked{{end}}>
+                    Partial fuel up (did not fill tank completely)
+                </label>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2 class="form-section-title">Notes</h2>
+
+            <div class="form-group">
+                <label class="form-label" for="notes">Notes</label>
+                <textarea class="form-input"
+                          id="notes" name="notes"
+                          rows="4"
+                          placeholder="Any additional notes about this fill-up">{{.Notes}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Add Record</button>
+            <a href="/fuel" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{{else}}
+<div class="empty-state">
+    <h2>No Vehicles Found</h2>
+    <p class="text-muted">You need to add a vehicle before logging fuel records.</p>
+    <a href="/vehicles/new" class="btn btn-primary">Add a Vehicle</a>
+</div>
+{{end}}
+{{end}}

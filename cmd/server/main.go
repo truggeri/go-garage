@@ -68,11 +68,13 @@ func main() {
 	userRepo := repositories.NewSQLiteUserRepository(db)
 	vehicleRepo := repositories.NewSQLiteVehicleRepository(db)
 	maintenanceRepo := repositories.NewSQLiteMaintenanceRepository(db)
+	fuelRepo := repositories.NewSQLiteFuelRepository(db)
 
 	// Initialize services
 	userSvc := services.NewUserService(userRepo)
 	vehicleSvc := services.NewVehicleService(vehicleRepo)
 	maintenanceSvc := services.NewMaintenanceService(maintenanceRepo, vehicleRepo)
+	fuelSvc := services.NewFuelService(fuelRepo, vehicleRepo)
 
 	// Initialize JWT token manager
 	tokenMgr, tokenErr := auth.BuildTokenManager(cfg.JWT.Secret, auth.StandardTokenDurations())
@@ -88,6 +90,7 @@ func main() {
 	authHandler := handlers.BuildAuthHandler(authSvc)
 	vehicleHandler := handlers.MakeVehicleAPIHandler(vehicleSvc)
 	maintenanceHandler := handlers.MakeMaintenanceAPIHandler(maintenanceSvc, vehicleSvc)
+	fuelHandler := handlers.MakeFuelAPIHandler(fuelSvc, vehicleSvc)
 	userHandler := handlers.MakeUserAPIHandler(userSvc)
 
 	// Initialize template engine
@@ -98,7 +101,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc, userSvc)
+	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc, fuelSvc, userSvc)
 
 	// Setup router and routes
 	router := mux.NewRouter()
@@ -137,6 +140,12 @@ func main() {
 	protectedPages.HandleFunc("/maintenance/{id}", pageHandler.MaintenanceDetail).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceEdit).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceUpdate).Methods("POST")
+	protectedPages.HandleFunc("/fuel", pageHandler.FuelList).Methods("GET")
+	protectedPages.HandleFunc("/fuel/new", pageHandler.FuelNew).Methods("GET")
+	protectedPages.HandleFunc("/fuel/new", pageHandler.FuelCreate).Methods("POST")
+	protectedPages.HandleFunc("/fuel/{id}", pageHandler.FuelDetail).Methods("GET")
+	protectedPages.HandleFunc("/fuel/{id}/edit", pageHandler.FuelEdit).Methods("GET")
+	protectedPages.HandleFunc("/fuel/{id}/edit", pageHandler.FuelUpdate).Methods("POST")
 	protectedPages.HandleFunc("/profile", pageHandler.ViewProfile).Methods("GET")
 	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileEdit).Methods("GET")
 	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileUpdate).Methods("POST")
@@ -177,6 +186,13 @@ func main() {
 	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.GetOne).Methods("GET")
 	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.ReplaceOne).Methods("PUT")
 	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.RemoveOne).Methods("DELETE")
+
+	// Fuel routes
+	protected.HandleFunc("/vehicles/{vehicleId}/fuel", fuelHandler.ListAll).Methods("GET")
+	protected.HandleFunc("/vehicles/{vehicleId}/fuel", fuelHandler.CreateOne).Methods("POST")
+	protected.HandleFunc("/fuel/{id}", fuelHandler.GetOne).Methods("GET")
+	protected.HandleFunc("/fuel/{id}", fuelHandler.ReplaceOne).Methods("PUT")
+	protected.HandleFunc("/fuel/{id}", fuelHandler.RemoveOne).Methods("DELETE")
 
 	// User routes
 	protected.HandleFunc("/users/me", userHandler.GetMe).Methods("GET")

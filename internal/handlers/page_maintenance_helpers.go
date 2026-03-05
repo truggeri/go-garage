@@ -13,7 +13,7 @@ import (
 )
 
 // calcTotalPages returns the total number of pages for a given total count and page size.
-func calcTotalPages(total, pageSize int) int {
+func calcTotalPages(total, pageSize int) int { //nolint:unparam
 	if total == 0 {
 		return 1
 	}
