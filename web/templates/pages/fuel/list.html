@@ -6,14 +6,6 @@
     <a href="/fuel/new" class="btn btn-primary">Add Record</a>
 </div>
 
-{{if .Flash}}
-{{range .Flash}}
-<div class="flash flash-{{.Type}}" role="alert">
-    <span class="flash-text">{{.Message}}</span>
-</div>
-{{end}}
-{{end}}
-
 {{if .Vehicles}}
 <div class="filter-bar" role="search" aria-label="Filter fuel records">
     <form method="GET" action="/fuel" class="filter-form">

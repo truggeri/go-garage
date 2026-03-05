@@ -126,7 +126,30 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
   - Delete maintenance record
   - Verify ownership
 
-### 5. User API Endpoints
+### 5. Fuel API Endpoints
+
+- [x] GET /api/v1/vehicles/{vehicleId}/fuel (PR #TBD)
+  - List fuel records for a vehicle
+  - Support pagination
+
+- [x] POST /api/v1/vehicles/{vehicleId}/fuel (PR #TBD)
+  - Create fuel record
+  - Verify vehicle ownership
+  - Validate required fields (fill_date, odometer, cost_per_unit, volume)
+
+- [x] GET /api/v1/fuel/{id} (PR #TBD)
+  - Get specific fuel record
+  - Verify ownership through vehicle
+
+- [x] PUT /api/v1/fuel/{id} (PR #TBD)
+  - Update fuel record
+  - Verify ownership
+
+- [x] DELETE /api/v1/fuel/{id} (PR #TBD)
+  - Delete fuel record
+  - Verify ownership
+
+### 6. User API Endpoints
 
 - [x] GET /api/v1/users/me
   - Get current user profile
