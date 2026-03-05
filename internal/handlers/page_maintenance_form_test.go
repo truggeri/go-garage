@@ -36,6 +36,10 @@ func TestSafeIndex(t *testing.T) {
 		assert.Equal(t, "", safeIndex(slice, 100))
 	})
 
+	t.Run("returns empty string for negative index", func(t *testing.T) {
+		assert.Equal(t, "", safeIndex(slice, -1))
+	})
+
 	t.Run("returns empty string for nil slice", func(t *testing.T) {
 		assert.Equal(t, "", safeIndex(nil, 0))
 	})

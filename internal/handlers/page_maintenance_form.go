@@ -269,7 +269,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 
 // safeIndex returns the string at index i of the slice, or empty string if out of bounds.
 func safeIndex(slice []string, i int) string {
-	if i < len(slice) {
+	if i >= 0 && i < len(slice) {
 		return slice[i]
 	}
 	return ""
