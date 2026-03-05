@@ -148,7 +148,8 @@ func (s *DefaultMaintenanceService) DeleteMaintenance(ctx context.Context, id st
 }
 
 // recalculateMetrics recalculates and upserts the total_spent metric for a vehicle.
-// Errors are logged but not propagated since metrics are non-critical.
+// Errors are silently ignored since metrics are non-critical and the primary
+// maintenance operation has already succeeded.
 func (s *DefaultMaintenanceService) recalculateMetrics(ctx context.Context, vehicleID string) {
 	if s.metricsRepo == nil {
 		return

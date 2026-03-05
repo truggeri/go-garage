@@ -65,12 +65,7 @@ func (h *PageHandler) Dashboard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Read total spent from pre-computed metrics.
-	totalSpent := 0.0
-	if h.metricsRepo != nil && len(vehicleIDs) > 0 {
-		if sum, err := h.metricsRepo.SumTotalSpentByVehicleIDs(r.Context(), vehicleIDs); err == nil {
-			totalSpent = sum
-		}
-	}
+	totalSpent := h.getUserTotalSpent(r.Context(), vehicleIDs)
 
 	var allMaintenance []*models.MaintenanceRecord
 	for _, v := range vehicles {
