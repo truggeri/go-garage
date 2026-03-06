@@ -146,7 +146,8 @@ The `maintenance_records` table stores service and maintenance history for vehic
 |--------|------|-------------|-------------|
 | `id` | TEXT | PRIMARY KEY | UUID identifier for the record |
 | `vehicle_id` | TEXT | FK, NOT NULL | Reference to the vehicle |
-| `service_type` | TEXT | NOT NULL | Type of service (e.g., "Oil Change", "Tire Rotation") |
+| `service_type` | TEXT | NOT NULL | Type of service (enum value, e.g., "oil_change", "tire_rotation") |
+| `custom_service_type` | TEXT | DEFAULT '' | Custom description when service_type is "other" |
 | `service_date` | DATE | NOT NULL | Date service was performed |
 | `mileage_at_service` | INTEGER | | Odometer reading at service time |
 | `cost` | REAL | | Service cost in dollars |
@@ -209,6 +210,8 @@ The schema is managed through versioned migrations:
 | 000001 | create_users_table | Creates users table with indexes |
 | 000002 | create_vehicles_table | Creates vehicles table with FK to users |
 | 000003 | create_maintenance_records_table | Creates maintenance_records table with FK to vehicles |
+| 000004 | add_display_name_to_vehicles | Adds display_name column to vehicles table |
+| 000005 | add_custom_service_type_to_maintenance | Adds custom_service_type column to maintenance_records table |
 
 For migration management details, see [Database Migrations Guide](./database-migrations.md).
 

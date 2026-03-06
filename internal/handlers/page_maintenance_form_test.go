@@ -186,7 +186,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 	validForm := url.Values{
 		"vehicle_id":   {"v1"},
-		"service_type": {"Oil Change"},
+		"service_type": {"oil_change"},
 		"service_date": {"2024-01-15"},
 	}
 
@@ -210,7 +210,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 		form := url.Values{
 			"vehicle_id":   {"other-vehicle"},
-			"service_type": {"Oil Change"},
+			"service_type": {"oil_change"},
 			"service_date": {"2024-01-15"},
 		}
 		req := postForm(form)
@@ -228,7 +228,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 		form := url.Values{
 			"vehicle_id":   {"v1"},
-			"service_type": {"Oil Change"},
+			"service_type": {"oil_change"},
 			"service_date": {"not-a-date"},
 		}
 		req := postForm(form)
@@ -304,7 +304,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 		form := url.Values{
 			"vehicle_id":         {"v1"},
-			"service_type":       {"Oil Change"},
+			"service_type":       {"oil_change"},
 			"service_date":       {"2024-01-15"},
 			"mileage_at_service": {"45000"},
 			"cost":               {"49.99"},

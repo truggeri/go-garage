@@ -26,6 +26,8 @@ The following migrations are currently in place:
 1. **000001_create_users_table**: Creates the `users` table with indexes
 2. **000002_create_vehicles_table**: Creates the `vehicles` table with foreign key to users
 3. **000003_create_maintenance_records_table**: Creates the `maintenance_records` table with foreign key to vehicles
+4. **000004_add_display_name_to_vehicles**: Adds display_name column to the `vehicles` table
+5. **000005_add_custom_service_type_to_maintenance**: Adds custom_service_type column to the `maintenance_records` table
 
 ### Schema Evolution
 

@@ -31,7 +31,7 @@ func TestPageHandler_MaintenanceList(t *testing.T) {
 		Status: models.VehicleStatusActive,
 	}
 	baseRecord := &models.MaintenanceRecord{
-		ID: "m1", VehicleID: "v1", ServiceType: "Oil Change",
+		ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange,
 		ServiceDate: serviceDate, Cost: &cost, MileageAtService: &mileage,
 		ServiceProvider: "Quick Lube",
 	}
@@ -185,12 +185,12 @@ func TestPageHandler_MaintenanceList(t *testing.T) {
 		maintenanceStub := &stubMaintenanceSvc{
 			listResult: []*models.MaintenanceRecord{
 				baseRecord,
-				{ID: "m2", VehicleID: "v1", ServiceType: "Tire Rotation", ServiceDate: serviceDate},
+				{ID: "m2", VehicleID: "v1", ServiceType: models.ServiceTypeTireRotation, ServiceDate: serviceDate},
 			},
 		}
 		handler := newTestMaintenanceListPageHandler(t, vehicleStub, maintenanceStub)
 
-		req := httptest.NewRequest(http.MethodGet, "/maintenance?service_type=oil", nil)
+		req := httptest.NewRequest(http.MethodGet, "/maintenance?service_type=oil_change", nil)
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 

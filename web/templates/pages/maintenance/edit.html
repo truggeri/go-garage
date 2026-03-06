@@ -26,16 +26,35 @@
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label" for="service_type">Service Type <span class="required" aria-hidden="true">*</span></label>
-                    <input class="form-input{{if .Errors.service_type}} is-invalid{{end}}"
-                           type="text" id="service_type" name="service_type"
-                           value="{{.ServiceType}}"
-                           required placeholder="e.g. Oil Change"
-                           {{if .Errors.service_type}}aria-invalid="true" {{end}}aria-describedby="service-type-error">
+                    <select class="form-input{{if .Errors.service_type}} is-invalid{{end}}"
+                            id="service_type" name="service_type"
+                            required
+                            {{if .Errors.service_type}}aria-invalid="true" {{end}}aria-describedby="service-type-error">
+                        <option value="">Select a service type</option>
+                        {{range .ServiceTypes}}
+                        <option value="{{.Value}}"{{if eq $.ServiceType .Value}} selected{{end}}>{{.DisplayName}}</option>
+                        {{end}}
+                    </select>
                     {{if .Errors.service_type}}
                     <p class="form-error" id="service-type-error">{{.Errors.service_type}}</p>
                     {{end}}
                 </div>
 
+                <div class="form-group" id="custom-service-type-group"{{if ne .ServiceType "other"}} style="display: none;"{{end}}>
+                    <label class="form-label" for="custom_service_type">Custom Service Type <span class="required" aria-hidden="true">*</span></label>
+                    <input class="form-input{{if .Errors.custom_service_type}} is-invalid{{end}}"
+                           type="text" id="custom_service_type" name="custom_service_type"
+                           value="{{.CustomServiceType}}"
+                           placeholder="Describe the service type"
+                           {{if eq .ServiceType "other"}}required{{end}}
+                           {{if .Errors.custom_service_type}}aria-invalid="true" {{end}}aria-describedby="custom-service-type-error">
+                    {{if .Errors.custom_service_type}}
+                    <p class="form-error" id="custom-service-type-error">{{.Errors.custom_service_type}}</p>
+                    {{end}}
+                </div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label class="form-label" for="service_date">Service Date <span class="required" aria-hidden="true">*</span></label>
                     <input class="form-input{{if .Errors.service_date}} is-invalid{{end}}"
@@ -104,4 +123,23 @@
         </div>
     </form>
 </div>
+
+<script>
+(function() {
+    var serviceTypeSelect = document.getElementById('service_type');
+    var customGroup = document.getElementById('custom-service-type-group');
+    var customInput = document.getElementById('custom_service_type');
+    if (serviceTypeSelect && customGroup && customInput) {
+        serviceTypeSelect.addEventListener('change', function() {
+            if (this.value === 'other') {
+                customGroup.style.display = '';
+                customInput.setAttribute('required', '');
+            } else {
+                customGroup.style.display = 'none';
+                customInput.removeAttribute('required');
+            }
+        });
+    }
+})();
+</script>
 {{end}}

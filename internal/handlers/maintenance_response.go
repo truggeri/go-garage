@@ -11,10 +11,13 @@ func maintenanceToResponseMap(m *models.MaintenanceRecord) map[string]interface{
 	r := map[string]interface{}{
 		"id":           m.ID,
 		"vehicle_id":   m.VehicleID,
-		"service_type": m.ServiceType,
+		"service_type": string(m.ServiceType),
 		"service_date": m.ServiceDate.Format("2006-01-02"),
 		"created_at":   m.CreatedAt.Format(time.RFC3339),
 		"updated_at":   m.UpdatedAt.Format(time.RFC3339),
+	}
+	if m.CustomServiceType != "" {
+		r["custom_service_type"] = m.CustomServiceType
 	}
 	if m.MileageAtService != nil {
 		r["mileage_at_service"] = *m.MileageAtService

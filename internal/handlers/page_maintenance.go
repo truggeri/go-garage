@@ -24,6 +24,8 @@ type maintenanceListPageData struct {
 	Vehicles []*models.Vehicle
 	// VehicleNames maps vehicle IDs to human-readable names.
 	VehicleNames map[string]string
+	// ServiceTypes is the list of available service types for the filter dropdown.
+	ServiceTypes []serviceTypeOption
 	// TotalCount is the total number of records matching the current filters.
 	TotalCount int
 	// Page is the current page number (1-based).
@@ -89,6 +91,7 @@ func (h *PageHandler) MaintenanceList(w http.ResponseWriter, r *http.Request) {
 		Records:           records,
 		Vehicles:          userVehicles,
 		VehicleNames:      buildVehicleNameMap(userVehicles),
+		ServiceTypes:      buildServiceTypeOptions(),
 		TotalCount:        totalCount,
 		Page:              page,
 		PageSize:          maintenanceListPageSize,

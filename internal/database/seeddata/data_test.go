@@ -138,7 +138,7 @@ func TestGetSampleMaintenanceRecords(t *testing.T) {
 	// Verify there are multiple different service types
 	serviceTypes := make(map[string]bool)
 	for _, record := range records {
-		serviceTypes[record.ServiceType] = true
+		serviceTypes[string(record.ServiceType)] = true
 	}
 	assert.GreaterOrEqual(t, len(serviceTypes), 2, "Should have at least 2 different service types")
 }

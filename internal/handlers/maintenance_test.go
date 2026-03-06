@@ -72,7 +72,7 @@ func TestMaintenanceHandler_ListAll(t *testing.T) {
 		maintStub := &stubMaintenanceSvc{
 			countResult: 1,
 			listResult: []*models.MaintenanceRecord{
-				{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate},
+				{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange, ServiceDate: serviceDate},
 			},
 		}
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
@@ -146,7 +146,7 @@ func TestMaintenanceHandler_CreateOne(t *testing.T) {
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
 
 		body := map[string]interface{}{
-			"service_type": "Oil Change", "service_date": "2024-01-15",
+			"service_type": "oil_change", "service_date": "2024-01-15",
 		}
 		jsonBody, _ := json.Marshal(body)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles/v1/maintenance", bytes.NewReader(jsonBody))
@@ -169,7 +169,7 @@ func TestMaintenanceHandler_CreateOne(t *testing.T) {
 		}
 		h := MakeMaintenanceAPIHandler(&stubMaintenanceSvc{}, vehicleStub)
 
-		body := map[string]interface{}{"service_type": "Oil Change"}
+		body := map[string]interface{}{"service_type": "oil_change"}
 		jsonBody, _ := json.Marshal(body)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles/v1/maintenance", bytes.NewReader(jsonBody))
 		req = addAuthContext(req, "u1", "testuser")
@@ -184,7 +184,7 @@ func TestMaintenanceHandler_CreateOne(t *testing.T) {
 	t.Run("rejects unauthenticated request", func(t *testing.T) {
 		h := MakeMaintenanceAPIHandler(&stubMaintenanceSvc{}, &stubVehicleSvc{})
 
-		body := map[string]interface{}{"service_type": "Oil Change", "service_date": "2024-01-15"}
+		body := map[string]interface{}{"service_type": "oil_change", "service_date": "2024-01-15"}
 		jsonBody, _ := json.Marshal(body)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles/v1/maintenance", bytes.NewReader(jsonBody))
 		req = mux.SetURLVars(req, map[string]string{"vehicleId": "v1"})
@@ -201,7 +201,7 @@ func TestMaintenanceHandler_CreateOne(t *testing.T) {
 		}
 		h := MakeMaintenanceAPIHandler(&stubMaintenanceSvc{}, vehicleStub)
 
-		body := map[string]interface{}{"service_type": "Oil Change", "service_date": "2024-01-15"}
+		body := map[string]interface{}{"service_type": "oil_change", "service_date": "2024-01-15"}
 		jsonBody, _ := json.Marshal(body)
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles/v1/maintenance", bytes.NewReader(jsonBody))
 		req = addAuthContext(req, "u1", "testuser")
@@ -222,7 +222,7 @@ func TestMaintenanceHandler_GetOne(t *testing.T) {
 			getResult: &models.Vehicle{ID: "v1", UserID: "u1", VIN: "ABC12345678901234", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
 		}
 		maintStub := &stubMaintenanceSvc{
-			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate},
+			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange, ServiceDate: serviceDate},
 		}
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
 
@@ -244,7 +244,7 @@ func TestMaintenanceHandler_GetOne(t *testing.T) {
 			getResult: &models.Vehicle{ID: "v1", UserID: "other-user", VIN: "ABC12345678901234", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
 		}
 		maintStub := &stubMaintenanceSvc{
-			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate},
+			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange, ServiceDate: serviceDate},
 		}
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
 
@@ -284,12 +284,12 @@ func TestMaintenanceHandler_ReplaceOne(t *testing.T) {
 		}
 		cost := 89.99
 		maintStub := &stubMaintenanceSvc{
-			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate},
-			updateRes: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "Synthetic Oil Change", ServiceDate: serviceDate, Cost: &cost},
+			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange, ServiceDate: serviceDate},
+			updateRes: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeBrakes, ServiceDate: serviceDate, Cost: &cost},
 		}
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
 
-		body := map[string]interface{}{"service_type": "Synthetic Oil Change", "cost": 89.99}
+		body := map[string]interface{}{"service_type": "brakes", "cost": 89.99}
 		jsonBody, _ := json.Marshal(body)
 		req := httptest.NewRequest(http.MethodPut, "/api/v1/maintenance/m1", bytes.NewReader(jsonBody))
 		req = addAuthContext(req, "u1", "testuser")
@@ -309,11 +309,11 @@ func TestMaintenanceHandler_ReplaceOne(t *testing.T) {
 			getResult: &models.Vehicle{ID: "v1", UserID: "other-user", VIN: "ABC12345678901234", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
 		}
 		maintStub := &stubMaintenanceSvc{
-			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate},
+			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange, ServiceDate: serviceDate},
 		}
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
 
-		body := map[string]interface{}{"service_type": "Synthetic Oil Change"}
+		body := map[string]interface{}{"service_type": "brakes"}
 		jsonBody, _ := json.Marshal(body)
 		req := httptest.NewRequest(http.MethodPut, "/api/v1/maintenance/m1", bytes.NewReader(jsonBody))
 		req = addAuthContext(req, "u1", "testuser")
@@ -334,7 +334,7 @@ func TestMaintenanceHandler_RemoveOne(t *testing.T) {
 			getResult: &models.Vehicle{ID: "v1", UserID: "u1", VIN: "ABC12345678901234", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
 		}
 		maintStub := &stubMaintenanceSvc{
-			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate},
+			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange, ServiceDate: serviceDate},
 		}
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
 
@@ -356,7 +356,7 @@ func TestMaintenanceHandler_RemoveOne(t *testing.T) {
 			getResult: &models.Vehicle{ID: "v1", UserID: "other-user", VIN: "ABC12345678901234", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
 		}
 		maintStub := &stubMaintenanceSvc{
-			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate},
+			getResult: &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: models.ServiceTypeOilChange, ServiceDate: serviceDate},
 		}
 		h := MakeMaintenanceAPIHandler(maintStub, vehicleStub)
 
