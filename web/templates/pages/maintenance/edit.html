@@ -46,6 +46,7 @@
                            type="text" id="custom_service_type" name="custom_service_type"
                            value="{{.CustomServiceType}}"
                            placeholder="Describe the service type"
+                           {{if eq .ServiceType "other"}}required{{end}}
                            {{if .Errors.custom_service_type}}aria-invalid="true" {{end}}aria-describedby="custom-service-type-error">
                     {{if .Errors.custom_service_type}}
                     <p class="form-error" id="custom-service-type-error">{{.Errors.custom_service_type}}</p>
@@ -127,9 +128,16 @@
 (function() {
     var serviceTypeSelect = document.getElementById('service_type');
     var customGroup = document.getElementById('custom-service-type-group');
-    if (serviceTypeSelect && customGroup) {
+    var customInput = document.getElementById('custom_service_type');
+    if (serviceTypeSelect && customGroup && customInput) {
         serviceTypeSelect.addEventListener('change', function() {
-            customGroup.style.display = this.value === 'other' ? '' : 'none';
+            if (this.value === 'other') {
+                customGroup.style.display = '';
+                customInput.setAttribute('required', '');
+            } else {
+                customGroup.style.display = 'none';
+                customInput.removeAttribute('required');
+            }
         });
     }
 })();
