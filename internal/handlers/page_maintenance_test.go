@@ -199,5 +199,6 @@ func TestPageHandler_MaintenanceList(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Oil Change")
+		assert.NotContains(t, body, "Tire Rotation")
 	})
 }
