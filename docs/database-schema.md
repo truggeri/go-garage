@@ -146,7 +146,8 @@ The `maintenance_records` table stores service and maintenance history for vehic
 |--------|------|-------------|-------------|
 | `id` | TEXT | PRIMARY KEY | UUID identifier for the record |
 | `vehicle_id` | TEXT | FK, NOT NULL | Reference to the vehicle |
-| `service_type` | TEXT | NOT NULL | Type of service (e.g., "Oil Change", "Tire Rotation") |
+| `service_type` | TEXT | NOT NULL | Enum value identifying the type of service (e.g., "oil_change", "tire_rotation") |
+| `custom_service_type` | TEXT | DEFAULT '' | Custom description when service_type is "other" |
 | `service_date` | DATE | NOT NULL | Date service was performed |
 | `mileage_at_service` | INTEGER | | Odometer reading at service time |
 | `cost` | REAL | | Service cost in dollars |
