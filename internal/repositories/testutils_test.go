@@ -147,19 +147,13 @@ func runMigrations(db *sql.DB) error {
 	// Create vehicle_metrics table
 	_, err = db.Exec(`
 		CREATE TABLE IF NOT EXISTS vehicle_metrics (
-			id TEXT PRIMARY KEY,
-			vehicle_id TEXT NOT NULL UNIQUE,
+			vehicle_id TEXT PRIMARY KEY,
 			total_spent REAL,
 			created_at DATETIME NOT NULL,
 			updated_at DATETIME NOT NULL,
 			FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
 		)
 	`)
-	if err != nil {
-		return err
-	}
-
-	_, err = db.Exec(`CREATE INDEX IF NOT EXISTS idx_vehicle_metrics_vehicle_id ON vehicle_metrics(vehicle_id)`)
 	if err != nil {
 		return err
 	}

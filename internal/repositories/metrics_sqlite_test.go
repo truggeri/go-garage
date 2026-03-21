@@ -54,7 +54,6 @@ func TestMetricsRepository_Upsert(t *testing.T) {
 
 		err := metricsRepo.Upsert(ctx, metrics)
 		require.NoError(t, err)
-		assert.NotEmpty(t, metrics.ID)
 
 		result, err := metricsRepo.GetByVehicleID(ctx, vehicle.ID)
 		require.NoError(t, err)
