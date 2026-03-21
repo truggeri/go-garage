@@ -272,7 +272,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440005",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440002", // Ford Edge
-			ServiceType:      "Inspection",
+			ServiceType:      "glass",
 			ServiceDate:      serviceDate5,
 			MileageAtService: &mileage5,
 			Cost:             &cost5,
