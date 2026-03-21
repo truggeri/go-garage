@@ -120,6 +120,7 @@ func runMigrations(db *sql.DB) error {
 			id TEXT PRIMARY KEY,
 			vehicle_id TEXT NOT NULL,
 			service_type TEXT NOT NULL,
+			custom_service_type TEXT DEFAULT '',
 			service_date DATE NOT NULL,
 			mileage_at_service INTEGER,
 			cost REAL,

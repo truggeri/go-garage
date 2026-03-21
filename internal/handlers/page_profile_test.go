@@ -46,7 +46,7 @@ func TestPageHandler_ViewProfile(t *testing.T) {
 		}
 		maintenanceStub := &stubMaintenanceSvc{
 			listResult: []*models.MaintenanceRecord{
-				{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: now},
+				{ID: "m1", VehicleID: "v1", ServiceType: "oil_change", ServiceDate: now},
 			},
 		}
 		handler := newTestProfilePageHandler(t, userStub, vehicleStub, maintenanceStub)
