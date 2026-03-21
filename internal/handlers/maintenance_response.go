@@ -28,6 +28,9 @@ func maintenanceToResponseMap(m *models.MaintenanceRecord) map[string]interface{
 	if m.Notes != "" {
 		r["notes"] = m.Notes
 	}
+	if m.CustomServiceType != "" {
+		r["custom_service_type"] = m.CustomServiceType
+	}
 	return r
 }
 

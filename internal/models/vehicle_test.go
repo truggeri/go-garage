@@ -343,7 +343,7 @@ func TestValidateMaintenanceRecord(t *testing.T) {
 			name: "valid record",
 			record: &MaintenanceRecord{
 				VehicleID:   "vehicle123",
-				ServiceType: "Oil Change",
+				ServiceType: "oil_change",
 				ServiceDate: time.Now().Add(-24 * time.Hour),
 			},
 			expectError: false,
@@ -352,7 +352,7 @@ func TestValidateMaintenanceRecord(t *testing.T) {
 			name: "empty vehicle ID",
 			record: &MaintenanceRecord{
 				VehicleID:   "",
-				ServiceType: "Oil Change",
+				ServiceType: "oil_change",
 				ServiceDate: time.Now().Add(-24 * time.Hour),
 			},
 			expectError: true,
@@ -369,10 +369,40 @@ func TestValidateMaintenanceRecord(t *testing.T) {
 			errorField:  "service_type",
 		},
 		{
+			name: "invalid service type",
+			record: &MaintenanceRecord{
+				VehicleID:   "vehicle123",
+				ServiceType: "Not A Real Type",
+				ServiceDate: time.Now().Add(-24 * time.Hour),
+			},
+			expectError: true,
+			errorField:  "service_type",
+		},
+		{
+			name: "other requires custom service type",
+			record: &MaintenanceRecord{
+				VehicleID:   "vehicle123",
+				ServiceType: "other",
+				ServiceDate: time.Now().Add(-24 * time.Hour),
+			},
+			expectError: true,
+			errorField:  "custom_service_type",
+		},
+		{
+			name: "other with custom service type is valid",
+			record: &MaintenanceRecord{
+				VehicleID:         "vehicle123",
+				ServiceType:       "other",
+				CustomServiceType: "Windshield wiper replacement",
+				ServiceDate:       time.Now().Add(-24 * time.Hour),
+			},
+			expectError: false,
+		},
+		{
 			name: "zero service date",
 			record: &MaintenanceRecord{
 				VehicleID:   "vehicle123",
-				ServiceType: "Oil Change",
+				ServiceType: "oil_change",
 				ServiceDate: time.Time{},
 			},
 			expectError: true,
@@ -382,7 +412,7 @@ func TestValidateMaintenanceRecord(t *testing.T) {
 			name: "future service date",
 			record: &MaintenanceRecord{
 				VehicleID:   "vehicle123",
-				ServiceType: "Oil Change",
+				ServiceType: "oil_change",
 				ServiceDate: time.Now().Add(24 * time.Hour),
 			},
 			expectError: true,
@@ -392,7 +422,7 @@ func TestValidateMaintenanceRecord(t *testing.T) {
 			name: "negative cost",
 			record: &MaintenanceRecord{
 				VehicleID:   "vehicle123",
-				ServiceType: "Oil Change",
+				ServiceType: "oil_change",
 				ServiceDate: time.Now().Add(-24 * time.Hour),
 				Cost:        &negativeCost,
 			},
@@ -403,7 +433,7 @@ func TestValidateMaintenanceRecord(t *testing.T) {
 			name: "negative mileage",
 			record: &MaintenanceRecord{
 				VehicleID:        "vehicle123",
-				ServiceType:      "Oil Change",
+				ServiceType:      "oil_change",
 				ServiceDate:      time.Now().Add(-24 * time.Hour),
 				MileageAtService: &negativeMileage,
 			},
@@ -414,7 +444,7 @@ func TestValidateMaintenanceRecord(t *testing.T) {
 			name: "valid with all fields",
 			record: &MaintenanceRecord{
 				VehicleID:        "vehicle123",
-				ServiceType:      "Oil Change",
+				ServiceType:      "oil_change",
 				ServiceDate:      time.Now().Add(-24 * time.Hour),
 				Cost:             &cost,
 				MileageAtService: &mileage,

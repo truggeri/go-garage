@@ -136,7 +136,7 @@ func TestMaintenanceService_CreateMaintenance(t *testing.T) {
 
 		record := &models.MaintenanceRecord{
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 
@@ -152,7 +152,7 @@ func TestMaintenanceService_CreateMaintenance(t *testing.T) {
 
 		record := &models.MaintenanceRecord{
 			VehicleID:   "non-existent-vehicle",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 
@@ -173,7 +173,7 @@ func TestMaintenanceService_GetMaintenance(t *testing.T) {
 		existingRecord := &models.MaintenanceRecord{
 			ID:          "record-123",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
@@ -181,7 +181,7 @@ func TestMaintenanceService_GetMaintenance(t *testing.T) {
 
 		record, err := service.GetMaintenance(ctx, "record-123")
 		require.NoError(t, err)
-		assert.Equal(t, "Oil Change", record.ServiceType)
+		assert.Equal(t, "oil_change", record.ServiceType)
 	})
 
 	t.Run("returns not found error for non-existent record", func(t *testing.T) {
@@ -206,13 +206,13 @@ func TestMaintenanceService_GetVehicleMaintenance(t *testing.T) {
 		record1 := &models.MaintenanceRecord{
 			ID:          "record-1",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-48 * time.Hour),
 		}
 		record2 := &models.MaintenanceRecord{
 			ID:          "record-2",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Tire Rotation",
+			ServiceType: "tire_rotation",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[record1.ID] = record1
@@ -244,7 +244,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 		existingRecord := &models.MaintenanceRecord{
 			ID:          "record-123",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
@@ -269,7 +269,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 		existingRecord := &models.MaintenanceRecord{
 			ID:          "record-123",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
@@ -283,7 +283,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 		updatedRecord, err := service.UpdateMaintenance(ctx, "record-123", updates)
 		require.NoError(t, err)
 		assert.Equal(t, newServiceDate.Unix(), updatedRecord.ServiceDate.Unix())
-		assert.Equal(t, "Oil Change", updatedRecord.ServiceType) // unchanged
+		assert.Equal(t, "oil_change", updatedRecord.ServiceType) // unchanged
 	})
 
 	t.Run("partial update preserves unchanged fields", func(t *testing.T) {
@@ -293,7 +293,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 		existingRecord := &models.MaintenanceRecord{
 			ID:               "record-123",
 			VehicleID:        "vehicle-123",
-			ServiceType:      "Oil Change",
+			ServiceType:      "oil_change",
 			ServiceDate:      time.Now().Add(-24 * time.Hour),
 			MileageAtService: &mileage,
 			ServiceProvider:  "Quick Lube",
@@ -308,7 +308,7 @@ func TestMaintenanceService_UpdateMaintenance(t *testing.T) {
 
 		updatedRecord, err := service.UpdateMaintenance(ctx, "record-123", updates)
 		require.NoError(t, err)
-		assert.Equal(t, "Oil Change", updatedRecord.ServiceType)     // unchanged
+		assert.Equal(t, "oil_change", updatedRecord.ServiceType)     // unchanged
 		assert.Equal(t, "Quick Lube", updatedRecord.ServiceProvider) // unchanged
 		assert.Equal(t, 50000, *updatedRecord.MileageAtService)      // unchanged
 		assert.Equal(t, "Used synthetic oil", updatedRecord.Notes)   // updated
@@ -336,7 +336,7 @@ func TestMaintenanceService_DeleteMaintenance(t *testing.T) {
 		existingRecord := &models.MaintenanceRecord{
 			ID:          "record-123",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
@@ -372,7 +372,7 @@ func TestMaintenanceService_ListMaintenance(t *testing.T) {
 		record1 := &models.MaintenanceRecord{
 			ID:          "record-1",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.listResult = []*models.MaintenanceRecord{record1}
@@ -396,13 +396,13 @@ func TestMaintenanceService_CountMaintenance(t *testing.T) {
 		maintenanceRepo.records["record-1"] = &models.MaintenanceRecord{
 			ID:          "record-1",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records["record-2"] = &models.MaintenanceRecord{
 			ID:          "record-2",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Tire Rotation",
+			ServiceType: "tire_rotation",
 			ServiceDate: time.Now().Add(-48 * time.Hour),
 		}
 		service := NewMaintenanceService(maintenanceRepo, vehicleRepo, nil)
@@ -422,7 +422,7 @@ func TestMaintenanceService_UpdateMaintenance_AllFields(t *testing.T) {
 		existingRecord := &models.MaintenanceRecord{
 			ID:          "record-123",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord
@@ -439,7 +439,7 @@ func TestMaintenanceService_UpdateMaintenance_AllFields(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, 75000, *updatedRecord.MileageAtService)
 		assert.Equal(t, "New Provider", updatedRecord.ServiceProvider)
-		assert.Equal(t, "Oil Change", updatedRecord.ServiceType) // unchanged
+		assert.Equal(t, "oil_change", updatedRecord.ServiceType) // unchanged
 	})
 
 	t.Run("returns error on update failure", func(t *testing.T) {
@@ -448,7 +448,7 @@ func TestMaintenanceService_UpdateMaintenance_AllFields(t *testing.T) {
 		existingRecord := &models.MaintenanceRecord{
 			ID:          "record-123",
 			VehicleID:   "vehicle-123",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		maintenanceRepo.records[existingRecord.ID] = existingRecord

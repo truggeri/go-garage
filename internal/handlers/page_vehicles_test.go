@@ -372,7 +372,7 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 	t.Run("renders vehicle detail page for authenticated user", func(t *testing.T) {
 		maintenanceStub := &stubMaintenanceSvc{
 			listResult: []*models.MaintenanceRecord{
-				{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate, Cost: &cost},
+				{ID: "m1", VehicleID: "v1", ServiceType: "oil_change", ServiceDate: serviceDate, Cost: &cost},
 			},
 		}
 		handler := newTestVehicleDetailPageHandler(t, &stubVehicleSvc{}, maintenanceStub)

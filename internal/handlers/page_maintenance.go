@@ -36,6 +36,8 @@ type maintenanceListPageData struct {
 	FilterVehicleID string
 	// FilterServiceType is the current service type filter value.
 	FilterServiceType string
+	// ServiceTypes is the list of valid service type enum values for filter dropdown.
+	ServiceTypes []models.ServiceType
 }
 
 const maintenanceListPageSize = 15
@@ -95,6 +97,7 @@ func (h *PageHandler) MaintenanceList(w http.ResponseWriter, r *http.Request) {
 		TotalPages:        calcTotalPages(totalCount, maintenanceListPageSize),
 		FilterVehicleID:   filterVehicleID,
 		FilterServiceType: filterServiceType,
+		ServiceTypes:      models.AllServiceTypes(),
 	}
 
 	if r.URL.Query().Get("added") == queryTrue {

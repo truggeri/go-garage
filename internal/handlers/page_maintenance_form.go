@@ -17,13 +17,14 @@ const maxBulkRecords = 50
 // maintenanceRecordFormEntry holds the form values and per-record validation errors
 // for a single maintenance record in the bulk creation form.
 type maintenanceRecordFormEntry struct {
-	ServiceType      string
-	ServiceDate      string
-	MileageAtService string
-	Cost             string
-	ServiceProvider  string
-	Notes            string
-	Errors           map[string]string
+	ServiceType       string
+	CustomServiceType string
+	ServiceDate       string
+	MileageAtService  string
+	Cost              string
+	ServiceProvider   string
+	Notes             string
+	Errors            map[string]string
 }
 
 // maintenanceNewPageData holds the data passed to the add-maintenance template.
@@ -47,6 +48,8 @@ type maintenanceNewPageData struct {
 	VehicleID string
 	// Records holds the form values and per-record errors for each maintenance record entry.
 	Records []maintenanceRecordFormEntry
+	// ServiceTypes is the list of valid service type enum values for dropdowns.
+	ServiceTypes []models.ServiceType
 }
 
 // maintenanceNewFormResult holds the parsed results of the add-maintenance form.
@@ -124,6 +127,7 @@ func (h *PageHandler) MaintenanceNew(w http.ResponseWriter, r *http.Request) {
 		VehicleID:       vehicleID,
 		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 		Records:         []maintenanceRecordFormEntry{{Errors: make(map[string]string)}},
+		ServiceTypes:    models.AllServiceTypes(),
 	}
 
 	if err := h.engine.Render(w, "maintenance/new.html", "base", data); err != nil {
@@ -155,6 +159,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 
 	// Read array form values for multiple records.
 	serviceTypes := r.Form["service_type"]
+	customServiceTypes := r.Form["custom_service_type"]
 	serviceDates := r.Form["service_date"]
 	mileages := r.Form["mileage_at_service"]
 	costs := r.Form["cost"]
@@ -173,13 +178,14 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 	records := make([]maintenanceRecordFormEntry, count)
 	for i := range records {
 		records[i] = maintenanceRecordFormEntry{
-			ServiceType:      safeIndex(serviceTypes, i),
-			ServiceDate:      safeIndex(serviceDates, i),
-			MileageAtService: safeIndex(mileages, i),
-			Cost:             safeIndex(costs, i),
-			ServiceProvider:  safeIndex(providers, i),
-			Notes:            safeIndex(notesArr, i),
-			Errors:           make(map[string]string),
+			ServiceType:       safeIndex(serviceTypes, i),
+			CustomServiceType: safeIndex(customServiceTypes, i),
+			ServiceDate:       safeIndex(serviceDates, i),
+			MileageAtService:  safeIndex(mileages, i),
+			Cost:              safeIndex(costs, i),
+			ServiceProvider:   safeIndex(providers, i),
+			Notes:             safeIndex(notesArr, i),
+			Errors:            make(map[string]string),
 		}
 	}
 
@@ -198,6 +204,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 			CSRFToken:       middleware.GetCSRFToken(r.Context()),
 			VehicleID:       vehicleID,
 			Records:         records,
+			ServiceTypes:    models.AllServiceTypes(),
 		}
 		_ = h.engine.Render(w, "maintenance/new.html", "base", data)
 	}
@@ -214,6 +221,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 	for i := range records {
 		entry := &records[i]
 		entry.ServiceType = strings.TrimSpace(entry.ServiceType)
+		entry.CustomServiceType = strings.TrimSpace(entry.CustomServiceType)
 		entry.ServiceProvider = strings.TrimSpace(entry.ServiceProvider)
 
 		parseResult := parseMaintenanceNewForm(entry.ServiceDate, entry.MileageAtService, entry.Cost)
@@ -225,14 +233,20 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 			continue
 		}
 
+		customServiceType := ""
+		if models.ServiceType(entry.ServiceType) == models.ServiceTypeOther {
+			customServiceType = entry.CustomServiceType
+		}
+
 		record := &models.MaintenanceRecord{
-			VehicleID:        vehicleID,
-			ServiceType:      entry.ServiceType,
-			ServiceDate:      parseResult.ServiceDate,
-			MileageAtService: parseResult.MileageAtService,
-			Cost:             parseResult.Cost,
-			ServiceProvider:  entry.ServiceProvider,
-			Notes:            entry.Notes,
+			VehicleID:         vehicleID,
+			ServiceType:       entry.ServiceType,
+			CustomServiceType: customServiceType,
+			ServiceDate:       parseResult.ServiceDate,
+			MileageAtService:  parseResult.MileageAtService,
+			Cost:              parseResult.Cost,
+			ServiceProvider:   entry.ServiceProvider,
+			Notes:             entry.Notes,
 		}
 
 		if valErr := models.ValidateMaintenanceRecord(record); valErr != nil {

@@ -102,6 +102,23 @@
                 }
             });
 
+            // Reset select elements to their first option.
+            var selects = newCard.querySelectorAll("select");
+            selects.forEach(function (sel) {
+                sel.selectedIndex = 0;
+            });
+
+            // Hide custom service type group and remove required.
+            var customGroup = newCard.querySelector(".custom-service-type-group");
+            if (customGroup) {
+                customGroup.classList.add("hidden");
+                var customInput = customGroup.querySelector("input");
+                if (customInput) {
+                    customInput.removeAttribute("required");
+                    customInput.value = "";
+                }
+            }
+
             // Remove any server-rendered error messages.
             var errors = newCard.querySelectorAll(".form-error");
             errors.forEach(function (el) {
@@ -148,8 +165,8 @@
             container.appendChild(newCard);
             updateRecordNumbers();
 
-            // Focus the first text input in the new card.
-            var firstInput = newCard.querySelector("input[type='text']");
+            // Focus the first select or text input in the new card.
+            var firstInput = newCard.querySelector("select, input[type='text']");
             if (firstInput) {
                 firstInput.focus();
             }

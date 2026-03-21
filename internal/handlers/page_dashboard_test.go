@@ -34,7 +34,7 @@ func TestPageHandler_Dashboard(t *testing.T) {
 		}
 		maintenanceStub := &stubMaintenanceSvc{
 			listResult: []*models.MaintenanceRecord{
-				{ID: "m1", VehicleID: "v1", ServiceType: "Oil Change", ServiceDate: serviceDate, Cost: &cost},
+				{ID: "m1", VehicleID: "v1", ServiceType: "oil_change", ServiceDate: serviceDate, Cost: &cost},
 			},
 		}
 		handler := newTestDashboardPageHandler(t, vehicleStub, maintenanceStub)

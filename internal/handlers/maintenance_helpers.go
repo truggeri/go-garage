@@ -23,6 +23,12 @@ func buildNewMaintenanceRecord(d map[string]interface{}, vehicleID string) (*mod
 		ServiceDate: serviceDate,
 	}
 
+	if models.ServiceType(serviceType) == models.ServiceTypeOther {
+		if v, ok := d["custom_service_type"].(string); ok {
+			rec.CustomServiceType = v
+		}
+	}
+
 	if v, ok := d["mileage_at_service"].(float64); ok {
 		i := int(v)
 		rec.MileageAtService = &i
@@ -37,6 +43,10 @@ func buildNewMaintenanceRecord(d map[string]interface{}, vehicleID string) (*mod
 		rec.Notes = v
 	}
 
+	if err := models.ValidateMaintenanceRecord(rec); err != nil {
+		return nil, err
+	}
+
 	return rec, nil
 }
 
@@ -45,6 +55,14 @@ func extractMaintenanceChanges(d map[string]interface{}) (services.MaintenanceUp
 	var u services.MaintenanceUpdates
 	if v, ok := d["service_type"].(string); ok && v != "" {
 		u.ServiceType = &v
+		if models.ServiceType(v) == models.ServiceTypeOther {
+			if cst, cstOK := d["custom_service_type"].(string); cstOK {
+				u.CustomServiceType = &cst
+			}
+		} else {
+			empty := ""
+			u.CustomServiceType = &empty
+		}
 	}
 	if v, ok := d["service_date"].(string); ok && v != "" {
 		t, err := time.Parse("2006-01-02", v)
