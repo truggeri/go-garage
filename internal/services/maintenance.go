@@ -34,13 +34,13 @@ type MaintenanceService interface {
 
 // MaintenanceUpdates contains the fields that can be updated for a maintenance record
 type MaintenanceUpdates struct {
-	ServiceType      *string
+	ServiceType       *string
 	CustomServiceType *string
-	ServiceDate      *time.Time
-	MileageAtService *int
-	Cost             *float64
-	ServiceProvider  *string
-	Notes            *string
+	ServiceDate       *time.Time
+	MileageAtService  *int
+	Cost              *float64
+	ServiceProvider   *string
+	Notes             *string
 }
 
 // DefaultMaintenanceService implements MaintenanceService using a MaintenanceRepository
