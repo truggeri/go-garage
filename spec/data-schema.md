@@ -48,6 +48,17 @@ Stores maintenance and service records for each vehicle.
 - notes
 - created_at, updated_at
 
+### Vehicle Metrics Table
+
+Stores aggregated metrics for each vehicle, updated automatically when maintenance records change.
+
+**Fields:**
+
+- id (primary key)
+- vehicle_id (foreign key to Vehicles, unique)
+- total_spent (sum of maintenance costs, nullable)
+- created_at, updated_at
+
 ### Fuel Records Table
 
 Stores fuel fill-up records for each vehicle.
@@ -72,6 +83,7 @@ Stores fuel fill-up records for each vehicle.
 - **Users → Vehicles**: One-to-Many (a user can own multiple vehicles)
 - **Vehicles → Maintenance Records**: One-to-Many (a vehicle can have multiple maintenance records)
 - **Vehicles → Fuel Records**: One-to-Many (a vehicle can have multiple fuel records)
+- **Vehicles → Vehicle Metrics**: One-to-One (each vehicle has one metrics record)
 
 ## Indexes
 
@@ -79,6 +91,7 @@ Stores fuel fill-up records for each vehicle.
 - Vehicles: index on user_id, vin
 - Maintenance Records: index on vehicle_id, service_date
 - Fuel Records: index on vehicle_id, fill_date
+- Vehicle Metrics: index on vehicle_id
 
 ## Constraints
 

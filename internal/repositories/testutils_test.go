@@ -144,5 +144,19 @@ func runMigrations(db *sql.DB) error {
 		return err
 	}
 
+	// Create vehicle_metrics table
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS vehicle_metrics (
+			vehicle_id TEXT PRIMARY KEY,
+			total_spent REAL,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+		)
+	`)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

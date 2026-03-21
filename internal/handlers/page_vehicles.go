@@ -332,11 +332,9 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 
 	// Compute statistics.
 	stats := vehicleStats{MaintenanceCount: len(allMaintenance)}
-	for _, rec := range allMaintenance {
-		if rec.Cost != nil {
-			stats.TotalMaintenanceCost += *rec.Cost
-		}
-	}
+
+	// Read total maintenance cost from pre-computed metrics.
+	stats.TotalMaintenanceCost = h.getVehicleTotalSpent(r.Context(), vehicle.ID)
 	if len(allMaintenance) > 0 {
 		d := allMaintenance[0].ServiceDate
 		stats.LastMaintenanceDate = &d
