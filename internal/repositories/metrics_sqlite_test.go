@@ -199,7 +199,7 @@ func TestMaintenanceRepository_SumCostByVehicleID(t *testing.T) {
 	t.Run("returns nil when records have no cost", func(t *testing.T) {
 		record := &models.MaintenanceRecord{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Inspection",
+			ServiceType: "tire_rotation",
 			ServiceDate: time.Date(2024, 1, 15, 0, 0, 0, 0, time.UTC),
 		}
 		require.NoError(t, maintenanceRepo.Create(ctx, record))
@@ -214,13 +214,13 @@ func TestMaintenanceRepository_SumCostByVehicleID(t *testing.T) {
 		cost2 := 150.00
 		record1 := &models.MaintenanceRecord{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Date(2024, 2, 15, 0, 0, 0, 0, time.UTC),
 			Cost:        &cost1,
 		}
 		record2 := &models.MaintenanceRecord{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Brake Pad Replace",
+			ServiceType: "brakes",
 			ServiceDate: time.Date(2024, 3, 15, 0, 0, 0, 0, time.UTC),
 			Cost:        &cost2,
 		}
