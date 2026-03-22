@@ -42,7 +42,7 @@ func TestMaintenanceRepository_Create(t *testing.T) {
 	t.Run("create valid maintenance record", func(t *testing.T) {
 		record := &models.MaintenanceRecord{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 
@@ -59,7 +59,7 @@ func TestMaintenanceRepository_Create(t *testing.T) {
 
 		record := &models.MaintenanceRecord{
 			VehicleID:        vehicle.ID,
-			ServiceType:      "Tire Rotation",
+			ServiceType:      "tire_rotation",
 			ServiceDate:      time.Now().Add(-48 * time.Hour),
 			Cost:             &cost,
 			MileageAtService: &mileage,
@@ -75,7 +75,7 @@ func TestMaintenanceRepository_Create(t *testing.T) {
 	t.Run("invalid vehicle ID", func(t *testing.T) {
 		record := &models.MaintenanceRecord{
 			VehicleID:   "non-existent-vehicle",
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 
@@ -133,7 +133,7 @@ func TestMaintenanceRepository_FindByID(t *testing.T) {
 
 		record := &models.MaintenanceRecord{
 			VehicleID:        vehicle.ID,
-			ServiceType:      "Brake Service",
+			ServiceType:      "brakes",
 			ServiceDate:      time.Now().Add(-72 * time.Hour),
 			Cost:             &cost,
 			MileageAtService: &mileage,
@@ -205,7 +205,7 @@ func TestMaintenanceRepository_FindByVehicleID(t *testing.T) {
 		// Create maintenance records for vehicle1
 		record1 := &models.MaintenanceRecord{
 			VehicleID:   vehicle1.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 		err := maintenanceRepo.Create(ctx, record1)
@@ -213,7 +213,7 @@ func TestMaintenanceRepository_FindByVehicleID(t *testing.T) {
 
 		record2 := &models.MaintenanceRecord{
 			VehicleID:   vehicle1.ID,
-			ServiceType: "Tire Rotation",
+			ServiceType: "tire_rotation",
 			ServiceDate: time.Now().Add(-48 * time.Hour),
 		}
 		err = maintenanceRepo.Create(ctx, record2)
@@ -222,7 +222,7 @@ func TestMaintenanceRepository_FindByVehicleID(t *testing.T) {
 		// Create record for vehicle2
 		record3 := &models.MaintenanceRecord{
 			VehicleID:   vehicle2.ID,
-			ServiceType: "Inspection",
+			ServiceType: "glass",
 			ServiceDate: time.Now().Add(-72 * time.Hour),
 		}
 		err = maintenanceRepo.Create(ctx, record3)
@@ -285,7 +285,7 @@ func TestMaintenanceRepository_Update(t *testing.T) {
 		cost := 100.0
 		record := &models.MaintenanceRecord{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 			Cost:        &cost,
 		}
@@ -319,7 +319,7 @@ func TestMaintenanceRepository_Update(t *testing.T) {
 		record := &models.MaintenanceRecord{
 			ID:          "non-existent",
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 
@@ -361,7 +361,7 @@ func TestMaintenanceRepository_Delete(t *testing.T) {
 	t.Run("delete existing record", func(t *testing.T) {
 		record := &models.MaintenanceRecord{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 
@@ -415,7 +415,7 @@ func TestMaintenanceRepository_Update_ValidationError(t *testing.T) {
 	t.Run("update with validation error", func(t *testing.T) {
 		record := &models.MaintenanceRecord{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		}
 
@@ -460,17 +460,17 @@ func TestMaintenanceRepository_Count(t *testing.T) {
 	records := []*models.MaintenanceRecord{
 		{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		},
 		{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-48 * time.Hour),
 		},
 		{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Tire Rotation",
+			ServiceType: "tire_rotation",
 			ServiceDate: time.Now().Add(-72 * time.Hour),
 		},
 	}
@@ -493,7 +493,7 @@ func TestMaintenanceRepository_Count(t *testing.T) {
 	})
 
 	t.Run("count with service type filter", func(t *testing.T) {
-		serviceType := "Oil Change"
+		serviceType := "oil_change"
 		count, err := maintenanceRepo.Count(ctx, MaintenanceFilters{ServiceType: &serviceType})
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, count, 2)
@@ -533,17 +533,17 @@ func TestMaintenanceRepository_List(t *testing.T) {
 	records := []*models.MaintenanceRecord{
 		{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-24 * time.Hour),
 		},
 		{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Oil Change",
+			ServiceType: "oil_change",
 			ServiceDate: time.Now().Add(-48 * time.Hour),
 		},
 		{
 			VehicleID:   vehicle.ID,
-			ServiceType: "Tire Rotation",
+			ServiceType: "tire_rotation",
 			ServiceDate: time.Now().Add(-72 * time.Hour),
 		},
 	}
@@ -560,12 +560,12 @@ func TestMaintenanceRepository_List(t *testing.T) {
 	})
 
 	t.Run("filter by service type", func(t *testing.T) {
-		serviceType := "Oil Change"
+		serviceType := "oil_change"
 		result, err := maintenanceRepo.List(ctx, MaintenanceFilters{ServiceType: &serviceType}, PaginationParams{})
 		require.NoError(t, err)
 		assert.GreaterOrEqual(t, len(result), 2)
 		for _, r := range result {
-			assert.Equal(t, "Oil Change", r.ServiceType)
+			assert.Equal(t, "oil_change", r.ServiceType)
 		}
 	})
 
@@ -626,7 +626,7 @@ func TestMaintenanceRepository_CascadeDelete(t *testing.T) {
 	// Create maintenance records
 	record := &models.MaintenanceRecord{
 		VehicleID:   vehicle.ID,
-		ServiceType: "Oil Change",
+		ServiceType: "oil_change",
 		ServiceDate: time.Now().Add(-24 * time.Hour),
 	}
 	err = maintenanceRepo.Create(ctx, record)

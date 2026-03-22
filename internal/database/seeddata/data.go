@@ -224,7 +224,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440001",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440001", // Honda Accord
-			ServiceType:      "Oil Change",
+			ServiceType:      "oil_change",
 			ServiceDate:      serviceDate1,
 			MileageAtService: &mileage1,
 			Cost:             &cost1,
@@ -236,7 +236,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440002",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440001", // Honda Accord
-			ServiceType:      "Tire Rotation",
+			ServiceType:      "tire_rotation",
 			ServiceDate:      serviceDate2,
 			MileageAtService: &mileage2,
 			Cost:             &cost2,
@@ -248,7 +248,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440003",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440001", // Honda Accord
-			ServiceType:      "Brake Service",
+			ServiceType:      "brakes",
 			ServiceDate:      serviceDate3,
 			MileageAtService: &mileage3,
 			Cost:             &cost3,
@@ -260,7 +260,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440004",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440002", // Ford Edge
-			ServiceType:      "Oil Change",
+			ServiceType:      "oil_change",
 			ServiceDate:      serviceDate4,
 			MileageAtService: &mileage4,
 			Cost:             &cost4,
@@ -272,7 +272,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440005",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440002", // Ford Edge
-			ServiceType:      "Inspection",
+			ServiceType:      "glass",
 			ServiceDate:      serviceDate5,
 			MileageAtService: &mileage5,
 			Cost:             &cost5,
@@ -284,7 +284,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440006",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440003", // Toyota Corolla
-			ServiceType:      "Brake Service",
+			ServiceType:      "brakes",
 			ServiceDate:      serviceDate6,
 			MileageAtService: &mileage6,
 			Cost:             &cost6,
@@ -296,7 +296,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440007",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440003", // Toyota Corolla
-			ServiceType:      "Tire Rotation",
+			ServiceType:      "tire_rotation",
 			ServiceDate:      serviceDate7,
 			MileageAtService: &mileage7,
 			Cost:             &cost7,
@@ -308,7 +308,7 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		{
 			ID:               "770e8400-e29b-41d4-a716-446655440008",
 			VehicleID:        "660e8400-e29b-41d4-a716-446655440005", // Chevrolet Malibu
-			ServiceType:      "Oil Change",
+			ServiceType:      "oil_change",
 			ServiceDate:      serviceDate8,
 			MileageAtService: &mileage8,
 			Cost:             &cost8,

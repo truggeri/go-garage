@@ -20,10 +20,12 @@
         </div>
         <div class="filter-group">
             <label for="filter-service-type" class="filter-label">Service Type</label>
-            <input type="text" id="filter-service-type" name="service_type"
-                   value="{{.FilterServiceType}}"
-                   placeholder="Filter by service type"
-                   class="form-input filter-input">
+            <select id="filter-service-type" name="service_type" class="form-input filter-input">
+                <option value="">All Types</option>
+                {{range .ServiceTypes}}
+                <option value="{{.}}"{{if eq (print .) $.FilterServiceType}} selected{{end}}>{{serviceTypeDisplayName (print .)}}</option>
+                {{end}}
+            </select>
         </div>
         <button type="submit" class="btn btn-secondary">Filter</button>
         {{if or .FilterVehicleID .FilterServiceType}}
@@ -49,7 +51,7 @@
     <tbody>
         {{range .Records}}
         <tr>
-            <td data-label="Service Type"><a href="/maintenance/{{.ID}}">{{.ServiceType}}</a></td>
+            <td data-label="Service Type"><a href="/maintenance/{{.ID}}">{{serviceTypeDisplayName .ServiceType}}{{if .CustomServiceType}} ({{.CustomServiceType}}){{end}}</a></td>
             <td data-label="Vehicle"><a href="/maintenance/{{.ID}}">{{index $.VehicleNames .VehicleID}}</a></td>
             <td data-label="Date"><a href="/maintenance/{{.ID}}">{{formatDate .ServiceDate}}</a></td>
             <td data-label="Mileage"><a href="/maintenance/{{.ID}}">{{formatMileagePtr .MileageAtService}}</a></td>

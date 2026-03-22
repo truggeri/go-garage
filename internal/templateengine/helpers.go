@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"github.com/truggeri/go-garage/internal/models"
 )
 
 // emDash is the em-dash character used as a nil placeholder in formatted output.
@@ -15,22 +17,23 @@ const emDash = "—"
 // buildFuncMap returns a FuncMap containing all helper functions available in templates.
 func buildFuncMap() template.FuncMap {
 	return template.FuncMap{
-		"formatDate":        formatDate,
-		"formatDatePtr":     formatDatePtr,
-		"formatDateTime":    formatDateTime,
-		"formatCurrency":    formatCurrency,
-		"formatCurrencyPtr": formatCurrencyPtr,
-		"formatMileage":     formatMileage,
-		"formatMileagePtr":  formatMileagePtr,
-		"toUpper":           strings.ToUpper,
-		"toLower":           strings.ToLower,
-		"toTitle":           titleCase,
-		"currentYear":       currentYear,
-		"seq":               seq,
-		"add":               add,
-		"sub":               sub,
-		"safeHTML":          safeHTML,
-		"urlEncode":         url.QueryEscape,
+		"formatDate":             formatDate,
+		"formatDatePtr":          formatDatePtr,
+		"formatDateTime":         formatDateTime,
+		"formatCurrency":         formatCurrency,
+		"formatCurrencyPtr":      formatCurrencyPtr,
+		"formatMileage":          formatMileage,
+		"formatMileagePtr":       formatMileagePtr,
+		"toUpper":                strings.ToUpper,
+		"toLower":                strings.ToLower,
+		"toTitle":                titleCase,
+		"currentYear":            currentYear,
+		"seq":                    seq,
+		"add":                    add,
+		"sub":                    sub,
+		"safeHTML":               safeHTML,
+		"urlEncode":              url.QueryEscape,
+		"serviceTypeDisplayName": serviceTypeDisplayName,
 	}
 }
 
@@ -166,4 +169,9 @@ func titleCase(s string) string {
 		prev = r
 		return r
 	}, s)
+}
+
+// serviceTypeDisplayName returns the human-readable display name for a service type enum value.
+func serviceTypeDisplayName(s string) string {
+	return models.ServiceTypeDisplayName(s)
 }

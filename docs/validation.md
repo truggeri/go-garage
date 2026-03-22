@@ -239,6 +239,8 @@ if err != nil {
 |-------|------|---------------|
 | `vehicle_id` | Required | "vehicle ID is required" |
 | `service_type` | Required | "service type is required" |
+| `service_type` | Must be a valid enum value | "invalid service type" |
+| `custom_service_type` | Required when `service_type` is "other" | "custom service type is required when service type is Other" |
 | `service_date` | Required (non-zero) | "service date is required" |
 | `service_date` | Not in the future | "service date cannot be in the future" |
 | `cost` | Non-negative if provided | "cost cannot be negative" |
@@ -246,21 +248,26 @@ if err != nil {
 
 ### Service Types
 
-While `service_type` is a free-form text field, common values include:
-- Oil Change
-- Tire Rotation
-- Brake Inspection
-- Brake Replacement
-- Tire Replacement
-- Battery Replacement
-- Air Filter
-- Transmission Service
-- Coolant Flush
-- Wheel Alignment
-- State Inspection
-- Emissions Test
-- General Maintenance
-- Repair
+The `service_type` field must be one of the following predefined enum values:
+
+| Enum Value | Display Name |
+|-----------|-------------|
+| `oil_change` | Oil Change |
+| `tire_rotation` | Tire Rotation |
+| `air_filter` | Air Filter |
+| `cabin_air_filter` | Cabin Air Filter |
+| `fuel_additive` | Fuel Additive |
+| `battery` | Battery |
+| `brakes` | Brakes |
+| `brake_fluid` | Brake Fluid |
+| `radiator_fluid` | Radiator Fluid |
+| `tires` | Tires |
+| `glass` | Glass |
+| `body_work` | Body Work |
+| `interior` | Interior |
+| `other` | Other |
+
+When `service_type` is `"other"`, the `custom_service_type` field must be provided with a description of the service.
 
 ### Service Date
 
