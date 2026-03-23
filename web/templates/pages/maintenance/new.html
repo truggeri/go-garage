@@ -1,8 +1,8 @@
-{{define "title"}}Add Maintenance Record - Go-Garage{{end}}
+{{define "title"}}Add Maintenance Records - Go-Garage{{end}}
 
 {{define "content"}}
 <div class="page-header">
-    <h1>Add Maintenance Record</h1>
+    <h1>Add Maintenance Records</h1>
     <a href="/maintenance" class="btn btn-secondary">Cancel</a>
 </div>
 
@@ -13,109 +13,132 @@
 {{end}}
 
 {{if .Vehicles}}
-<div class="card">
-    <form method="POST" action="/maintenance/new" novalidate>
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-        <div class="form-section">
-            <h2 class="form-section-title">Record Details</h2>
+<form method="POST" action="/maintenance/new" id="bulk-maintenance-form" novalidate>
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
 
-            <div class="form-group">
-                <label class="form-label" for="vehicle_id">Vehicle <span class="required" aria-hidden="true">*</span></label>
-                <select class="form-input{{if .Errors.vehicle_id}} is-invalid{{end}}"
-                        id="vehicle_id" name="vehicle_id"
-                        required
-                        {{if .Errors.vehicle_id}}aria-invalid="true" {{end}}aria-describedby="vehicle-error">
-                    <option value="">Select a vehicle</option>
-                    {{range .Vehicles}}
-                    <option value="{{.ID}}"{{if eq $.VehicleID .ID}} selected{{end}}>{{index $.VehicleNames .ID}}</option>
-                    {{end}}
-                </select>
-                {{if .Errors.vehicle_id}}
-                <p class="form-error" id="vehicle-error">{{.Errors.vehicle_id}}</p>
+    <div class="card">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" for="vehicle_id">Vehicle <span class="required" aria-hidden="true">*</span></label>
+            <select class="form-input{{if .Errors.vehicle_id}} is-invalid{{end}}"
+                    id="vehicle_id" name="vehicle_id"
+                    required
+                    {{if .Errors.vehicle_id}}aria-invalid="true" {{end}}aria-describedby="vehicle-error">
+                <option value="">Select a vehicle</option>
+                {{range .Vehicles}}
+                <option value="{{.ID}}"{{if eq $.VehicleID .ID}} selected{{end}}>{{index $.VehicleNames .ID}}</option>
+                {{end}}
+            </select>
+            {{if .Errors.vehicle_id}}
+            <p class="form-error" id="vehicle-error">{{.Errors.vehicle_id}}</p>
+            {{end}}
+        </div>
+    </div>
+
+    <div id="records-container">
+        {{range $i, $rec := .Records}}
+        <div class="card record-card">
+            <div class="card-header card-header--flex record-card-header">
+                <h3 class="card-title record-title">Record #{{add $i 1}}</h3>
+                {{if gt $i 0}}
+                <button type="button" class="btn btn-secondary btn-sm record-remove-btn">Remove</button>
                 {{end}}
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="service_type">Service Type <span class="required" aria-hidden="true">*</span></label>
-                    <input class="form-input{{if .Errors.service_type}} is-invalid{{end}}"
-                           type="text" id="service_type" name="service_type"
-                           value="{{.ServiceType}}"
-                           required placeholder="e.g. Oil Change"
-                           {{if .Errors.service_type}}aria-invalid="true" {{end}}aria-describedby="service-type-error">
-                    {{if .Errors.service_type}}
-                    <p class="form-error" id="service-type-error">{{.Errors.service_type}}</p>
+                    <label class="form-label" for="service_type_{{$i}}">Service Type <span class="required" aria-hidden="true">*</span></label>
+                    <select class="form-input{{if index $rec.Errors "service_type"}} is-invalid{{end}}"
+                           id="service_type_{{$i}}" name="service_type"
+                           required
+                           {{if index $rec.Errors "service_type"}}aria-invalid="true" {{end}}aria-describedby="service-type-error-{{$i}}">
+                        <option value="">Select a service type</option>
+                        {{range $.ServiceTypes}}
+                        <option value="{{.}}"{{if eq (print .) $rec.ServiceType}} selected{{end}}>{{serviceTypeDisplayName (print .)}}</option>
+                        {{end}}
+                    </select>
+                    {{if index $rec.Errors "service_type"}}
+                    <p class="form-error" id="service-type-error-{{$i}}">{{index $rec.Errors "service_type"}}</p>
+                    {{end}}
+                </div>
+
+                <div class="form-group custom-service-type-group{{if ne $rec.ServiceType "other"}} hidden{{end}}">
+                    <label class="form-label" for="custom_service_type_{{$i}}">Custom Service Type <span class="required" aria-hidden="true">*</span></label>
+                    <input class="form-input{{if index $rec.Errors "custom_service_type"}} is-invalid{{end}}"
+                           type="text" id="custom_service_type_{{$i}}" name="custom_service_type"
+                           value="{{$rec.CustomServiceType}}"
+                           {{if eq $rec.ServiceType "other"}}required {{end}}placeholder="Describe the service"
+                           {{if index $rec.Errors "custom_service_type"}}aria-invalid="true" {{end}}aria-describedby="custom-service-type-error-{{$i}}">
+                    {{if index $rec.Errors "custom_service_type"}}
+                    <p class="form-error" id="custom-service-type-error-{{$i}}">{{index $rec.Errors "custom_service_type"}}</p>
                     {{end}}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="service_date">Service Date <span class="required" aria-hidden="true">*</span></label>
-                    <input class="form-input{{if .Errors.service_date}} is-invalid{{end}}"
-                           type="date" id="service_date" name="service_date"
-                           value="{{.ServiceDate}}"
+                    <label class="form-label" for="service_date_{{$i}}">Service Date <span class="required" aria-hidden="true">*</span></label>
+                    <input class="form-input{{if index $rec.Errors "service_date"}} is-invalid{{end}}"
+                           type="date" id="service_date_{{$i}}" name="service_date"
+                           value="{{$rec.ServiceDate}}"
                            required
-                           {{if .Errors.service_date}}aria-invalid="true" {{end}}aria-describedby="service-date-error">
-                    {{if .Errors.service_date}}
-                    <p class="form-error" id="service-date-error">{{.Errors.service_date}}</p>
+                           {{if index $rec.Errors "service_date"}}aria-invalid="true" {{end}}aria-describedby="service-date-error-{{$i}}">
+                    {{if index $rec.Errors "service_date"}}
+                    <p class="form-error" id="service-date-error-{{$i}}">{{index $rec.Errors "service_date"}}</p>
                     {{end}}
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="mileage_at_service">Mileage at Service</label>
-                    <input class="form-input{{if .Errors.mileage_at_service}} is-invalid{{end}}"
-                           type="number" id="mileage_at_service" name="mileage_at_service"
-                           value="{{.MileageAtService}}"
+                    <label class="form-label" for="mileage_at_service_{{$i}}">Mileage at Service</label>
+                    <input class="form-input{{if index $rec.Errors "mileage_at_service"}} is-invalid{{end}}"
+                           type="number" id="mileage_at_service_{{$i}}" name="mileage_at_service"
+                           value="{{$rec.MileageAtService}}"
                            min="0"
                            placeholder="e.g. 45000"
-                           aria-describedby="mileage-error">
-                    {{if .Errors.mileage_at_service}}
-                    <p class="form-error" id="mileage-error">{{.Errors.mileage_at_service}}</p>
+                           aria-describedby="mileage-error-{{$i}}">
+                    {{if index $rec.Errors "mileage_at_service"}}
+                    <p class="form-error" id="mileage-error-{{$i}}">{{index $rec.Errors "mileage_at_service"}}</p>
                     {{end}}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="cost">Cost</label>
-                    <input class="form-input{{if .Errors.cost}} is-invalid{{end}}"
-                           type="number" id="cost" name="cost"
-                           value="{{.Cost}}"
+                    <label class="form-label" for="cost_{{$i}}">Cost</label>
+                    <input class="form-input{{if index $rec.Errors "cost"}} is-invalid{{end}}"
+                           type="number" id="cost_{{$i}}" name="cost"
+                           value="{{$rec.Cost}}"
                            min="0" step="0.01"
                            placeholder="e.g. 49.99"
-                           aria-describedby="cost-error">
-                    {{if .Errors.cost}}
-                    <p class="form-error" id="cost-error">{{.Errors.cost}}</p>
+                           aria-describedby="cost-error-{{$i}}">
+                    {{if index $rec.Errors "cost"}}
+                    <p class="form-error" id="cost-error-{{$i}}">{{index $rec.Errors "cost"}}</p>
                     {{end}}
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="service_provider">Service Provider</label>
+                    <label class="form-label" for="service_provider_{{$i}}">Service Provider</label>
                     <input class="form-input"
-                           type="text" id="service_provider" name="service_provider"
-                           value="{{.ServiceProvider}}"
+                           type="text" id="service_provider_{{$i}}" name="service_provider"
+                           value="{{$rec.ServiceProvider}}"
                            placeholder="e.g. Quick Lube">
                 </div>
             </div>
-        </div>
-
-        <div class="form-section">
-            <h2 class="form-section-title">Additional Notes</h2>
 
             <div class="form-group">
-                <label class="form-label" for="notes">Notes</label>
+                <label class="form-label" for="notes_{{$i}}">Notes</label>
                 <textarea class="form-input"
-                          id="notes" name="notes"
-                          rows="4"
-                          placeholder="Any additional notes about this service">{{.Notes}}</textarea>
+                          id="notes_{{$i}}" name="notes"
+                          rows="3"
+                          placeholder="Any additional notes about this service">{{$rec.Notes}}</textarea>
             </div>
         </div>
+        {{end}}
+    </div>
 
-        <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Add Record</button>
-            <a href="/maintenance" class="btn btn-secondary">Cancel</a>
-        </div>
-    </form>
-</div>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Add Record</button>
+        <button type="button" class="btn btn-secondary" id="add-record-btn">Include More Records</button>
+        <a href="/maintenance" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
 {{else}}
 <div class="empty-state">
     <h2>No Vehicles Found</h2>
@@ -123,4 +146,32 @@
     <a href="/vehicles/new" class="btn btn-primary">Add a Vehicle</a>
 </div>
 {{end}}
+{{end}}
+
+{{define "extra_scripts"}}
+<script src="/static/js/bulk-maintenance-minified.js" defer></script>
+<script defer>
+document.addEventListener("DOMContentLoaded", function() {
+    function toggleCustomServiceType(select) {
+        var card = select.closest(".record-card");
+        if (!card) return;
+        var group = card.querySelector(".custom-service-type-group");
+        var input = group ? group.querySelector("input") : null;
+        if (!group || !input) return;
+        if (select.value === "other") {
+            group.classList.remove("hidden");
+            input.setAttribute("required", "");
+        } else {
+            group.classList.add("hidden");
+            input.removeAttribute("required");
+            input.value = "";
+        }
+    }
+    document.getElementById("bulk-maintenance-form").addEventListener("change", function(e) {
+        if (e.target.name === "service_type") {
+            toggleCustomServiceType(e.target);
+        }
+    });
+});
+</script>
 {{end}}

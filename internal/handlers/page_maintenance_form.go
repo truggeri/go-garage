@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -9,6 +10,22 @@ import (
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 )
+
+// maxBulkRecords is the maximum number of maintenance records that can be submitted at once.
+const maxBulkRecords = 50
+
+// maintenanceRecordFormEntry holds the form values and per-record validation errors
+// for a single maintenance record in the bulk creation form.
+type maintenanceRecordFormEntry struct {
+	ServiceType       string
+	CustomServiceType string
+	ServiceDate       string
+	MileageAtService  string
+	Cost              string
+	ServiceProvider   string
+	Notes             string
+	Errors            map[string]string
+}
 
 // maintenanceNewPageData holds the data passed to the add-maintenance template.
 type maintenanceNewPageData struct {
@@ -24,17 +41,15 @@ type maintenanceNewPageData struct {
 	Vehicles []*models.Vehicle
 	// VehicleNames maps vehicle IDs to human-readable names.
 	VehicleNames map[string]string
-	// Errors holds field-level and general validation error messages.
+	// Errors holds vehicle-level and general validation error messages.
 	Errors    map[string]string
 	CSRFToken string
-	// Form field values for repopulating the form after a failed submission.
-	VehicleID        string
-	ServiceType      string
-	ServiceDate      string
-	MileageAtService string
-	Cost             string
-	ServiceProvider  string
-	Notes            string
+	// VehicleID is the selected vehicle for all records.
+	VehicleID string
+	// Records holds the form values and per-record errors for each maintenance record entry.
+	Records []maintenanceRecordFormEntry
+	// ServiceTypes is the list of valid service type enum values for dropdowns.
+	ServiceTypes []models.ServiceType
 }
 
 // maintenanceNewFormResult holds the parsed results of the add-maintenance form.
@@ -111,6 +126,8 @@ func (h *PageHandler) MaintenanceNew(w http.ResponseWriter, r *http.Request) {
 		VehicleNames:    buildVehicleNameMap(vehicles),
 		VehicleID:       vehicleID,
 		CSRFToken:       middleware.GetCSRFToken(r.Context()),
+		Records:         []maintenanceRecordFormEntry{{Errors: make(map[string]string)}},
+		ServiceTypes:    models.AllServiceTypes(),
 	}
 
 	if err := h.engine.Render(w, "maintenance/new.html", "base", data); err != nil {
@@ -119,6 +136,7 @@ func (h *PageHandler) MaintenanceNew(w http.ResponseWriter, r *http.Request) {
 }
 
 // MaintenanceCreate handles the add maintenance record form submission (POST /maintenance/new).
+// It supports bulk creation of multiple records for a single vehicle.
 func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) {
 	account, ok := middleware.GetAccountFromContext(r.Context())
 	if !ok {
@@ -132,12 +150,6 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	vehicleID := r.FormValue("vehicle_id")
-	serviceType := strings.TrimSpace(r.FormValue("service_type"))
-	serviceDateStr := r.FormValue("service_date")
-	mileageStr := r.FormValue("mileage_at_service")
-	costStr := r.FormValue("cost")
-	serviceProvider := strings.TrimSpace(r.FormValue("service_provider"))
-	notes := r.FormValue("notes")
 
 	vehicles, err := h.vehicleService.GetUserVehicles(r.Context(), account.ID)
 	if err != nil {
@@ -145,23 +157,54 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	renderForm := func(status int, formErrors map[string]string) {
+	// Read array form values for multiple records.
+	serviceTypes := r.Form["service_type"]
+	customServiceTypes := r.Form["custom_service_type"]
+	serviceDates := r.Form["service_date"]
+	mileages := r.Form["mileage_at_service"]
+	costs := r.Form["cost"]
+	providers := r.Form["service_provider"]
+	notesArr := r.Form["notes"]
+
+	count := len(serviceTypes)
+	if count == 0 {
+		count = 1
+	}
+	if count > maxBulkRecords {
+		count = maxBulkRecords
+	}
+
+	// Build record form entries for potential re-rendering.
+	records := make([]maintenanceRecordFormEntry, count)
+	for i := range records {
+		records[i] = maintenanceRecordFormEntry{
+			ServiceType:       safeIndex(serviceTypes, i),
+			CustomServiceType: safeIndex(customServiceTypes, i),
+			ServiceDate:       safeIndex(serviceDates, i),
+			MileageAtService:  safeIndex(mileages, i),
+			Cost:              safeIndex(costs, i),
+			ServiceProvider:   safeIndex(providers, i),
+			Notes:             safeIndex(notesArr, i),
+			Errors:            make(map[string]string),
+		}
+	}
+
+	renderForm := func(status int, generalErrors map[string]string) {
+		if generalErrors == nil {
+			generalErrors = make(map[string]string)
+		}
 		w.WriteHeader(status)
 		data := maintenanceNewPageData{
-			IsAuthenticated:  true,
-			UserName:         account.Name,
-			ActiveNav:        "maintenance",
-			Vehicles:         vehicles,
-			VehicleNames:     buildVehicleNameMap(vehicles),
-			Errors:           formErrors,
-			CSRFToken:        middleware.GetCSRFToken(r.Context()),
-			VehicleID:        vehicleID,
-			ServiceType:      serviceType,
-			ServiceDate:      serviceDateStr,
-			MileageAtService: mileageStr,
-			Cost:             costStr,
-			ServiceProvider:  serviceProvider,
-			Notes:            notes,
+			IsAuthenticated: true,
+			UserName:        account.Name,
+			ActiveNav:       "maintenance",
+			Vehicles:        vehicles,
+			VehicleNames:    buildVehicleNameMap(vehicles),
+			Errors:          generalErrors,
+			CSRFToken:       middleware.GetCSRFToken(r.Context()),
+			VehicleID:       vehicleID,
+			Records:         records,
+			ServiceTypes:    models.AllServiceTypes(),
 		}
 		_ = h.engine.Render(w, "maintenance/new.html", "base", data)
 	}
@@ -171,36 +214,77 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	parseResult := parseMaintenanceNewForm(serviceDateStr, mileageStr, costStr)
-	if len(parseResult.Errors) > 0 {
-		renderForm(http.StatusBadRequest, parseResult.Errors)
+	// Parse and validate all records.
+	hasErrors := false
+	modelRecords := make([]*models.MaintenanceRecord, count)
+
+	for i := range records {
+		entry := &records[i]
+		entry.ServiceType = strings.TrimSpace(entry.ServiceType)
+		entry.CustomServiceType = strings.TrimSpace(entry.CustomServiceType)
+		entry.ServiceProvider = strings.TrimSpace(entry.ServiceProvider)
+
+		parseResult := parseMaintenanceNewForm(entry.ServiceDate, entry.MileageAtService, entry.Cost)
+		if len(parseResult.Errors) > 0 {
+			for k, v := range parseResult.Errors {
+				entry.Errors[k] = v
+			}
+			hasErrors = true
+			continue
+		}
+
+		customServiceType := ""
+		if models.ServiceType(entry.ServiceType) == models.ServiceTypeOther {
+			customServiceType = entry.CustomServiceType
+		}
+
+		record := &models.MaintenanceRecord{
+			VehicleID:         vehicleID,
+			ServiceType:       entry.ServiceType,
+			CustomServiceType: customServiceType,
+			ServiceDate:       parseResult.ServiceDate,
+			MileageAtService:  parseResult.MileageAtService,
+			Cost:              parseResult.Cost,
+			ServiceProvider:   entry.ServiceProvider,
+			Notes:             entry.Notes,
+		}
+
+		if valErr := models.ValidateMaintenanceRecord(record); valErr != nil {
+			var ve *models.ValidationError
+			if models.IsValidationError(valErr, &ve) {
+				entry.Errors[ve.Field] = ve.Message
+			} else {
+				entry.Errors["general"] = "Invalid form data. Please check your input."
+			}
+			hasErrors = true
+			continue
+		}
+
+		modelRecords[i] = record
+	}
+
+	if hasErrors {
+		renderForm(http.StatusBadRequest, nil)
 		return
 	}
 
-	record := &models.MaintenanceRecord{
-		VehicleID:        vehicleID,
-		ServiceType:      serviceType,
-		ServiceDate:      parseResult.ServiceDate,
-		MileageAtService: parseResult.MileageAtService,
-		Cost:             parseResult.Cost,
-		ServiceProvider:  serviceProvider,
-		Notes:            notes,
-	}
-
-	if err := models.ValidateMaintenanceRecord(record); err != nil {
-		var ve *models.ValidationError
-		if models.IsValidationError(err, &ve) {
-			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
+	// Create all records.
+	for i, record := range modelRecords {
+		if createErr := h.maintenanceService.CreateMaintenance(r.Context(), record); createErr != nil {
+			renderForm(http.StatusInternalServerError, map[string]string{
+				"general": fmt.Sprintf("Failed to add record %d. Please try again.", i+1),
+			})
 			return
 		}
-		renderForm(http.StatusBadRequest, map[string]string{"general": "Invalid form data. Please check your input."})
-		return
-	}
-
-	if err := h.maintenanceService.CreateMaintenance(r.Context(), record); err != nil {
-		renderForm(http.StatusInternalServerError, map[string]string{"general": "Failed to add maintenance record. Please try again."})
-		return
 	}
 
 	http.Redirect(w, r, "/maintenance?added=true", http.StatusSeeOther)
+}
+
+// safeIndex returns the string at index i of the slice, or empty string if out of bounds.
+func safeIndex(slice []string, i int) string {
+	if i >= 0 && i < len(slice) {
+		return slice[i]
+	}
+	return ""
 }

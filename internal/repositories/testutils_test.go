@@ -120,6 +120,7 @@ func runMigrations(db *sql.DB) error {
 			id TEXT PRIMARY KEY,
 			vehicle_id TEXT NOT NULL,
 			service_type TEXT NOT NULL,
+			custom_service_type TEXT DEFAULT '',
 			service_date DATE NOT NULL,
 			mileage_at_service INTEGER,
 			cost REAL,
@@ -162,14 +163,27 @@ func runMigrations(db *sql.DB) error {
 			partial BOOLEAN NOT NULL DEFAULT 0,
 			created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 			updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-			FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
-		)
-	`)
+      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+    )
+  `)
+  if err != nil {
+		return err
+	}
+  _, err = db.Exec(`CREATE INDEX IF NOT EXISTS idx_fuel_vehicle_id ON fuel_records(vehicle_id)`)
 	if err != nil {
 		return err
 	}
-
-	_, err = db.Exec(`CREATE INDEX IF NOT EXISTS idx_fuel_vehicle_id ON fuel_records(vehicle_id)`)
+  
+	// Create vehicle_metrics table
+	_, err = db.Exec(`
+		CREATE TABLE IF NOT EXISTS vehicle_metrics (
+			vehicle_id TEXT PRIMARY KEY,
+			total_spent REAL,
+			created_at DATETIME NOT NULL,
+			updated_at DATETIME NOT NULL,
+			FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+		)
+	`)
 	if err != nil {
 		return err
 	}

@@ -23,6 +23,28 @@ func newTestMaintenanceFormPageHandler(
 	return NewPageHandler(engine, &mockAuthService{}, vehicleSvc, maintenanceSvc, nil, nil)
 }
 
+func TestSafeIndex(t *testing.T) {
+	slice := []string{"a", "b", "c"}
+
+	t.Run("returns value at valid index", func(t *testing.T) {
+		assert.Equal(t, "a", safeIndex(slice, 0))
+		assert.Equal(t, "c", safeIndex(slice, 2))
+	})
+
+	t.Run("returns empty string for out of bounds index", func(t *testing.T) {
+		assert.Equal(t, "", safeIndex(slice, 3))
+		assert.Equal(t, "", safeIndex(slice, 100))
+	})
+
+	t.Run("returns empty string for negative index", func(t *testing.T) {
+		assert.Equal(t, "", safeIndex(slice, -1))
+	})
+
+	t.Run("returns empty string for nil slice", func(t *testing.T) {
+		assert.Equal(t, "", safeIndex(nil, 0))
+	})
+}
+
 func TestParseMaintenanceNewForm(t *testing.T) {
 	t.Run("parses valid service date", func(t *testing.T) {
 		result := parseMaintenanceNewForm("2024-06-15", "", "")
@@ -186,7 +208,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 	validForm := url.Values{
 		"vehicle_id":   {"v1"},
-		"service_type": {"Oil Change"},
+		"service_type": {"oil_change"},
 		"service_date": {"2024-01-15"},
 	}
 
@@ -210,7 +232,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 		form := url.Values{
 			"vehicle_id":   {"other-vehicle"},
-			"service_type": {"Oil Change"},
+			"service_type": {"oil_change"},
 			"service_date": {"2024-01-15"},
 		}
 		req := postForm(form)
@@ -228,7 +250,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 		form := url.Values{
 			"vehicle_id":   {"v1"},
-			"service_type": {"Oil Change"},
+			"service_type": {"oil_change"},
 			"service_date": {"not-a-date"},
 		}
 		req := postForm(form)
@@ -271,7 +293,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 		handler.MaintenanceCreate(rec, req)
 
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
-		assert.Contains(t, rec.Body.String(), "Failed to add maintenance record")
+		assert.Contains(t, rec.Body.String(), "Failed to add record 1")
 	})
 
 	t.Run("returns 500 when account missing from context", func(t *testing.T) {
@@ -304,7 +326,7 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 
 		form := url.Values{
 			"vehicle_id":         {"v1"},
-			"service_type":       {"Oil Change"},
+			"service_type":       {"oil_change"},
 			"service_date":       {"2024-01-15"},
 			"mileage_at_service": {"45000"},
 			"cost":               {"49.99"},
@@ -317,5 +339,92 @@ func TestPageHandler_MaintenanceCreate(t *testing.T) {
 		handler.MaintenanceCreate(rec, req)
 
 		assert.Equal(t, http.StatusSeeOther, rec.Code)
+	})
+
+	t.Run("bulk creates multiple records for one vehicle", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
+		maintenanceStub := &stubMaintenanceSvc{}
+		handler := newTestMaintenanceFormPageHandler(t, vehicleStub, maintenanceStub)
+
+		form := url.Values{
+			"vehicle_id":         {"v1"},
+			"service_type":       {"oil_change", "tire_rotation"},
+			"service_date":       {"2024-01-15", "2024-02-20"},
+			"mileage_at_service": {"45000", "46000"},
+			"cost":               {"49.99", "80.00"},
+			"service_provider":   {"Quick Lube", "Tire Shop"},
+			"notes":              {"First record", "Second record"},
+		}
+		req := postForm(form)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.MaintenanceCreate(rec, req)
+
+		assert.Equal(t, http.StatusSeeOther, rec.Code)
+		assert.Equal(t, "/maintenance?added=true", rec.Header().Get("Location"))
+	})
+
+	t.Run("bulk returns 400 when one record has validation error", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
+		handler := newTestMaintenanceFormPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
+
+		form := url.Values{
+			"vehicle_id":   {"v1"},
+			"service_type": {"oil_change", ""},
+			"service_date": {"2024-01-15", "2024-02-20"},
+		}
+		req := postForm(form)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.MaintenanceCreate(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "service type is required")
+	})
+
+	t.Run("bulk returns 400 when one record has invalid date", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
+		handler := newTestMaintenanceFormPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
+
+		form := url.Values{
+			"vehicle_id":   {"v1"},
+			"service_type": {"oil_change", "tire_rotation"},
+			"service_date": {"2024-01-15", "not-a-date"},
+		}
+		req := postForm(form)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.MaintenanceCreate(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Invalid date format")
+	})
+
+	t.Run("bulk preserves valid record values on error re-render", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
+		handler := newTestMaintenanceFormPageHandler(t, vehicleStub, &stubMaintenanceSvc{})
+
+		form := url.Values{
+			"vehicle_id":   {"v1"},
+			"service_type": {"oil_change", ""},
+			"service_date": {"2024-01-15", "2024-02-20"},
+			"cost":         {"49.99", ""},
+		}
+		req := postForm(form)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.MaintenanceCreate(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		body := rec.Body.String()
+		assert.Contains(t, body, "Oil Change")
+		assert.Contains(t, body, "Record #1")
+		assert.Contains(t, body, "Record #2")
 	})
 }

@@ -39,15 +39,16 @@ func (r *SQLiteMaintenanceRepository) Create(ctx context.Context, record *models
 
 	query := `
 		INSERT INTO maintenance_records (
-			id, vehicle_id, service_type, service_date, mileage_at_service,
+			id, vehicle_id, service_type, custom_service_type, service_date, mileage_at_service,
 			cost, service_provider, notes, created_at, updated_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
 		record.ID,
 		record.VehicleID,
 		record.ServiceType,
+		record.CustomServiceType,
 		record.ServiceDate,
 		record.MileageAtService,
 		record.Cost,
@@ -70,7 +71,7 @@ func (r *SQLiteMaintenanceRepository) Create(ctx context.Context, record *models
 // FindByID retrieves a maintenance record by its ID
 func (r *SQLiteMaintenanceRepository) FindByID(ctx context.Context, id string) (*models.MaintenanceRecord, error) {
 	query := `
-		SELECT id, vehicle_id, service_type, service_date, mileage_at_service,
+		SELECT id, vehicle_id, service_type, custom_service_type, service_date, mileage_at_service,
 		       cost, service_provider, notes, created_at, updated_at
 		FROM maintenance_records
 		WHERE id = ?
@@ -79,12 +80,13 @@ func (r *SQLiteMaintenanceRepository) FindByID(ctx context.Context, id string) (
 	record := &models.MaintenanceRecord{}
 	var mileageAtService sql.NullInt64
 	var cost sql.NullFloat64
-	var serviceProvider, notes sql.NullString
+	var customServiceType, serviceProvider, notes sql.NullString
 
 	err := r.db.QueryRowContext(ctx, query, id).Scan(
 		&record.ID,
 		&record.VehicleID,
 		&record.ServiceType,
+		&customServiceType,
 		&record.ServiceDate,
 		&mileageAtService,
 		&cost,
@@ -102,6 +104,9 @@ func (r *SQLiteMaintenanceRepository) FindByID(ctx context.Context, id string) (
 	}
 
 	// Handle nullable fields
+	if customServiceType.Valid {
+		record.CustomServiceType = customServiceType.String
+	}
 	if mileageAtService.Valid {
 		m := int(mileageAtService.Int64)
 		record.MileageAtService = &m
@@ -122,7 +127,7 @@ func (r *SQLiteMaintenanceRepository) FindByID(ctx context.Context, id string) (
 // FindByVehicleID retrieves all maintenance records for a specific vehicle
 func (r *SQLiteMaintenanceRepository) FindByVehicleID(ctx context.Context, vehicleID string) ([]*models.MaintenanceRecord, error) {
 	query := `
-		SELECT id, vehicle_id, service_type, service_date, mileage_at_service,
+		SELECT id, vehicle_id, service_type, custom_service_type, service_date, mileage_at_service,
 		       cost, service_provider, notes, created_at, updated_at
 		FROM maintenance_records
 		WHERE vehicle_id = ?
@@ -148,7 +153,7 @@ func (r *SQLiteMaintenanceRepository) Update(ctx context.Context, record *models
 
 	query := `
 		UPDATE maintenance_records
-		SET vehicle_id = ?, service_type = ?, service_date = ?,
+		SET vehicle_id = ?, service_type = ?, custom_service_type = ?, service_date = ?,
 		    mileage_at_service = ?, cost = ?, service_provider = ?,
 		    notes = ?, updated_at = ?
 		WHERE id = ?
@@ -157,6 +162,7 @@ func (r *SQLiteMaintenanceRepository) Update(ctx context.Context, record *models
 	result, err := r.db.ExecContext(ctx, query,
 		record.VehicleID,
 		record.ServiceType,
+		record.CustomServiceType,
 		record.ServiceDate,
 		record.MileageAtService,
 		record.Cost,
@@ -209,7 +215,7 @@ func (r *SQLiteMaintenanceRepository) Delete(ctx context.Context, id string) err
 // List retrieves maintenance records with optional filters and pagination
 func (r *SQLiteMaintenanceRepository) List(ctx context.Context, filters MaintenanceFilters, pagination PaginationParams) ([]*models.MaintenanceRecord, error) {
 	query := `
-		SELECT id, vehicle_id, service_type, service_date, mileage_at_service,
+		SELECT id, vehicle_id, service_type, custom_service_type, service_date, mileage_at_service,
 		       cost, service_provider, notes, created_at, updated_at
 		FROM maintenance_records
 		WHERE 1=1
@@ -272,6 +278,24 @@ func (r *SQLiteMaintenanceRepository) Count(ctx context.Context, filters Mainten
 	return count, nil
 }
 
+// SumCostByVehicleID returns the sum of all maintenance costs for a specific vehicle.
+// Returns nil if there are no records with a cost for the vehicle.
+func (r *SQLiteMaintenanceRepository) SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error) {
+	query := `SELECT SUM(cost) FROM maintenance_records WHERE vehicle_id = ? AND cost IS NOT NULL`
+
+	var total sql.NullFloat64
+	err := r.db.QueryRowContext(ctx, query, vehicleID).Scan(&total)
+	if err != nil {
+		return nil, models.NewDatabaseError("sum cost by vehicle ID", err)
+	}
+
+	if !total.Valid {
+		return nil, nil
+	}
+
+	return &total.Float64, nil
+}
+
 // scanMaintenanceRecords is a helper method to scan multiple maintenance record rows
 func (r *SQLiteMaintenanceRepository) scanMaintenanceRecords(rows *sql.Rows) ([]*models.MaintenanceRecord, error) {
 	records := []*models.MaintenanceRecord{}
@@ -280,12 +304,13 @@ func (r *SQLiteMaintenanceRepository) scanMaintenanceRecords(rows *sql.Rows) ([]
 		record := &models.MaintenanceRecord{}
 		var mileageAtService sql.NullInt64
 		var cost sql.NullFloat64
-		var serviceProvider, notes sql.NullString
+		var customServiceType, serviceProvider, notes sql.NullString
 
 		err := rows.Scan(
 			&record.ID,
 			&record.VehicleID,
 			&record.ServiceType,
+			&customServiceType,
 			&record.ServiceDate,
 			&mileageAtService,
 			&cost,
@@ -300,6 +325,9 @@ func (r *SQLiteMaintenanceRepository) scanMaintenanceRecords(rows *sql.Rows) ([]
 		}
 
 		// Handle nullable fields
+		if customServiceType.Valid {
+			record.CustomServiceType = customServiceType.String
+		}
 		if mileageAtService.Valid {
 			m := int(mileageAtService.Int64)
 			record.MileageAtService = &m

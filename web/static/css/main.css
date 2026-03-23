@@ -1582,3 +1582,10 @@ html[data-theme="dark"] .flash-info {
 html[data-theme="light"] {
     color-scheme: light;
 }
+
+/* ========================================
+   Utility Classes
+   ======================================== */
+.hidden {
+    display: none !important;
+}

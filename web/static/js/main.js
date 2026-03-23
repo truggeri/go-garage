@@ -174,6 +174,7 @@
      */
     function initFormSubmitLoading() {
         document.addEventListener("submit", function (e) {
+            if (e.defaultPrevented) { return; }
             var form = e.target;
             if (form.tagName !== "FORM") { return; }
             var btn = form.querySelector('button[type="submit"]');

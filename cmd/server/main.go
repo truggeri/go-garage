@@ -69,12 +69,13 @@ func main() {
 	vehicleRepo := repositories.NewSQLiteVehicleRepository(db)
 	maintenanceRepo := repositories.NewSQLiteMaintenanceRepository(db)
 	fuelRepo := repositories.NewSQLiteFuelRepository(db)
+	metricsRepo := repositories.NewSQLiteMetricsRepository(db)
 
 	// Initialize services
 	userSvc := services.NewUserService(userRepo)
 	vehicleSvc := services.NewVehicleService(vehicleRepo)
-	maintenanceSvc := services.NewMaintenanceService(maintenanceRepo, vehicleRepo)
 	fuelSvc := services.NewFuelService(fuelRepo, vehicleRepo)
+	maintenanceSvc := services.NewMaintenanceService(maintenanceRepo, vehicleRepo, metricsRepo)
 
 	// Initialize JWT token manager
 	tokenMgr, tokenErr := auth.BuildTokenManager(cfg.JWT.Secret, auth.StandardTokenDurations())
@@ -101,7 +102,8 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc, fuelSvc, userSvc)
+
+	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc, fuelSvc, userSvc, metricsRepo)
 
 	// Setup router and routes
 	router := mux.NewRouter()

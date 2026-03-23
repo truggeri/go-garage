@@ -34,25 +34,28 @@ type MaintenanceService interface {
 
 // MaintenanceUpdates contains the fields that can be updated for a maintenance record
 type MaintenanceUpdates struct {
-	ServiceType      *string
-	ServiceDate      *time.Time
-	MileageAtService *int
-	Cost             *float64
-	ServiceProvider  *string
-	Notes            *string
+	ServiceType       *string
+	CustomServiceType *string
+	ServiceDate       *time.Time
+	MileageAtService  *int
+	Cost              *float64
+	ServiceProvider   *string
+	Notes             *string
 }
 
 // DefaultMaintenanceService implements MaintenanceService using a MaintenanceRepository
 type DefaultMaintenanceService struct {
 	repo        repositories.MaintenanceRepository
 	vehicleRepo repositories.VehicleRepository
+	metricsRepo repositories.MetricsRepository
 }
 
 // NewMaintenanceService creates a new DefaultMaintenanceService
-func NewMaintenanceService(repo repositories.MaintenanceRepository, vehicleRepo repositories.VehicleRepository) *DefaultMaintenanceService {
+func NewMaintenanceService(repo repositories.MaintenanceRepository, vehicleRepo repositories.VehicleRepository, metricsRepo repositories.MetricsRepository) *DefaultMaintenanceService {
 	return &DefaultMaintenanceService{
 		repo:        repo,
 		vehicleRepo: vehicleRepo,
+		metricsRepo: metricsRepo,
 	}
 }
 
@@ -64,7 +67,12 @@ func (s *DefaultMaintenanceService) CreateMaintenance(ctx context.Context, recor
 		return err
 	}
 
-	return s.repo.Create(ctx, record)
+	if err := s.repo.Create(ctx, record); err != nil {
+		return err
+	}
+
+	s.recalculateMetrics(ctx, record.VehicleID)
+	return nil
 }
 
 // GetMaintenance retrieves a maintenance record by its ID
@@ -99,6 +107,9 @@ func (s *DefaultMaintenanceService) UpdateMaintenance(ctx context.Context, id st
 	if updates.ServiceType != nil {
 		record.ServiceType = *updates.ServiceType
 	}
+	if updates.CustomServiceType != nil {
+		record.CustomServiceType = *updates.CustomServiceType
+	}
 	if updates.ServiceDate != nil {
 		record.ServiceDate = *updates.ServiceDate
 	}
@@ -120,10 +131,43 @@ func (s *DefaultMaintenanceService) UpdateMaintenance(ctx context.Context, id st
 		return nil, err
 	}
 
+	s.recalculateMetrics(ctx, record.VehicleID)
 	return record, nil
 }
 
 // DeleteMaintenance deletes a maintenance record
 func (s *DefaultMaintenanceService) DeleteMaintenance(ctx context.Context, id string) error {
-	return s.repo.Delete(ctx, id)
+	// Get the record first to find the vehicle ID for metrics recalculation
+	record, err := s.repo.FindByID(ctx, id)
+	if err != nil {
+		return err
+	}
+
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	s.recalculateMetrics(ctx, record.VehicleID)
+	return nil
+}
+
+// recalculateMetrics recalculates and upserts the total_spent metric for a vehicle.
+// Errors are silently ignored since metrics are non-critical and the primary
+// maintenance operation has already succeeded.
+func (s *DefaultMaintenanceService) recalculateMetrics(ctx context.Context, vehicleID string) {
+	if s.metricsRepo == nil {
+		return
+	}
+
+	totalSpent, err := s.repo.SumCostByVehicleID(ctx, vehicleID)
+	if err != nil {
+		return
+	}
+
+	metrics := &models.VehicleMetrics{
+		VehicleID:  vehicleID,
+		TotalSpent: totalSpent,
+	}
+
+	_ = s.metricsRepo.Upsert(ctx, metrics)
 }

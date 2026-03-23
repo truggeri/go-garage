@@ -29,12 +29,15 @@ type maintenanceEditPageData struct {
 	// CSRFToken is the CSRF protection token to embed in the form.
 	CSRFToken string
 	// Form field values for repopulating the form after a failed submission.
-	ServiceType      string
-	ServiceDate      string
-	MileageAtService string
-	Cost             string
-	ServiceProvider  string
-	Notes            string
+	ServiceType       string
+	CustomServiceType string
+	ServiceDate       string
+	MileageAtService  string
+	Cost              string
+	ServiceProvider   string
+	Notes             string
+	// ServiceTypes is the list of valid service type enum values for dropdowns.
+	ServiceTypes []models.ServiceType
 }
 
 // maintenanceEditPageDataFromRecord builds an edit page data struct pre-populated
@@ -45,15 +48,17 @@ func maintenanceEditPageDataFromRecord(
 	vehicle *models.Vehicle,
 ) maintenanceEditPageData {
 	data := maintenanceEditPageData{
-		IsAuthenticated: true,
-		UserName:        account.Name,
-		ActiveNav:       "maintenance",
-		RecordID:        record.ID,
-		VehicleTitle:    fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model),
-		ServiceType:     record.ServiceType,
-		ServiceDate:     record.ServiceDate.Format("2006-01-02"),
-		ServiceProvider: record.ServiceProvider,
-		Notes:           record.Notes,
+		IsAuthenticated:   true,
+		UserName:          account.Name,
+		ActiveNav:         "maintenance",
+		RecordID:          record.ID,
+		VehicleTitle:      fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model),
+		ServiceType:       record.ServiceType,
+		CustomServiceType: record.CustomServiceType,
+		ServiceDate:       record.ServiceDate.Format("2006-01-02"),
+		ServiceProvider:   record.ServiceProvider,
+		Notes:             record.Notes,
+		ServiceTypes:      models.AllServiceTypes(),
 	}
 	if record.MileageAtService != nil {
 		data.MileageAtService = fmt.Sprintf("%d", *record.MileageAtService)
@@ -116,6 +121,7 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	serviceType := strings.TrimSpace(r.FormValue("service_type"))
+	customServiceType := strings.TrimSpace(r.FormValue("custom_service_type"))
 	serviceDateStr := r.FormValue("service_date")
 	mileageStr := r.FormValue("mileage_at_service")
 	costStr := r.FormValue("cost")
@@ -127,19 +133,21 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 	renderForm := func(status int, formErrors map[string]string) {
 		w.WriteHeader(status)
 		data := maintenanceEditPageData{
-			IsAuthenticated:  true,
-			UserName:         account.Name,
-			ActiveNav:        "maintenance",
-			RecordID:         record.ID,
-			VehicleTitle:     vehicleTitle,
-			Errors:           formErrors,
-			CSRFToken:        middleware.GetCSRFToken(r.Context()),
-			ServiceType:      serviceType,
-			ServiceDate:      serviceDateStr,
-			MileageAtService: mileageStr,
-			Cost:             costStr,
-			ServiceProvider:  serviceProvider,
-			Notes:            notes,
+			IsAuthenticated:   true,
+			UserName:          account.Name,
+			ActiveNav:         "maintenance",
+			RecordID:          record.ID,
+			VehicleTitle:      vehicleTitle,
+			Errors:            formErrors,
+			CSRFToken:         middleware.GetCSRFToken(r.Context()),
+			ServiceType:       serviceType,
+			CustomServiceType: customServiceType,
+			ServiceDate:       serviceDateStr,
+			MileageAtService:  mileageStr,
+			Cost:              costStr,
+			ServiceProvider:   serviceProvider,
+			Notes:             notes,
+			ServiceTypes:      models.AllServiceTypes(),
 		}
 		_ = h.engine.Render(w, "maintenance/edit.html", "base", data)
 	}
@@ -150,15 +158,22 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	// Guard custom_service_type by ServiceTypeOther check.
+	effectiveCustomServiceType := ""
+	if models.ServiceType(serviceType) == models.ServiceTypeOther {
+		effectiveCustomServiceType = customServiceType
+	}
+
 	// Build a temporary record for validation.
 	validationRecord := &models.MaintenanceRecord{
-		VehicleID:        record.VehicleID,
-		ServiceType:      serviceType,
-		ServiceDate:      parseResult.ServiceDate,
-		MileageAtService: parseResult.MileageAtService,
-		Cost:             parseResult.Cost,
-		ServiceProvider:  serviceProvider,
-		Notes:            notes,
+		VehicleID:         record.VehicleID,
+		ServiceType:       serviceType,
+		CustomServiceType: effectiveCustomServiceType,
+		ServiceDate:       parseResult.ServiceDate,
+		MileageAtService:  parseResult.MileageAtService,
+		Cost:              parseResult.Cost,
+		ServiceProvider:   serviceProvider,
+		Notes:             notes,
 	}
 
 	if err := models.ValidateMaintenanceRecord(validationRecord); err != nil {
@@ -172,12 +187,13 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	updates := services.MaintenanceUpdates{
-		ServiceType:      &serviceType,
-		ServiceDate:      &parseResult.ServiceDate,
-		MileageAtService: parseResult.MileageAtService,
-		Cost:             parseResult.Cost,
-		ServiceProvider:  &serviceProvider,
-		Notes:            &notes,
+		ServiceType:       &serviceType,
+		CustomServiceType: &effectiveCustomServiceType,
+		ServiceDate:       &parseResult.ServiceDate,
+		MileageAtService:  parseResult.MileageAtService,
+		Cost:              parseResult.Cost,
+		ServiceProvider:   &serviceProvider,
+		Notes:             &notes,
 	}
 
 	if _, err := h.maintenanceService.UpdateMaintenance(r.Context(), record.ID, updates); err != nil {
