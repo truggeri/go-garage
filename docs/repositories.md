@@ -17,6 +17,10 @@ internal/repositories/
 ├── maintenance.go           # MaintenanceRepository interface
 ├── maintenance_sqlite.go    # SQLite implementation
 ├── maintenance_sqlite_test.go # Unit tests
+├── fuel.go                  # FuelRepository interface
+├── fuel_sqlite.go           # SQLite implementation (write ops + helpers)
+├── fuel_sqlite_read.go      # SQLite implementation (read ops)
+├── fuel_sqlite_test.go      # Unit tests
 └── testutils_test.go        # Shared test utilities
 ```
 
@@ -34,6 +38,7 @@ type PaginationParams struct {
 ```
 
 **Example Usage:**
+
 ```go
 // Get first 10 vehicles
 pagination := PaginationParams{Limit: 10, Offset: 0}
@@ -71,17 +76,21 @@ Create(ctx context.Context, user *models.User) error
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `user`: User object to create. ID will be generated if empty.
 
 **Returns:**
+
 - `error`: `nil` on success, `*models.ValidationError` if validation fails, `*models.DuplicateError` if username or email exists
 
 **Side Effects:**
+
 - Sets `user.ID` if empty (generates UUID)
 - Sets `user.CreatedAt` and `user.UpdatedAt` to current time
 
 **Example:**
+
 ```go
 user := &models.User{
     Username:     "johndoe",
@@ -110,14 +119,17 @@ FindByID(ctx context.Context, id string) (*models.User, error)
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `id`: UUID of the user
 
 **Returns:**
+
 - `*models.User`: User object if found
 - `error`: `*models.NotFoundError` if user doesn't exist
 
 **Example:**
+
 ```go
 user, err := repo.FindByID(ctx, "550e8400-e29b-41d4-a716-446655440000")
 if err != nil {
@@ -138,10 +150,12 @@ FindByEmail(ctx context.Context, email string) (*models.User, error)
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `email`: Email address to search for
 
 **Returns:**
+
 - `*models.User`: User object if found
 - `error`: `*models.NotFoundError` if user doesn't exist
 
@@ -156,10 +170,12 @@ FindByUsername(ctx context.Context, username string) (*models.User, error)
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `username`: Username to search for
 
 **Returns:**
+
 - `*models.User`: User object if found
 - `error`: `*models.NotFoundError` if user doesn't exist
 
@@ -174,16 +190,20 @@ Update(ctx context.Context, user *models.User) error
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `user`: User object with updated fields. ID must be set.
 
 **Returns:**
+
 - `error`: `*models.NotFoundError` if user doesn't exist, `*models.ValidationError` if validation fails, `*models.DuplicateError` if email/username conflicts
 
 **Side Effects:**
+
 - Updates `user.UpdatedAt` to current time
 
 **Example:**
+
 ```go
 user.FirstName = "Jane"
 user.LastName = "Smith"
@@ -199,13 +219,16 @@ Delete(ctx context.Context, id string) error
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `id`: UUID of the user to delete
 
 **Returns:**
+
 - `error`: `*models.NotFoundError` if user doesn't exist
 
 **Side Effects:**
+
 - Cascading delete of all user's vehicles and their maintenance records
 
 #### UpdateLastLogin
@@ -217,10 +240,12 @@ UpdateLastLogin(ctx context.Context, id string) error
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `id`: UUID of the user
 
 **Returns:**
+
 - `error`: `*models.NotFoundError` if user doesn't exist
 
 **Use Case:** Called after successful authentication
@@ -267,19 +292,23 @@ Create(ctx context.Context, vehicle *models.Vehicle) error
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `vehicle`: Vehicle object to create. ID will be generated if empty.
 
 **Returns:**
+
 - `error`: `*models.ValidationError` if validation fails, `*models.DuplicateError` if VIN exists
 
 **Validation:**
+
 - VIN must be exactly 17 characters (excluding I, O, Q)
 - Year must be between 1900 and current year + 1
 - UserID must reference an existing user
 - Make, Model, and Status are required
 
 **Example:**
+
 ```go
 vehicle := &models.Vehicle{
     UserID: userID,
@@ -301,6 +330,7 @@ FindByID(ctx context.Context, id string) (*models.Vehicle, error)
 ```
 
 **Returns:**
+
 - `*models.Vehicle`: Vehicle object if found
 - `error`: `*models.NotFoundError` if vehicle doesn't exist
 
@@ -313,14 +343,17 @@ FindByUserID(ctx context.Context, userID string) ([]*models.Vehicle, error)
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `userID`: UUID of the user
 
 **Returns:**
+
 - `[]*models.Vehicle`: Slice of vehicles (empty if none found)
 - `error`: Database errors only (not NotFoundError for empty results)
 
 **Example:**
+
 ```go
 vehicles, err := repo.FindByUserID(ctx, userID)
 if err != nil {
@@ -340,10 +373,12 @@ FindByVIN(ctx context.Context, vin string) (*models.Vehicle, error)
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `vin`: Vehicle Identification Number
 
 **Returns:**
+
 - `*models.Vehicle`: Vehicle object if found
 - `error`: `*models.NotFoundError` if vehicle doesn't exist
 
@@ -358,6 +393,7 @@ Update(ctx context.Context, vehicle *models.Vehicle) error
 ```
 
 **Returns:**
+
 - `error`: `*models.NotFoundError` if vehicle doesn't exist, `*models.ValidationError` if validation fails, `*models.DuplicateError` if VIN conflicts
 
 #### Delete
@@ -369,9 +405,11 @@ Delete(ctx context.Context, id string) error
 ```
 
 **Returns:**
+
 - `error`: `*models.NotFoundError` if vehicle doesn't exist
 
 **Side Effects:**
+
 - Cascading delete of all vehicle's maintenance records
 
 #### List
@@ -383,15 +421,18 @@ List(ctx context.Context, filters VehicleFilters, pagination PaginationParams) (
 ```
 
 **Parameters:**
+
 - `ctx`: Context for cancellation and timeouts
 - `filters`: Optional filters (nil values are ignored)
 - `pagination`: Limit and offset for results
 
 **Returns:**
+
 - `[]*models.Vehicle`: Slice of matching vehicles
 - `error`: Database errors only
 
 **Example:**
+
 ```go
 // Get all active vehicles, page 1
 status := models.VehicleStatusActive
@@ -438,12 +479,14 @@ Create(ctx context.Context, record *models.MaintenanceRecord) error
 ```
 
 **Validation:**
+
 - VehicleID must reference an existing vehicle
 - ServiceType is required
 - ServiceDate is required and cannot be in the future
 - Cost must be non-negative if provided
 
 **Example:**
+
 ```go
 record := &models.MaintenanceRecord{
     VehicleID:   vehicleID,
@@ -463,6 +506,7 @@ FindByID(ctx context.Context, id string) (*models.MaintenanceRecord, error)
 ```
 
 **Returns:**
+
 - `*models.MaintenanceRecord`: Record if found
 - `error`: `*models.NotFoundError` if record doesn't exist
 
@@ -475,6 +519,7 @@ FindByVehicleID(ctx context.Context, vehicleID string) ([]*models.MaintenanceRec
 ```
 
 **Returns:**
+
 - `[]*models.MaintenanceRecord`: Slice of records (empty if none found)
 - `error`: Database errors only
 
@@ -489,6 +534,7 @@ Update(ctx context.Context, record *models.MaintenanceRecord) error
 ```
 
 **Returns:**
+
 - `error`: `*models.NotFoundError` if record doesn't exist, `*models.ValidationError` if validation fails
 
 #### Delete
@@ -500,6 +546,7 @@ Delete(ctx context.Context, id string) error
 ```
 
 **Returns:**
+
 - `error`: `*models.NotFoundError` if record doesn't exist
 
 #### List
@@ -511,12 +558,141 @@ List(ctx context.Context, filters MaintenanceFilters, pagination PaginationParam
 ```
 
 **Example:**
+
 ```go
 // Get all oil changes
 serviceType := "Oil Change"
 filters := MaintenanceFilters{ServiceType: &serviceType}
 pagination := PaginationParams{Limit: 100, Offset: 0}
 records, err := repo.List(ctx, filters, pagination)
+```
+
+---
+
+## FuelRepository
+
+Interface for fuel record data access operations.
+
+### Filter Types
+
+```go
+type FuelFilters struct {
+    VehicleID *string  // Filter by vehicle
+    FuelType  *string  // Filter by fuel type (gasoline, diesel, e85)
+}
+```
+
+### Interface Definition
+
+```go
+type FuelRepository interface {
+    Create(ctx context.Context, record *models.FuelRecord) error
+    FindByID(ctx context.Context, id string) (*models.FuelRecord, error)
+    FindByVehicleID(ctx context.Context, vehicleID string) ([]*models.FuelRecord, error)
+    Update(ctx context.Context, record *models.FuelRecord) error
+    Delete(ctx context.Context, id string) error
+    List(ctx context.Context, filters FuelFilters, pagination PaginationParams) ([]*models.FuelRecord, error)
+    Count(ctx context.Context, filters FuelFilters) (int, error)
+}
+```
+
+### Method Details
+
+#### Create
+
+Inserts a new fuel record into the database.
+
+```go
+Create(ctx context.Context, record *models.FuelRecord) error
+```
+
+**Validation:**
+
+- VehicleID must reference an existing vehicle
+- FillDate is required and cannot be in the future
+- Mileage must be greater than zero
+- Volume must be greater than zero
+- FuelType must be a valid enum value (gasoline, diesel, e85)
+
+**Example:**
+
+```go
+price := 3.459
+record := &models.FuelRecord{
+    VehicleID:    vehicleID,
+    FillDate:     time.Now(),
+    Mileage:      50000,
+    Volume:       12.5,
+    FuelType:     "gasoline",
+    PricePerUnit: &price,
+}
+err := repo.Create(ctx, record)
+```
+
+#### FindByID
+
+Retrieves a fuel record by its ID.
+
+```go
+FindByID(ctx context.Context, id string) (*models.FuelRecord, error)
+```
+
+**Returns:**
+
+- `*models.FuelRecord`: Record if found
+- `error`: `*models.NotFoundError` if record doesn't exist
+
+#### FindByVehicleID
+
+Retrieves all fuel records for a specific vehicle, ordered by fill date descending.
+
+```go
+FindByVehicleID(ctx context.Context, vehicleID string) ([]*models.FuelRecord, error)
+```
+
+**Returns:**
+
+- `[]*models.FuelRecord`: Slice of records (empty if none found)
+- `error`: Database errors only
+
+#### Update
+
+Modifies an existing fuel record.
+
+```go
+Update(ctx context.Context, record *models.FuelRecord) error
+```
+
+**Returns:**
+
+- `error`: `*models.NotFoundError` if record doesn't exist, `*models.ValidationError` if validation fails
+
+#### Delete
+
+Removes a fuel record from the database.
+
+```go
+Delete(ctx context.Context, id string) error
+```
+
+**Returns:**
+
+- `error`: `*models.NotFoundError` if record doesn't exist
+
+#### List
+
+Retrieves fuel records with optional filters and pagination.
+
+```go
+List(ctx context.Context, filters FuelFilters, pagination PaginationParams) ([]*models.FuelRecord, error)
+```
+
+#### Count
+
+Returns the total number of fuel records matching the filters.
+
+```go
+Count(ctx context.Context, filters FuelFilters) (int, error)
 ```
 
 ---
@@ -537,6 +713,7 @@ type NotFoundError struct {
 ```
 
 **Handling:**
+
 ```go
 user, err := repo.FindByID(ctx, id)
 if err != nil {
@@ -560,6 +737,7 @@ type ValidationError struct {
 ```
 
 **Handling:**
+
 ```go
 err := repo.Create(ctx, user)
 if err != nil {
@@ -584,6 +762,7 @@ type DuplicateError struct {
 ```
 
 **Handling:**
+
 ```go
 err := repo.Create(ctx, user)
 if err != nil {
@@ -652,6 +831,7 @@ if err := tx.Commit(); err != nil {
 ### Context Support
 
 All repository methods accept a `context.Context` for:
+
 - **Cancellation**: Cancel long-running queries
 - **Timeouts**: Set query timeouts
 - **Tracing**: Propagate request IDs for logging

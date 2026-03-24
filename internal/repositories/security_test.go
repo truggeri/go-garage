@@ -190,3 +190,65 @@ func TestSQLInjection_MaintenanceRepository(t *testing.T) {
 		}
 	})
 }
+
+// TestSQLInjection_FuelRepository verifies that parameterized queries protect
+// the fuel repository against SQL injection attacks.
+func TestSQLInjection_FuelRepository(t *testing.T) {
+	db, cleanup := setupTestDB(t)
+	defer cleanup()
+
+	userRepo := NewSQLiteUserRepository(db)
+	vehicleRepo := NewSQLiteVehicleRepository(db)
+	fuelRepo := NewSQLiteFuelRepository(db)
+	ctx := context.Background()
+
+	// Seed prerequisite data.
+	user := &models.User{
+		Username:     "fuelowner",
+		Email:        "fowner@example.com",
+		PasswordHash: "hashed_password",
+	}
+	require.NoError(t, userRepo.Create(ctx, user))
+
+	vehicle := &models.Vehicle{
+		UserID: user.ID,
+		VIN:    "3HGBH41JXMN109188",
+		Make:   "Ford",
+		Model:  "F-150",
+		Year:   2023,
+		Status: models.VehicleStatusActive,
+	}
+	require.NoError(t, vehicleRepo.Create(ctx, vehicle))
+
+	injectionPayloads := []string{
+		"' OR '1'='1",
+		"'; DROP TABLE fuel_records; --",
+		"' UNION SELECT * FROM fuel_records --",
+	}
+
+	t.Run("FindByID rejects SQL injection payloads", func(t *testing.T) {
+		for _, payload := range injectionPayloads {
+			result, err := fuelRepo.FindByID(ctx, payload)
+			assert.Nil(t, result, "payload %q should not return a record", payload)
+			assert.Error(t, err, "payload %q should produce an error", payload)
+		}
+	})
+
+	t.Run("FindByVehicleID rejects SQL injection payloads", func(t *testing.T) {
+		for _, payload := range injectionPayloads {
+			results, err := fuelRepo.FindByVehicleID(ctx, payload)
+			require.NoError(t, err, "parameterized query should not fail for payload %q", payload)
+			assert.Empty(t, results, "payload %q should not return records", payload)
+		}
+	})
+
+	t.Run("Delete with SQL injection payload does not affect data", func(t *testing.T) {
+		err := fuelRepo.Delete(ctx, "'; DROP TABLE fuel_records; --")
+		assert.Error(t, err, "should return not-found error")
+
+		// Verify we can still query the table
+		count, err := fuelRepo.Count(ctx, FuelFilters{})
+		require.NoError(t, err)
+		assert.Equal(t, 0, count)
+	})
+}

@@ -209,3 +209,52 @@ func ValidateMaintenanceRecord(m *MaintenanceRecord) error {
 
 	return nil
 }
+
+// ValidateFuelRecord validates a FuelRecord model
+func ValidateFuelRecord(f *FuelRecord) error {
+	if f.VehicleID == "" {
+		return NewValidationError("vehicle_id", "vehicle ID is required")
+	}
+
+	if f.FillDate.IsZero() {
+		return NewValidationError("fill_date", "fill date is required")
+	}
+
+	if f.FillDate.After(time.Now()) {
+		return NewValidationError("fill_date", "fill date cannot be in the future")
+	}
+
+	if f.Mileage <= 0 {
+		return NewValidationError("mileage", "mileage must be greater than zero")
+	}
+
+	if f.Volume <= 0 {
+		return NewValidationError("volume", "volume must be greater than zero")
+	}
+
+	if f.FuelType == "" {
+		return NewValidationError("fuel_type", "fuel type is required")
+	}
+
+	if !IsValidFuelType(f.FuelType) {
+		return NewValidationError("fuel_type", "invalid fuel type")
+	}
+
+	if f.PricePerUnit != nil && *f.PricePerUnit < 0 {
+		return NewValidationError("price_per_unit", "price per unit cannot be negative")
+	}
+
+	if f.OctaneRating != nil && *f.OctaneRating <= 0 {
+		return NewValidationError("octane_rating", "octane rating must be greater than zero")
+	}
+
+	if f.CityDrivingPercentage != nil && (*f.CityDrivingPercentage < 0 || *f.CityDrivingPercentage > 100) {
+		return NewValidationError("city_driving_percentage", "city driving percentage must be between 0 and 100")
+	}
+
+	if f.VehicleReportedMPG != nil && *f.VehicleReportedMPG <= 0 {
+		return NewValidationError("vehicle_reported_mpg", "vehicle reported MPG must be greater than zero")
+	}
+
+	return nil
+}

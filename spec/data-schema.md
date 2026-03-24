@@ -68,14 +68,17 @@ Stores fuel fill-up records for each vehicle.
 - id (primary key)
 - vehicle_id (foreign key to Vehicles)
 - fill_date (date and time of fill-up)
-- mileage (mileage at fill-up)
-- price (total price paid)
-- volume (gallons)
-- city_driving_percentage (0-100)
-- octane_rating
-- location
-- brand
-- notes
+- mileage (odometer at fill-up, required)
+- volume (gallons, required)
+- fuel_type (gasoline, diesel, e85; defaults to gasoline, required)
+- partial_fill (boolean, defaults false, required)
+- price_per_unit (price per gallon, optional)
+- octane_rating (optional)
+- location (optional)
+- brand (optional)
+- notes (optional)
+- city_driving_percentage (0-100, optional)
+- vehicle_reported_mpg (optional)
 - created_at, updated_at
 
 ## Relationships

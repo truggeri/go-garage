@@ -28,6 +28,8 @@ The following migrations are currently in place:
 3. **000003_create_maintenance_records_table**: Creates the `maintenance_records` table with foreign key to vehicles
 4. **000004_add_display_name_to_vehicles**: Adds `display_name` column to vehicles table
 5. **000005_add_custom_service_type_to_maintenance**: Adds `custom_service_type` column to maintenance_records table for the "Other" service type option
+6. **000006_create_vehicle_metrics_table**: Creates the `vehicle_metrics` table for aggregated vehicle statistics
+7. **000007_create_fuel_records_table**: Creates the `fuel_records` table with foreign key to vehicles, supporting fuel fill-up tracking
 
 ### Schema Evolution
 
@@ -197,6 +199,7 @@ migrate -database "sqlite3://./data/go-garage.db" -path ./migrations up
 ### Scenario 4: Rollback in Production
 
 1. **Backup Database First** (Critical!)
+
    ```bash
    make db-backup
    # or
@@ -204,23 +207,27 @@ migrate -database "sqlite3://./data/go-garage.db" -path ./migrations up
    ```
 
 2. **Stop the Application**
+
    ```bash
    # Stop the running server
    pkill -f go-garage
    ```
 
 3. **Rollback the Migration**
+
    ```bash
    # Using migrate CLI
    migrate -database "sqlite3://./data/go-garage.db" -path ./migrations down 1
    ```
 
 4. **Verify the Rollback**
+
    ```bash
    migrate -database "sqlite3://./data/go-garage.db" -path ./migrations version
    ```
 
 5. **Restart with Previous Application Version**
+
    ```bash
    # Deploy and start previous version
    git checkout <previous-version>
@@ -248,6 +255,7 @@ touch migrations/000004_add_fuel_records_table.down.sql
 ```
 
 **Up Migration** (`000004_add_fuel_records_table.up.sql`):
+
 ```sql
 CREATE TABLE IF NOT EXISTS fuel_records (
     id TEXT PRIMARY KEY,
@@ -269,6 +277,7 @@ CREATE INDEX idx_fuel_date ON fuel_records(date);
 ```
 
 **Down Migration** (`000004_add_fuel_records_table.down.sql`):
+
 ```sql
 DROP INDEX IF EXISTS idx_fuel_date;
 DROP INDEX IF EXISTS idx_fuel_vehicle_id;
@@ -282,6 +291,7 @@ DROP TABLE IF EXISTS fuel_records;
 **Cause**: A migration was interrupted or failed midway.
 
 **Solution**:
+
 1. Check which migration is dirty: `migrate version`
 2. Manually fix the database state or use `migrate force <version>`
 3. Re-run migrations

@@ -13,6 +13,7 @@ ValidateUser(u *User) error
 ValidatePassword(password string) error
 ValidateVehicle(v *Vehicle) error
 ValidateMaintenanceRecord(m *MaintenanceRecord) error
+ValidateFuelRecord(f *FuelRecord) error
 ```
 
 ## User Validation
@@ -47,12 +48,14 @@ if err != nil {
 Valid usernames match the pattern: `^[a-zA-Z0-9_\-]+$`
 
 **Valid Examples:**
+
 - `johndoe`
 - `john_doe`
 - `john-doe`
 - `JohnDoe123`
 
 **Invalid Examples:**
+
 - `john doe` (contains space)
 - `john@doe` (contains @)
 - `jo` (too short)
@@ -62,11 +65,13 @@ Valid usernames match the pattern: `^[a-zA-Z0-9_\-]+$`
 Valid emails match a standard email pattern.
 
 **Valid Examples:**
+
 - `john@example.com`
 - `john.doe@example.co.uk`
 - `john+tag@example.com`
 
 **Invalid Examples:**
+
 - `john@` (incomplete)
 - `@example.com` (no local part)
 - `john` (no domain)
@@ -104,11 +109,13 @@ if err != nil {
 4. **Digit**: At least one 0-9
 
 **Valid Examples:**
+
 - `Password1` ✓
 - `MySecure123` ✓
 - `Abc12345` ✓
 
 **Invalid Examples:**
+
 - `password` ✗ (no uppercase, no digit)
 - `PASSWORD1` ✗ (no lowercase)
 - `Password` ✗ (no digit)
@@ -154,6 +161,7 @@ if err != nil {
 ### VIN Format
 
 Vehicle Identification Numbers (VINs) must:
+
 1. Be exactly 17 characters
 2. Contain only alphanumeric characters (A-Z, 0-9)
 3. Not contain letters I, O, or Q (to avoid confusion with 1 and 0)
@@ -161,11 +169,13 @@ Vehicle Identification Numbers (VINs) must:
 **VIN Pattern**: `^[A-HJ-NPR-Z0-9]{17}$`
 
 **Valid Examples:**
+
 - `1HGCM82633A004352`
 - `WVWZZZ3CZWE123456`
 - `5YJSA1S20EFP12345`
 
 **Invalid Examples:**
+
 - `1HGCM82633A00435` (16 characters)
 - `1HGCM82633A0043521` (18 characters)
 - `1HGCM826I3A004352` (contains I)
@@ -173,6 +183,7 @@ Vehicle Identification Numbers (VINs) must:
 - `1HGCM8263QA004352` (contains Q)
 
 **VIN Normalization:**
+
 - Spaces are automatically removed
 - Letters are converted to uppercase
 
@@ -185,16 +196,19 @@ Vehicle Identification Numbers (VINs) must:
 ### Year Validation
 
 The year must be:
+
 - At least 1900 (minimum supported year)
 - At most current year + 1 (allows for next model year vehicles)
 
 **Example (in 2024):**
+
 - Valid: 1900, 1950, 2020, 2024, 2025
 - Invalid: 1899, 2026, 2030
 
 ### Vehicle Status
 
 Valid status values:
+
 - `active` - Vehicle is currently in use
 - `sold` - Vehicle has been sold
 - `scrapped` - Vehicle has been disposed of
@@ -272,10 +286,62 @@ When `service_type` is `"other"`, the `custom_service_type` field must be provid
 ### Service Date
 
 The service date:
+
 - Cannot be empty (zero value)
 - Cannot be in the future
 
 This prevents scheduling future maintenance as completed work.
+
+---
+
+## Fuel Record Validation
+
+### ValidateFuelRecord
+
+Validates a FuelRecord model before creation or update.
+
+```go
+err := models.ValidateFuelRecord(record)
+if err != nil {
+    var valErr *models.ValidationError
+    if errors.As(err, &valErr) {
+        fmt.Printf("Field: %s, Error: %s\n", valErr.Field, valErr.Message)
+    }
+}
+```
+
+### Field Rules
+
+| Field | Rule | Error Message |
+|-------|------|---------------|
+| `vehicle_id` | Required | "vehicle ID is required" |
+| `fill_date` | Required (non-zero) | "fill date is required" |
+| `fill_date` | Not in the future | "fill date cannot be in the future" |
+| `mileage` | Must be > 0 | "mileage must be greater than zero" |
+| `volume` | Must be > 0 | "volume must be greater than zero" |
+| `fuel_type` | Required | "fuel type is required" |
+| `fuel_type` | Must be valid enum value | "invalid fuel type" |
+| `price_per_unit` | Non-negative if provided | "price per unit cannot be negative" |
+| `octane_rating` | Greater than zero if provided | "octane rating must be greater than zero" |
+| `city_driving_percentage` | 0-100 if provided | "city driving percentage must be between 0 and 100" |
+| `vehicle_reported_mpg` | Greater than zero if provided | "vehicle reported MPG must be greater than zero" |
+
+### Fuel Types
+
+The `fuel_type` field must be one of the following:
+
+| Enum Value | Display Name |
+|-----------|-------------|
+| `gasoline` | Gasoline |
+| `diesel` | Diesel |
+| `e85` | E85 |
+
+### Fill Date
+
+The fill date:
+
+- Cannot be empty (zero value)
+- Cannot be in the future
 
 ---
 
