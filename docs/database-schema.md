@@ -82,6 +82,43 @@ Go-Garage uses SQLite as its database. The schema is managed through versioned m
 │   idx_maintenance_service_date           │
 │         (service_date)                   │
 └─────────────────────────────────────────┘
+
+                    │ (from vehicles)
+                    │ 1:N
+                    ▼
+┌─────────────────────────────────────────┐
+│            fuel_records                  │
+├─────────────────────────────────────────┤
+│ id                    TEXT    PK         │
+│ vehicle_id            TEXT    FK NOT NULL│
+│ fill_date             DATE    NOT NULL   │
+│ mileage               INTEGER NOT NULL   │
+│ volume                REAL    NOT NULL   │
+│ fuel_type             TEXT    NOT NULL   │
+│ partial_fill          INTEGER NOT NULL   │
+│ price_per_unit        REAL               │
+│ octane_rating         INTEGER            │
+│ location              TEXT               │
+│ brand                 TEXT               │
+│ notes                 TEXT               │
+│ city_driving_percentage INTEGER          │
+│ vehicle_reported_mpg  REAL               │
+│ created_at            DATETIME NOT NULL  │
+│ updated_at            DATETIME NOT NULL  │
+├─────────────────────────────────────────┤
+│ Constraints:                             │
+│   CHECK(fuel_type IN ('gasoline',       │
+│         'diesel','e85'))                 │
+│   CHECK(city_driving_percentage IS NULL  │
+│     OR (>= 0 AND <= 100))              │
+│   FOREIGN KEY (vehicle_id) REFERENCES    │
+│         vehicles(id) ON DELETE CASCADE   │
+│ Indexes:                                 │
+│   idx_fuel_records_vehicle_id            │
+│         (vehicle_id)                     │
+│   idx_fuel_records_fill_date             │
+│         (fill_date)                      │
+└─────────────────────────────────────────┘
 ```
 
 ## Table Descriptions
@@ -103,6 +140,7 @@ The `users` table stores user account information and authentication credentials
 | `last_login_at` | DATETIME | | Timestamp of last successful login |
 
 **Indexes:**
+
 - `idx_users_email` - Speeds up email lookups for authentication
 - `idx_users_username` - Speeds up username lookups for authentication
 
@@ -130,10 +168,12 @@ The `vehicles` table stores information about vehicles owned by users.
 | `updated_at` | DATETIME | NOT NULL | Timestamp of last update |
 
 **Constraints:**
+
 - Foreign key to `users(id)` with `ON DELETE CASCADE`
 - Check constraint: `status IN ('active', 'sold', 'scrapped')`
 
 **Indexes:**
+
 - `idx_vehicles_user_id` - Speeds up queries for a user's vehicles
 - `idx_vehicles_vin` - Speeds up VIN lookups
 - `idx_vehicles_status` - Speeds up filtering by status
@@ -157,11 +197,47 @@ The `maintenance_records` table stores service and maintenance history for vehic
 | `updated_at` | DATETIME | NOT NULL | Timestamp of last update |
 
 **Constraints:**
+
 - Foreign key to `vehicles(id)` with `ON DELETE CASCADE`
 
 **Indexes:**
+
 - `idx_maintenance_vehicle_id` - Speeds up queries for a vehicle's maintenance history
 - `idx_maintenance_service_date` - Speeds up date-based queries and sorting
+
+### fuel_records
+
+The `fuel_records` table stores fuel fill-up records for vehicles.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | TEXT | PRIMARY KEY | UUID identifier for the record |
+| `vehicle_id` | TEXT | FK, NOT NULL | Reference to the vehicle |
+| `fill_date` | DATE | NOT NULL | Date of the fuel fill-up |
+| `mileage` | INTEGER | NOT NULL | Odometer reading at fill-up |
+| `volume` | REAL | NOT NULL | Volume of fuel in gallons |
+| `fuel_type` | TEXT | NOT NULL, CHECK | Fuel type: 'gasoline', 'diesel', or 'e85' |
+| `partial_fill` | INTEGER | NOT NULL, DEFAULT 0 | Whether this was a partial fill (0=no, 1=yes) |
+| `price_per_unit` | REAL | | Price per gallon |
+| `octane_rating` | INTEGER | | Fuel octane rating |
+| `location` | TEXT | | Location of the fuel station |
+| `brand` | TEXT | | Fuel brand name |
+| `notes` | TEXT | | Additional notes |
+| `city_driving_percentage` | INTEGER | CHECK 0-100 | Percentage of city driving since last fill-up |
+| `vehicle_reported_mpg` | REAL | | MPG reported by vehicle computer |
+| `created_at` | DATETIME | NOT NULL | Timestamp of record creation |
+| `updated_at` | DATETIME | NOT NULL | Timestamp of last update |
+
+**Constraints:**
+
+- Foreign key to `vehicles(id)` with `ON DELETE CASCADE`
+- Check constraint: `fuel_type IN ('gasoline', 'diesel', 'e85')`
+- Check constraint: `city_driving_percentage IS NULL OR (>= 0 AND <= 100)`
+
+**Indexes:**
+
+- `idx_fuel_records_vehicle_id` - Speeds up queries for a vehicle's fuel records
+- `idx_fuel_records_fill_date` - Speeds up date-based queries and sorting
 
 ## Relationships
 
@@ -181,6 +257,15 @@ A vehicle can have multiple maintenance records. When a vehicle is deleted, all 
 ```sql
 -- Example: Get all maintenance for a vehicle
 SELECT * FROM maintenance_records WHERE vehicle_id = ? ORDER BY service_date DESC;
+```
+
+### Vehicle → Fuel Records (One-to-Many)
+
+A vehicle can have multiple fuel records. When a vehicle is deleted, all its fuel records are automatically deleted due to `ON DELETE CASCADE`.
+
+```sql
+-- Example: Get all fuel records for a vehicle
+SELECT * FROM fuel_records WHERE vehicle_id = ? ORDER BY fill_date DESC;
 ```
 
 ## Data Types
@@ -210,6 +295,10 @@ The schema is managed through versioned migrations:
 | 000001 | create_users_table | Creates users table with indexes |
 | 000002 | create_vehicles_table | Creates vehicles table with FK to users |
 | 000003 | create_maintenance_records_table | Creates maintenance_records table with FK to vehicles |
+| 000004 | add_display_name_to_vehicles | Adds display_name column to vehicles |
+| 000005 | add_custom_service_type_to_maintenance | Adds custom_service_type column to maintenance_records |
+| 000006 | create_vehicle_metrics_table | Creates vehicle_metrics table for aggregated stats |
+| 000007 | create_fuel_records_table | Creates fuel_records table with FK to vehicles |
 
 For migration management details, see [Database Migrations Guide](./database-migrations.md).
 
@@ -218,6 +307,7 @@ For migration management details, see [Database Migrations Guide](./database-mig
 ### SQLite Choice
 
 SQLite was chosen for:
+
 - **Simplicity**: No separate database server required
 - **Portability**: Single file database, easy to backup
 - **Performance**: Excellent read performance for small-to-medium datasets
@@ -226,6 +316,7 @@ SQLite was chosen for:
 ### UUID Primary Keys
 
 UUIDs are used instead of auto-increment integers for:
+
 - **Distributed Generation**: IDs can be generated in application code
 - **No Collisions**: Safe for distributed systems
 - **Security**: IDs are not sequential/predictable
@@ -233,6 +324,7 @@ UUIDs are used instead of auto-increment integers for:
 ### Cascade Deletes
 
 `ON DELETE CASCADE` is used to:
+
 - **Maintain Integrity**: Automatically clean up child records
 - **Simplify Code**: No need for manual cleanup logic
 - **Prevent Orphans**: No orphaned vehicles or maintenance records
@@ -240,6 +332,7 @@ UUIDs are used instead of auto-increment integers for:
 ### Index Strategy
 
 Indexes are added for:
+
 - **Foreign Keys**: `user_id`, `vehicle_id` for join performance
 - **Unique Lookups**: `email`, `username`, `vin` for authentication and search
 - **Filtering**: `status`, `service_date` for common filter operations
@@ -248,8 +341,7 @@ Indexes are added for:
 
 ### Planned Tables
 
-1. **fuel_records** - Track fuel purchases and consumption
-2. **reminders** - Service reminders and scheduled maintenance
+1. **reminders** - Service reminders and scheduled maintenance
 
 ### Potential Improvements
 

@@ -21,6 +21,13 @@ type PaginationParams struct {
 	Offset int
 }
 
+// Common SQL fragments used by multiple repositories
+const (
+	sqlFilterVehicleID = " AND vehicle_id = ?"
+	sqlLimit           = " LIMIT ?"
+	sqlOffset          = " OFFSET ?"
+)
+
 // VehicleRepository defines the interface for vehicle data access
 type VehicleRepository interface {
 	// Create inserts a new vehicle into the database

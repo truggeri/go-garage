@@ -223,7 +223,7 @@ func (r *SQLiteMaintenanceRepository) List(ctx context.Context, filters Maintena
 	args := []interface{}{}
 
 	if filters.VehicleID != nil {
-		query += " AND vehicle_id = ?"
+		query += sqlFilterVehicleID
 		args = append(args, *filters.VehicleID)
 	}
 
@@ -236,12 +236,12 @@ func (r *SQLiteMaintenanceRepository) List(ctx context.Context, filters Maintena
 
 	// Add pagination
 	if pagination.Limit > 0 {
-		query += " LIMIT ?"
+		query += sqlLimit
 		args = append(args, pagination.Limit)
 	}
 
 	if pagination.Offset > 0 {
-		query += " OFFSET ?"
+		query += sqlOffset
 		args = append(args, pagination.Offset)
 	}
 
@@ -260,7 +260,7 @@ func (r *SQLiteMaintenanceRepository) Count(ctx context.Context, filters Mainten
 	args := []interface{}{}
 
 	if filters.VehicleID != nil {
-		query += " AND vehicle_id = ?"
+		query += sqlFilterVehicleID
 		args = append(args, *filters.VehicleID)
 	}
 
