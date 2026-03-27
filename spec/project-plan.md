@@ -71,7 +71,7 @@ Milestone 4, Responsive Design
 - [x] Loading States
 - [x] Empty States
 - [x] Error Pages
-- [ ] Documentation
+- [x] Documentation
 
 ### Milestone 5: Testing Deployment
 
