@@ -68,12 +68,15 @@ func main() {
 	userRepo := repositories.NewSQLiteUserRepository(db)
 	vehicleRepo := repositories.NewSQLiteVehicleRepository(db)
 	maintenanceRepo := repositories.NewSQLiteMaintenanceRepository(db)
+	fuelRepo := repositories.NewSQLiteFuelRepository(db)
 	metricsRepo := repositories.NewSQLiteMetricsRepository(db)
 
 	// Initialize services
 	userSvc := services.NewUserService(userRepo)
 	vehicleSvc := services.NewVehicleService(vehicleRepo)
 	maintenanceSvc := services.NewMaintenanceService(maintenanceRepo, vehicleRepo, metricsRepo)
+	fuelSvc := services.NewFuelService(fuelRepo, vehicleRepo)
+	_ = fuelSvc // TODO: wire into handlers when fuel API/page endpoints are added
 
 	// Initialize JWT token manager
 	tokenMgr, tokenErr := auth.BuildTokenManager(cfg.JWT.Secret, auth.StandardTokenDurations())
