@@ -570,10 +570,11 @@ func TestMaintenanceService_MetricsRecalculation(t *testing.T) {
 		err := service.DeleteMaintenance(ctx, "record-123")
 		require.NoError(t, err)
 
-		// Verify metrics were updated (should be nil since no more records)
+		// Verify metrics were updated (should be 0 since no more records)
 		metrics, ok := metricsRepo.metrics["vehicle-123"]
 		require.True(t, ok)
-		assert.Nil(t, metrics.TotalSpent)
+		require.NotNil(t, metrics.TotalSpent)
+		assert.Equal(t, 0.0, *metrics.TotalSpent)
 	})
 
 	t.Run("handles nil metrics repo gracefully", func(t *testing.T) {

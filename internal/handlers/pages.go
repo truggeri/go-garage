@@ -66,8 +66,15 @@ func (h *PageHandler) getVehicleTotalSpent(ctx context.Context, vehicleID string
 		return 0
 	}
 	m, err := h.metricsRepo.GetByVehicleID(ctx, vehicleID)
-	if err != nil || m == nil || m.TotalSpent == nil {
+	if err != nil || m == nil {
 		return 0
 	}
-	return *m.TotalSpent
+	var total float64
+	if m.TotalSpent != nil {
+		total += *m.TotalSpent
+	}
+	if m.TotalFuelSpent != nil {
+		total += *m.TotalFuelSpent
+	}
+	return total
 }

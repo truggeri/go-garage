@@ -27,16 +27,18 @@ func (r *SQLiteMetricsRepository) Upsert(ctx context.Context, metrics *models.Ve
 	metrics.UpdatedAt = now
 
 	query := `
-		INSERT INTO vehicle_metrics (vehicle_id, total_spent, created_at, updated_at)
-		VALUES (?, ?, ?, ?)
+		INSERT INTO vehicle_metrics (vehicle_id, total_spent, total_fuel_spent, created_at, updated_at)
+		VALUES (?, ?, ?, ?, ?)
 		ON CONFLICT(vehicle_id) DO UPDATE SET
-			total_spent = excluded.total_spent,
+			total_spent = COALESCE(excluded.total_spent, vehicle_metrics.total_spent),
+			total_fuel_spent = COALESCE(excluded.total_fuel_spent, vehicle_metrics.total_fuel_spent),
 			updated_at = excluded.updated_at
 	`
 
 	_, err := r.db.ExecContext(ctx, query,
 		metrics.VehicleID,
 		metrics.TotalSpent,
+		metrics.TotalFuelSpent,
 		now,
 		now,
 	)
@@ -51,17 +53,19 @@ func (r *SQLiteMetricsRepository) Upsert(ctx context.Context, metrics *models.Ve
 // Returns nil without error if no metrics row exists.
 func (r *SQLiteMetricsRepository) GetByVehicleID(ctx context.Context, vehicleID string) (*models.VehicleMetrics, error) {
 	query := `
-		SELECT vehicle_id, total_spent, created_at, updated_at
+		SELECT vehicle_id, total_spent, total_fuel_spent, created_at, updated_at
 		FROM vehicle_metrics
 		WHERE vehicle_id = ?
 	`
 
 	metrics := &models.VehicleMetrics{}
 	var totalSpent sql.NullFloat64
+	var totalFuelSpent sql.NullFloat64
 
 	err := r.db.QueryRowContext(ctx, query, vehicleID).Scan(
 		&metrics.VehicleID,
 		&totalSpent,
+		&totalFuelSpent,
 		&metrics.CreatedAt,
 		&metrics.UpdatedAt,
 	)
@@ -76,11 +80,14 @@ func (r *SQLiteMetricsRepository) GetByVehicleID(ctx context.Context, vehicleID 
 	if totalSpent.Valid {
 		metrics.TotalSpent = &totalSpent.Float64
 	}
+	if totalFuelSpent.Valid {
+		metrics.TotalFuelSpent = &totalFuelSpent.Float64
+	}
 
 	return metrics, nil
 }
 
-// SumTotalSpentByVehicleIDs returns the sum of total_spent across the given vehicle IDs.
+// SumTotalSpentByVehicleIDs returns the sum of total_spent and total_fuel_spent across the given vehicle IDs.
 func (r *SQLiteMetricsRepository) SumTotalSpentByVehicleIDs(ctx context.Context, vehicleIDs []string) (float64, error) {
 	if len(vehicleIDs) == 0 {
 		return 0, nil
@@ -94,7 +101,7 @@ func (r *SQLiteMetricsRepository) SumTotalSpentByVehicleIDs(ctx context.Context,
 	}
 
 	query := fmt.Sprintf(
-		`SELECT COALESCE(SUM(total_spent), 0) FROM vehicle_metrics WHERE vehicle_id IN (%s)`,
+		`SELECT COALESCE(SUM(COALESCE(total_spent, 0) + COALESCE(total_fuel_spent, 0)), 0) FROM vehicle_metrics WHERE vehicle_id IN (%s)`,
 		strings.Join(placeholders, ","),
 	)
 

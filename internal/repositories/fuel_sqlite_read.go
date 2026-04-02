@@ -171,3 +171,21 @@ func (r *SQLiteFuelRepository) Count(ctx context.Context, filters FuelFilters) (
 
 	return count, nil
 }
+
+// SumCostByVehicleID returns the total fuel cost (price_per_unit * volume) for a specific vehicle.
+// Returns nil if there are no records with a price for the vehicle.
+func (r *SQLiteFuelRepository) SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error) {
+	query := `SELECT SUM(price_per_unit * volume) FROM fuel_records WHERE vehicle_id = ? AND price_per_unit IS NOT NULL`
+
+	var total sql.NullFloat64
+	err := r.db.QueryRowContext(ctx, query, vehicleID).Scan(&total)
+	if err != nil {
+		return nil, models.NewDatabaseError("sum fuel cost by vehicle ID", err)
+	}
+
+	if !total.Valid {
+		return nil, nil
+	}
+
+	return &total.Float64, nil
+}

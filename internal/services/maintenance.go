@@ -164,6 +164,13 @@ func (s *DefaultMaintenanceService) recalculateMetrics(ctx context.Context, vehi
 		return
 	}
 
+	// nil means no records with cost — treat as zero spent so the Upsert
+	// overwrites any stale value instead of preserving it via COALESCE.
+	if totalSpent == nil {
+		zero := 0.0
+		totalSpent = &zero
+	}
+
 	metrics := &models.VehicleMetrics{
 		VehicleID:  vehicleID,
 		TotalSpent: totalSpent,

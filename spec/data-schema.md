@@ -50,13 +50,14 @@ Stores maintenance and service records for each vehicle.
 
 ### Vehicle Metrics Table
 
-Stores aggregated metrics for each vehicle, updated automatically when maintenance records change.
+Stores aggregated metrics for each vehicle, updated automatically when maintenance or fuel records change.
 
 **Fields:**
 
 - id (primary key)
 - vehicle_id (foreign key to Vehicles, unique)
 - total_spent (sum of maintenance costs, nullable)
+- total_fuel_spent (sum of fuel costs, nullable)
 - created_at, updated_at
 
 ### Fuel Records Table

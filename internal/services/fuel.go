@@ -52,13 +52,15 @@ type FuelUpdates struct {
 type DefaultFuelService struct {
 	repo        repositories.FuelRepository
 	vehicleRepo repositories.VehicleRepository
+	metricsRepo repositories.MetricsRepository
 }
 
 // NewFuelService creates a new DefaultFuelService
-func NewFuelService(repo repositories.FuelRepository, vehicleRepo repositories.VehicleRepository) *DefaultFuelService {
+func NewFuelService(repo repositories.FuelRepository, vehicleRepo repositories.VehicleRepository, metricsRepo repositories.MetricsRepository) *DefaultFuelService {
 	return &DefaultFuelService{
 		repo:        repo,
 		vehicleRepo: vehicleRepo,
+		metricsRepo: metricsRepo,
 	}
 }
 
@@ -70,7 +72,12 @@ func (s *DefaultFuelService) CreateFuel(ctx context.Context, record *models.Fuel
 		return err
 	}
 
-	return s.repo.Create(ctx, record)
+	if err := s.repo.Create(ctx, record); err != nil {
+		return err
+	}
+
+	s.recalculateMetrics(ctx, record.VehicleID)
+	return nil
 }
 
 // GetFuel retrieves a fuel record by its ID
@@ -93,7 +100,7 @@ func (s *DefaultFuelService) CountFuel(ctx context.Context, filters repositories
 	return s.repo.Count(ctx, filters)
 }
 
-// UpdateFuel updates a fuel record's information
+// UpdateFuel updates a fuel record
 func (s *DefaultFuelService) UpdateFuel(ctx context.Context, id string, updates FuelUpdates) (*models.FuelRecord, error) {
 	// Get the existing record
 	record, err := s.repo.FindByID(ctx, id)
@@ -144,16 +151,50 @@ func (s *DefaultFuelService) UpdateFuel(ctx context.Context, id string, updates 
 		return nil, err
 	}
 
+	s.recalculateMetrics(ctx, record.VehicleID)
 	return record, nil
 }
 
 // DeleteFuel deletes a fuel record
 func (s *DefaultFuelService) DeleteFuel(ctx context.Context, id string) error {
-	// Verify the record exists before deleting
-	_, err := s.repo.FindByID(ctx, id)
+	// Get the record first to find the vehicle ID for metrics recalculation
+	record, err := s.repo.FindByID(ctx, id)
 	if err != nil {
 		return err
 	}
 
-	return s.repo.Delete(ctx, id)
+	if err := s.repo.Delete(ctx, id); err != nil {
+		return err
+	}
+
+	s.recalculateMetrics(ctx, record.VehicleID)
+	return nil
+}
+
+// recalculateMetrics recalculates and upserts the total_fuel_spent metric for a vehicle.
+// Errors are silently ignored since metrics are non-critical and the primary
+// fuel operation has already succeeded.
+func (s *DefaultFuelService) recalculateMetrics(ctx context.Context, vehicleID string) {
+	if s.metricsRepo == nil {
+		return
+	}
+
+	totalFuelSpent, err := s.repo.SumCostByVehicleID(ctx, vehicleID)
+	if err != nil {
+		return
+	}
+
+	// nil means no records with cost — treat as zero spent so the Upsert
+	// overwrites any stale value instead of preserving it via COALESCE.
+	if totalFuelSpent == nil {
+		zero := 0.0
+		totalFuelSpent = &zero
+	}
+
+	metrics := &models.VehicleMetrics{
+		VehicleID:      vehicleID,
+		TotalFuelSpent: totalFuelSpent,
+	}
+
+	_ = s.metricsRepo.Upsert(ctx, metrics)
 }

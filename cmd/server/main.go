@@ -75,7 +75,7 @@ func main() {
 	userSvc := services.NewUserService(userRepo)
 	vehicleSvc := services.NewVehicleService(vehicleRepo)
 	maintenanceSvc := services.NewMaintenanceService(maintenanceRepo, vehicleRepo, metricsRepo)
-	fuelSvc := services.NewFuelService(fuelRepo, vehicleRepo)
+	fuelSvc := services.NewFuelService(fuelRepo, vehicleRepo, metricsRepo)
 	_ = fuelSvc // TODO: wire into handlers when fuel API/page endpoints are added
 
 	// Initialize JWT token manager
