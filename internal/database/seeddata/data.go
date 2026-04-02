@@ -319,3 +319,187 @@ func GetSampleMaintenanceRecords() []*models.MaintenanceRecord {
 		},
 	}
 }
+
+// GetSampleFuelRecords returns a list of sample fuel records for seeding the database
+// These records are linked to the sample vehicles
+func GetSampleFuelRecords() []*models.FuelRecord {
+	now := time.Now()
+	fillDate1 := now.Add(-7 * 24 * time.Hour)  // 1 week ago
+	fillDate2 := now.Add(-21 * 24 * time.Hour) // 3 weeks ago
+	fillDate3 := now.Add(-35 * 24 * time.Hour) // 5 weeks ago
+	fillDate4 := now.Add(-14 * 24 * time.Hour) // 2 weeks ago
+	fillDate5 := now.Add(-28 * 24 * time.Hour) // 4 weeks ago
+	fillDate6 := now.Add(-10 * 24 * time.Hour) // 10 days ago
+	fillDate7 := now.Add(-42 * 24 * time.Hour) // 6 weeks ago
+	fillDate8 := now.Add(-56 * 24 * time.Hour) // 8 weeks ago
+
+	price1 := 3.459
+	price2 := 3.299
+	price3 := 3.529
+	price4 := 3.899
+	price5 := 3.199
+	price6 := 3.749
+	price7 := 4.099
+	price8 := 3.359
+
+	octane1 := 87
+	octane2 := 87
+	octane3 := 91
+	octane6 := 93
+
+	cityPct1 := 70
+	cityPct3 := 40
+	cityPct5 := 80
+	cityPct7 := 50
+
+	mpg1 := 28.5
+	mpg4 := 24.2
+	mpg6 := 30.1
+
+	return []*models.FuelRecord{
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440001",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440001", // Honda Accord
+			FillDate:              fillDate1,
+			Mileage:               64800,
+			Volume:                12.5,
+			FuelType:              "gasoline",
+			PartialFill:           false,
+			PricePerUnit:          &price1,
+			OctaneRating:          &octane1,
+			Location:              "Shell Station, Main St",
+			Brand:                 "Shell",
+			Notes:                 "Regular fill-up",
+			CityDrivingPercentage: &cityPct1,
+			VehicleReportedMPG:    &mpg1,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440002",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440001", // Honda Accord
+			FillDate:              fillDate2,
+			Mileage:               64450,
+			Volume:                11.8,
+			FuelType:              "gasoline",
+			PartialFill:           false,
+			PricePerUnit:          &price2,
+			OctaneRating:          &octane2,
+			Location:              "Costco Gas, Oak Ave",
+			Brand:                 "Kirkland",
+			Notes:                 "",
+			CityDrivingPercentage: nil,
+			VehicleReportedMPG:    nil,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440003",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440001", // Honda Accord
+			FillDate:              fillDate3,
+			Mileage:               64100,
+			Volume:                13.2,
+			FuelType:              "gasoline",
+			PartialFill:           false,
+			PricePerUnit:          &price3,
+			OctaneRating:          &octane3,
+			Location:              "BP Station, Elm Blvd",
+			Brand:                 "BP",
+			Notes:                 "Premium fuel for highway trip",
+			CityDrivingPercentage: &cityPct3,
+			VehicleReportedMPG:    nil,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440004",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440002", // Ford Edge
+			FillDate:              fillDate4,
+			Mileage:               84500,
+			Volume:                16.3,
+			FuelType:              "gasoline",
+			PartialFill:           false,
+			PricePerUnit:          &price4,
+			OctaneRating:          nil,
+			Location:              "Exxon, Highway 101",
+			Brand:                 "Exxon",
+			Notes:                 "Long road trip fill-up",
+			CityDrivingPercentage: nil,
+			VehicleReportedMPG:    &mpg4,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440005",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440003", // Toyota Corolla
+			FillDate:              fillDate5,
+			Mileage:               34500,
+			Volume:                10.1,
+			FuelType:              "gasoline",
+			PartialFill:           false,
+			PricePerUnit:          &price5,
+			OctaneRating:          nil,
+			Location:              "Chevron, Pine St",
+			Brand:                 "Chevron",
+			Notes:                 "Great mileage this tank",
+			CityDrivingPercentage: &cityPct5,
+			VehicleReportedMPG:    nil,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440006",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440003", // Toyota Corolla
+			FillDate:              fillDate6,
+			Mileage:               34800,
+			Volume:                9.8,
+			FuelType:              "gasoline",
+			PartialFill:           true,
+			PricePerUnit:          &price6,
+			OctaneRating:          &octane6,
+			Location:              "Mobil, Cedar Rd",
+			Brand:                 "Mobil",
+			Notes:                 "Partial fill, was in a hurry",
+			CityDrivingPercentage: nil,
+			VehicleReportedMPG:    &mpg6,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440007",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440005", // Chevrolet Malibu
+			FillDate:              fillDate7,
+			Mileage:               19500,
+			Volume:                13.7,
+			FuelType:              "gasoline",
+			PartialFill:           false,
+			PricePerUnit:          &price7,
+			OctaneRating:          nil,
+			Location:              "Sunoco, Market St",
+			Brand:                 "Sunoco",
+			Notes:                 "",
+			CityDrivingPercentage: &cityPct7,
+			VehicleReportedMPG:    nil,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+		{
+			ID:                    "880e8400-e29b-41d4-a716-446655440008",
+			VehicleID:             "660e8400-e29b-41d4-a716-446655440005", // Chevrolet Malibu
+			FillDate:              fillDate8,
+			Mileage:               19100,
+			Volume:                14.0,
+			FuelType:              "e85",
+			PartialFill:           false,
+			PricePerUnit:          &price8,
+			OctaneRating:          nil,
+			Location:              "FlexFuel Station, 5th Ave",
+			Brand:                 "FlexFuel",
+			Notes:                 "Trying E85 fuel",
+			CityDrivingPercentage: nil,
+			VehicleReportedMPG:    nil,
+			CreatedAt:             now,
+			UpdatedAt:             now,
+		},
+	}
+}

@@ -56,6 +56,7 @@ func main() {
 	userRepo := repositories.NewSQLiteUserRepository(db)
 	vehicleRepo := repositories.NewSQLiteVehicleRepository(db)
 	maintenanceRepo := repositories.NewSQLiteMaintenanceRepository(db)
+	fuelRepo := repositories.NewSQLiteFuelRepository(db)
 
 	// Check if data already exists
 	fmt.Println()
@@ -146,6 +147,27 @@ func main() {
 	}
 	fmt.Printf("✓ Seeded %d maintenance records\n", maintenanceCount)
 
+	// Seed fuel records
+	fmt.Println()
+	fmt.Println("Seeding fuel records...")
+	fuelCount := 0
+	sampleFuelRecords := seeddata.GetSampleFuelRecords()
+	for _, record := range sampleFuelRecords {
+		// Check if record already exists
+		if existingRecord, err := fuelRepo.FindByID(ctx, record.ID); err == nil && existingRecord != nil {
+			fmt.Printf("  - Skipping fuel record (already exists)\n")
+			continue
+		}
+
+		if err := fuelRepo.Create(ctx, record); err != nil {
+			fmt.Fprintf(os.Stderr, "  ✗ Failed to create fuel record: %v\n", err)
+			continue
+		}
+		fmt.Printf("  ✓ Created fuel record: %s on %s\n", record.FuelType, record.FillDate.Format("2006-01-02"))
+		fuelCount++
+	}
+	fmt.Printf("✓ Seeded %d fuel records\n", fuelCount)
+
 	// Summary
 	fmt.Println()
 	fmt.Println("================================")
@@ -153,5 +175,6 @@ func main() {
 	fmt.Printf("  - Users: %d\n", userCount)
 	fmt.Printf("  - Vehicles: %d\n", vehicleCount)
 	fmt.Printf("  - Maintenance records: %d\n", maintenanceCount)
+	fmt.Printf("  - Fuel records: %d\n", fuelCount)
 	fmt.Println("================================")
 }

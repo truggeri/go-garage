@@ -176,6 +176,7 @@ The seed command:
 - Creates sample users
 - Creates sample vehicles
 - Creates sample maintenance records
+- Creates sample fuel records
 - Checks for existing data to avoid duplicates
 
 ### Manual Data Insertion

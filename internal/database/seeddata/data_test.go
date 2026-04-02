@@ -143,10 +143,63 @@ func TestGetSampleMaintenanceRecords(t *testing.T) {
 	assert.GreaterOrEqual(t, len(serviceTypes), 2, "Should have at least 2 different service types")
 }
 
+func TestGetSampleFuelRecords(t *testing.T) {
+	records := GetSampleFuelRecords()
+	vehicles := GetSampleVehicles()
+
+	// Verify we have at least 8 fuel records
+	assert.GreaterOrEqual(t, len(records), 8, "Should have at least 8 sample fuel records")
+
+	// Create a map of vehicle IDs for validation
+	vehicleIDs := make(map[string]bool)
+	for _, vehicle := range vehicles {
+		vehicleIDs[vehicle.ID] = true
+	}
+
+	// Check each fuel record has required fields
+	for i, record := range records {
+		assert.NotEmpty(t, record.ID, "Record %d should have an ID", i)
+		assert.NotEmpty(t, record.VehicleID, "Record %d should have a vehicle ID", i)
+		assert.True(t, vehicleIDs[record.VehicleID], "Record %d should have a valid vehicle ID", i)
+		assert.NotZero(t, record.FillDate, "Record %d should have a fill date", i)
+		assert.Greater(t, record.Mileage, 0, "Record %d should have a positive mileage", i)
+		assert.Greater(t, record.Volume, 0.0, "Record %d should have a positive volume", i)
+		assert.NotEmpty(t, record.FuelType, "Record %d should have a fuel type", i)
+		assert.True(t, models.IsValidFuelType(record.FuelType), "Record %d should have a valid fuel type", i)
+		assert.NotZero(t, record.CreatedAt, "Record %d should have a created at timestamp", i)
+		assert.NotZero(t, record.UpdatedAt, "Record %d should have an updated at timestamp", i)
+	}
+
+	// Verify IDs are unique
+	idMap := make(map[string]bool)
+	for _, record := range records {
+		assert.False(t, idMap[record.ID], "ID %s should be unique", record.ID)
+		idMap[record.ID] = true
+	}
+
+	// Verify there are multiple different fuel types
+	fuelTypes := make(map[string]bool)
+	for _, record := range records {
+		fuelTypes[record.FuelType] = true
+	}
+	assert.GreaterOrEqual(t, len(fuelTypes), 2, "Should have at least 2 different fuel types")
+
+	// Verify at least one partial fill exists
+	hasPartialFill := false
+	for _, record := range records {
+		if record.PartialFill {
+			hasPartialFill = true
+			break
+		}
+	}
+	assert.True(t, hasPartialFill, "Should have at least one partial fill record")
+}
+
 func TestSeedDataRelationships(t *testing.T) {
 	users := GetSampleUsers()
 	vehicles := GetSampleVehicles()
 	records := GetSampleMaintenanceRecords()
+	fuelRecords := GetSampleFuelRecords()
 
 	// Create maps for validation
 	userIDs := make(map[string]bool)
@@ -167,5 +220,10 @@ func TestSeedDataRelationships(t *testing.T) {
 	// Verify all maintenance records belong to valid vehicles
 	for _, record := range records {
 		assert.True(t, vehicleIDs[record.VehicleID], "Maintenance record %s should belong to a valid vehicle", record.ID)
+	}
+
+	// Verify all fuel records belong to valid vehicles
+	for _, record := range fuelRecords {
+		assert.True(t, vehicleIDs[record.VehicleID], "Fuel record %s should belong to a valid vehicle", record.ID)
 	}
 }
