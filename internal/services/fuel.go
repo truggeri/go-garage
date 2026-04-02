@@ -25,7 +25,7 @@ type FuelService interface {
 	// CountFuel returns the total number of fuel records matching the filters
 	CountFuel(ctx context.Context, filters repositories.FuelFilters) (int, error)
 
-	// UpdateFuel updates a fuel record
+	// UpdateFuel updates a fuel record's information
 	UpdateFuel(ctx context.Context, id string, updates FuelUpdates) (*models.FuelRecord, error)
 
 	// DeleteFuel deletes a fuel record
