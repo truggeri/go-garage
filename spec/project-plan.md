@@ -36,6 +36,7 @@ Milestone 4, Responsive Design
 
 - [x] Vehicle Service
 - [x] Maintenance Service
+- [x] Fuel Service
 - [x] User Service
 - [x] JWT Implementation
 - [x] Middleware
