@@ -30,6 +30,7 @@ The following migrations are currently in place:
 5. **000005_add_custom_service_type_to_maintenance**: Adds `custom_service_type` column to maintenance_records table for the "Other" service type option
 6. **000006_create_vehicle_metrics_table**: Creates the `vehicle_metrics` table for aggregated vehicle statistics
 7. **000007_create_fuel_records_table**: Creates the `fuel_records` table with foreign key to vehicles, supporting fuel fill-up tracking
+8. **000008_add_total_fuel_spent_to_vehicle_metrics**: Adds `total_fuel_spent` column to vehicle_metrics table for tracking aggregated fuel spending
 
 ### Schema Evolution
 

@@ -34,4 +34,8 @@ type FuelRepository interface {
 
 	// Count returns the total number of fuel records matching the filters
 	Count(ctx context.Context, filters FuelFilters) (int, error)
+
+	// SumCostByVehicleID returns the total fuel cost (price_per_unit * volume) for a specific vehicle.
+	// Returns nil if there are no records with a price for the vehicle.
+	SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error)
 }

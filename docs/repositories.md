@@ -593,6 +593,7 @@ type FuelRepository interface {
     Delete(ctx context.Context, id string) error
     List(ctx context.Context, filters FuelFilters, pagination PaginationParams) ([]*models.FuelRecord, error)
     Count(ctx context.Context, filters FuelFilters) (int, error)
+    SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error)
 }
 ```
 
@@ -694,6 +695,19 @@ Returns the total number of fuel records matching the filters.
 ```go
 Count(ctx context.Context, filters FuelFilters) (int, error)
 ```
+
+#### SumCostByVehicleID
+
+Returns the total fuel cost (price_per_unit × volume) for a specific vehicle. Returns nil if there are no records with a price for the vehicle.
+
+```go
+SumCostByVehicleID(ctx context.Context, vehicleID string) (*float64, error)
+```
+
+**Returns:**
+
+- `*float64`: Total fuel cost, or nil if no priced records exist
+- `error`: Database errors only
 
 ---
 

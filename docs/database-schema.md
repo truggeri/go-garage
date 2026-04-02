@@ -299,6 +299,7 @@ The schema is managed through versioned migrations:
 | 000005 | add_custom_service_type_to_maintenance | Adds custom_service_type column to maintenance_records |
 | 000006 | create_vehicle_metrics_table | Creates vehicle_metrics table for aggregated stats |
 | 000007 | create_fuel_records_table | Creates fuel_records table with FK to vehicles |
+| 000008 | add_total_fuel_spent_to_vehicle_metrics | Adds total_fuel_spent column to vehicle_metrics |
 
 For migration management details, see [Database Migrations Guide](./database-migrations.md).
 
