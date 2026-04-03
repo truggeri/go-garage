@@ -76,8 +76,6 @@ func main() {
 	vehicleSvc := services.NewVehicleService(vehicleRepo)
 	maintenanceSvc := services.NewMaintenanceService(maintenanceRepo, vehicleRepo, metricsRepo)
 	fuelSvc := services.NewFuelService(fuelRepo, vehicleRepo, metricsRepo)
-	_ = fuelSvc // TODO: wire into handlers when fuel API/page endpoints are added
-
 	// Initialize JWT token manager
 	tokenMgr, tokenErr := auth.BuildTokenManager(cfg.JWT.Secret, auth.StandardTokenDurations())
 	if tokenErr != nil {
@@ -102,7 +100,7 @@ func main() {
 			os.Exit(1)
 		}
 	}
-	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc, userSvc, metricsRepo)
+	pageHandler := handlers.NewPageHandler(tmplEngine, authSvc, vehicleSvc, maintenanceSvc, fuelSvc, userSvc, metricsRepo)
 
 	// Setup router and routes
 	router := mux.NewRouter()
@@ -141,6 +139,13 @@ func main() {
 	protectedPages.HandleFunc("/maintenance/{id}", pageHandler.MaintenanceDetail).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceEdit).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceUpdate).Methods("POST")
+	protectedPages.HandleFunc("/fuel", pageHandler.FuelList).Methods("GET")
+	protectedPages.HandleFunc("/fuel/new", pageHandler.FuelNew).Methods("GET")
+	protectedPages.HandleFunc("/fuel/new", pageHandler.FuelCreate).Methods("POST")
+	protectedPages.HandleFunc("/fuel/{id}", pageHandler.FuelDetail).Methods("GET")
+	protectedPages.HandleFunc("/fuel/{id}/edit", pageHandler.FuelEdit).Methods("GET")
+	protectedPages.HandleFunc("/fuel/{id}/edit", pageHandler.FuelUpdate).Methods("POST")
+	protectedPages.HandleFunc("/fuel/{id}/delete", pageHandler.FuelDelete).Methods("POST")
 	protectedPages.HandleFunc("/profile", pageHandler.ViewProfile).Methods("GET")
 	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileEdit).Methods("GET")
 	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileUpdate).Methods("POST")

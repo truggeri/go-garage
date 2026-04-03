@@ -294,6 +294,8 @@ type vehicleDetailPageData struct {
 	VehicleTitle string
 	// RecentMaintenance holds the five most recent maintenance records.
 	RecentMaintenance []*models.MaintenanceRecord
+	// RecentFuel holds the five most recent fuel records.
+	RecentFuel []*models.FuelRecord
 	// Stats holds computed statistics for the vehicle.
 	Stats vehicleStats
 }
@@ -325,9 +327,24 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Sort by most-recent service date first.
+	// Fetch fuel records for this vehicle.
+	var allFuel []*models.FuelRecord
+	if h.fuelService != nil {
+		allFuel, err = h.fuelService.GetVehicleFuel(r.Context(), vehicle.ID)
+		if err != nil {
+			// Best-effort: proceed without fuel records rather than failing.
+			allFuel = nil
+		}
+	}
+
+	// Sort maintenance by most-recent service date first.
 	sort.Slice(allMaintenance, func(i, j int) bool {
 		return allMaintenance[i].ServiceDate.After(allMaintenance[j].ServiceDate)
+	})
+
+	// Sort fuel by most-recent fill date first.
+	sort.Slice(allFuel, func(i, j int) bool {
+		return allFuel[i].FillDate.After(allFuel[j].FillDate)
 	})
 
 	// Compute statistics.
@@ -346,6 +363,11 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		recent = recent[:vehicleDetailRecentLimit]
 	}
 
+	recentFuel := allFuel
+	if len(recentFuel) > vehicleDetailRecentLimit {
+		recentFuel = recentFuel[:vehicleDetailRecentLimit]
+	}
+
 	title := fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model)
 	if vehicle.DisplayName != "" {
 		title = vehicle.DisplayName
@@ -358,6 +380,7 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		Vehicle:           vehicle,
 		VehicleTitle:      title,
 		RecentMaintenance: recent,
+		RecentFuel:        recentFuel,
 		Stats:             stats,
 	}
 
