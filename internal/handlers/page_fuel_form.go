@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -10,6 +9,9 @@ import (
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 )
+
+// errInvalidDateFormat is the error message for invalid date format fields.
+const errInvalidDateFormat = "Invalid date format"
 
 // fuelNewPageData holds the data passed to the add-fuel template.
 type fuelNewPageData struct {
@@ -68,7 +70,7 @@ func parseFuelForm(fillDateStr, mileageStr, volumeStr, pricePerUnitStr, octaneRa
 	if fillDateStr != "" {
 		t, err := time.Parse("2006-01-02", fillDateStr)
 		if err != nil {
-			result.Errors["fill_date"] = "Invalid date format"
+			result.Errors["fill_date"] = errInvalidDateFormat
 		} else {
 			result.FillDate = t
 		}
@@ -269,7 +271,7 @@ func (h *PageHandler) FuelCreate(w http.ResponseWriter, r *http.Request) {
 
 	if createErr := h.fuelService.CreateFuel(r.Context(), record); createErr != nil {
 		renderForm(http.StatusInternalServerError, map[string]string{
-			"general": fmt.Sprintf("Failed to add fuel record. Please try again."),
+			"general": "Failed to add fuel record. Please try again.",
 		})
 		return
 	}
