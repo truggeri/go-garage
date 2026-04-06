@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"math"
 	"net/http"
 	"sort"
 	"strconv"
@@ -176,10 +175,7 @@ func (h *PageHandler) fetchAllUserFuelRecords(
 	})
 
 	totalCount := len(all)
-	totalPages := int(math.Ceil(float64(totalCount) / float64(fuelListPageSize)))
-	if totalPages == 0 {
-		totalPages = 1
-	}
+	totalPages := calcTotalPages(totalCount, fuelListPageSize)
 	if page > totalPages {
 		page = totalPages
 	}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"sort"
 	"strconv"
@@ -77,10 +76,7 @@ func (h *PageHandler) VehicleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalCount) / float64(vehicleListPageSize)))
-	if totalPages == 0 {
-		totalPages = 1
-	}
+	totalPages := calcTotalPages(totalCount, vehicleListPageSize)
 	if page > totalPages {
 		page = totalPages
 	}
