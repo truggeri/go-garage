@@ -14,6 +14,7 @@ type PageHandler struct {
 	authService        services.AuthenticationService
 	vehicleService     services.VehicleService
 	maintenanceService services.MaintenanceService
+	fuelService        services.FuelService
 	userService        services.UserService
 	metricsRepo        repositories.MetricsRepository
 }
@@ -24,6 +25,7 @@ func NewPageHandler(
 	authService services.AuthenticationService,
 	vehicleSvc services.VehicleService,
 	maintenanceSvc services.MaintenanceService,
+	fuelSvc services.FuelService,
 	userSvc services.UserService,
 	metricsRepo repositories.MetricsRepository,
 ) *PageHandler {
@@ -32,6 +34,7 @@ func NewPageHandler(
 		authService:        authService,
 		vehicleService:     vehicleSvc,
 		maintenanceService: maintenanceSvc,
+		fuelService:        fuelSvc,
 		userService:        userSvc,
 		metricsRepo:        metricsRepo,
 	}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"sort"
 	"strconv"
@@ -77,10 +76,7 @@ func (h *PageHandler) VehicleList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	totalPages := int(math.Ceil(float64(totalCount) / float64(vehicleListPageSize)))
-	if totalPages == 0 {
-		totalPages = 1
-	}
+	totalPages := calcTotalPages(totalCount, vehicleListPageSize)
 	if page > totalPages {
 		page = totalPages
 	}
@@ -294,6 +290,8 @@ type vehicleDetailPageData struct {
 	VehicleTitle string
 	// RecentMaintenance holds the five most recent maintenance records.
 	RecentMaintenance []*models.MaintenanceRecord
+	// RecentFuel holds the five most recent fuel records.
+	RecentFuel []*models.FuelRecord
 	// Stats holds computed statistics for the vehicle.
 	Stats vehicleStats
 }
@@ -325,7 +323,22 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Sort by most-recent service date first.
+	// Fetch the most recent fuel records for this vehicle using DB-level
+	// filtering and limit so we don't load the entire history in memory.
+	var recentFuel []*models.FuelRecord
+	if h.fuelService != nil {
+		vid := vehicle.ID
+		recentFuel, err = h.fuelService.ListFuel(r.Context(),
+			repositories.FuelFilters{VehicleID: &vid},
+			repositories.PaginationParams{Limit: vehicleDetailRecentLimit},
+		)
+		if err != nil {
+			// Best-effort: proceed without fuel records rather than failing.
+			recentFuel = nil
+		}
+	}
+
+	// Sort maintenance by most-recent service date first.
 	sort.Slice(allMaintenance, func(i, j int) bool {
 		return allMaintenance[i].ServiceDate.After(allMaintenance[j].ServiceDate)
 	})
@@ -358,6 +371,7 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		Vehicle:           vehicle,
 		VehicleTitle:      title,
 		RecentMaintenance: recent,
+		RecentFuel:        recentFuel,
 		Stats:             stats,
 	}
 

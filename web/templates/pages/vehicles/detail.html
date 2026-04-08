@@ -152,6 +152,44 @@
                 <a href="/maintenance/new?vehicle={{.Vehicle.ID}}" class="btn btn-primary">Add Maintenance Record</a>
             </div>
         </div>
+
+        <div class="card">
+            <div class="card-header card-header--flex">
+                <h2 class="card-title">Fuel History</h2>
+                <a href="/fuel?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-sm">View All</a>
+            </div>
+            {{if .RecentFuel}}
+            <table class="table table-responsive table-clickable">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Fuel Type</th>
+                        <th>Volume</th>
+                        <th>Mileage</th>
+                        <th>Price/Gal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{range .RecentFuel}}
+                    <tr>
+                        <td data-label="Date"><a href="/fuel/{{.ID}}">{{formatDate .FillDate}}</a></td>
+                        <td data-label="Fuel Type"><a href="/fuel/{{.ID}}">{{fuelTypeDisplayName .FuelType}}</a></td>
+                        <td data-label="Volume"><a href="/fuel/{{.ID}}">{{formatVolume .Volume}}</a></td>
+                        <td data-label="Mileage"><a href="/fuel/{{.ID}}">{{formatMileage .Mileage}}</a></td>
+                        <td data-label="Price/Gal"><a href="/fuel/{{.ID}}">{{if .PricePerUnit}}{{formatCurrencyPtr .PricePerUnit}}{{else}}—{{end}}</a></td>
+                    </tr>
+                    {{end}}
+                </tbody>
+            </table>
+            {{else}}
+            <div class="card-body">
+                <p class="text-muted">No fuel records yet.</p>
+            </div>
+            {{end}}
+            <div class="card-footer">
+                <a href="/fuel/new?vehicle={{.Vehicle.ID}}" class="btn btn-primary">Add Fuel Record</a>
+            </div>
+        </div>
     </div>
 
     <div class="detail-sidebar">
@@ -186,7 +224,9 @@
             <div class="card-body">
                 <div class="action-list">
                     <a href="/maintenance/new?vehicle={{.Vehicle.ID}}" class="btn btn-primary btn-block">Add Maintenance</a>
-                    <a href="/maintenance?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">View Records</a>
+                    <a href="/fuel/new?vehicle={{.Vehicle.ID}}" class="btn btn-primary btn-block">Add Fuel Record</a>
+                    <a href="/maintenance?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">View Maintenance</a>
+                    <a href="/fuel?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">View Fuel Records</a>
                     <a href="/vehicles/{{.Vehicle.ID}}/edit" class="btn btn-secondary btn-block">Edit Vehicle</a>
                     <a href="/vehicles" class="btn btn-secondary btn-block">Back to Vehicles</a>
                 </div>

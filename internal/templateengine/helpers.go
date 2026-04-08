@@ -34,6 +34,8 @@ func buildFuncMap() template.FuncMap {
 		"safeHTML":               safeHTML,
 		"urlEncode":              url.QueryEscape,
 		"serviceTypeDisplayName": serviceTypeDisplayName,
+		"fuelTypeDisplayName":    fuelTypeDisplayName,
+		"formatVolume":           formatVolume,
 	}
 }
 
@@ -174,4 +176,14 @@ func titleCase(s string) string {
 // serviceTypeDisplayName returns the human-readable display name for a service type enum value.
 func serviceTypeDisplayName(s string) string {
 	return models.ServiceTypeDisplayName(s)
+}
+
+// fuelTypeDisplayName returns the human-readable display name for a fuel type enum value.
+func fuelTypeDisplayName(s string) string {
+	return models.FuelTypeDisplayName(s)
+}
+
+// formatVolume formats a float64 volume as gallons (e.g. "12.50 gal").
+func formatVolume(v float64) string {
+	return fmt.Sprintf("%.2f gal", v)
 }

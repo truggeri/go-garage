@@ -1,0 +1,152 @@
+{{define "title"}}Fuel Fill-up - {{.VehicleTitle}} - Go-Garage{{end}}
+
+{{define "content"}}
+<div class="page-header">
+    <h1>Fuel Fill-up</h1>
+    <div class="page-header-actions">
+        <a href="/fuel/{{.Record.ID}}/edit" class="btn btn-primary">Edit Record</a>
+        <button type="button" class="btn btn-danger"
+                data-confirm-delete="delete-form"
+                data-confirm-message="Are you sure you want to delete this fuel record? This action cannot be undone.">Delete</button>
+    </div>
+</div>
+
+{{if .Flash}}
+{{range .Flash}}
+<div class="flash flash-{{.Type}}" role="alert">
+    <span class="flash-text">{{.Message}}</span>
+</div>
+{{end}}
+{{end}}
+
+<div class="detail-layout">
+    <div class="detail-main">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Fill-up Details</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Fill Date</dt>
+                        <dd class="detail-value">{{formatDate .Record.FillDate}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Fuel Type</dt>
+                        <dd class="detail-value">{{fuelTypeDisplayName .Record.FuelType}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Volume</dt>
+                        <dd class="detail-value">{{formatVolume .Record.Volume}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Mileage</dt>
+                        <dd class="detail-value">{{formatMileage .Record.Mileage}}</dd>
+                    </div>
+                    {{if .Record.PricePerUnit}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Price per Gallon</dt>
+                        <dd class="detail-value">{{formatCurrencyPtr .Record.PricePerUnit}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .TotalCost}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Total Cost</dt>
+                        <dd class="detail-value">{{formatCurrencyPtr .TotalCost}}</dd>
+                    </div>
+                    {{end}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Partial Fill</dt>
+                        <dd class="detail-value">{{if .Record.PartialFill}}Yes{{else}}No{{end}}</dd>
+                    </div>
+                    {{if .Record.OctaneRating}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Octane Rating</dt>
+                        <dd class="detail-value">{{.Record.OctaneRating}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.Location}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Location</dt>
+                        <dd class="detail-value">{{.Record.Location}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.Brand}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Brand</dt>
+                        <dd class="detail-value">{{.Record.Brand}}</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.CityDrivingPercentage}}
+                    <div class="detail-item">
+                        <dt class="detail-label">City Driving</dt>
+                        <dd class="detail-value">{{printf "%d" .Record.CityDrivingPercentage}}%</dd>
+                    </div>
+                    {{end}}
+                    {{if .Record.VehicleReportedMPG}}
+                    <div class="detail-item">
+                        <dt class="detail-label">Vehicle Reported MPG</dt>
+                        <dd class="detail-value">{{printf "%.1f" .Record.VehicleReportedMPG}}</dd>
+                    </div>
+                    {{end}}
+                </dl>
+            </div>
+        </div>
+
+        {{if .Record.Notes}}
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Notes</h2>
+            </div>
+            <div class="card-body">
+                <p class="detail-notes">{{.Record.Notes}}</p>
+            </div>
+        </div>
+        {{end}}
+    </div>
+
+    <div class="detail-sidebar">
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Vehicle</h2>
+            </div>
+            <div class="card-body">
+                <dl class="detail-list">
+                    <div class="detail-item">
+                        <dt class="detail-label">Make</dt>
+                        <dd class="detail-value">{{.Vehicle.Make}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Model</dt>
+                        <dd class="detail-value">{{.Vehicle.Model}}</dd>
+                    </div>
+                    <div class="detail-item">
+                        <dt class="detail-label">Year</dt>
+                        <dd class="detail-value">{{.Vehicle.Year}}</dd>
+                    </div>
+                </dl>
+                <a href="/vehicles/{{.Vehicle.ID}}" class="btn btn-secondary btn-block">View Vehicle</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="action-list">
+                    <a href="/fuel/{{.Record.ID}}/edit" class="btn btn-primary btn-block">Edit Record</a>
+                    <a href="/fuel?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">All Fuel Records for Vehicle</a>
+                    <a href="/fuel/new?vehicle={{.Vehicle.ID}}" class="btn btn-secondary btn-block">Add Fuel Record</a>
+                    <a href="/fuel" class="btn btn-secondary btn-block">Back to Fuel Records</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<form id="delete-form" method="POST" action="/fuel/{{.Record.ID}}/delete" style="display: none;">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <input type="hidden" name="_method" value="DELETE">
+</form>
+{{end}}
