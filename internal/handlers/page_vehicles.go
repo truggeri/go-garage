@@ -323,24 +323,24 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Fetch fuel records for this vehicle.
-	var allFuel []*models.FuelRecord
+	// Fetch the most recent fuel records for this vehicle using DB-level
+	// filtering and limit so we don't load the entire history in memory.
+	var recentFuel []*models.FuelRecord
 	if h.fuelService != nil {
-		allFuel, err = h.fuelService.GetVehicleFuel(r.Context(), vehicle.ID)
+		vid := vehicle.ID
+		recentFuel, err = h.fuelService.ListFuel(r.Context(),
+			repositories.FuelFilters{VehicleID: &vid},
+			repositories.PaginationParams{Limit: vehicleDetailRecentLimit},
+		)
 		if err != nil {
 			// Best-effort: proceed without fuel records rather than failing.
-			allFuel = nil
+			recentFuel = nil
 		}
 	}
 
 	// Sort maintenance by most-recent service date first.
 	sort.Slice(allMaintenance, func(i, j int) bool {
 		return allMaintenance[i].ServiceDate.After(allMaintenance[j].ServiceDate)
-	})
-
-	// Sort fuel by most-recent fill date first.
-	sort.Slice(allFuel, func(i, j int) bool {
-		return allFuel[i].FillDate.After(allFuel[j].FillDate)
 	})
 
 	// Compute statistics.
@@ -357,11 +357,6 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 	recent := allMaintenance
 	if len(recent) > vehicleDetailRecentLimit {
 		recent = recent[:vehicleDetailRecentLimit]
-	}
-
-	recentFuel := allFuel
-	if len(recentFuel) > vehicleDetailRecentLimit {
-		recentFuel = recentFuel[:vehicleDetailRecentLimit]
 	}
 
 	title := fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model)
