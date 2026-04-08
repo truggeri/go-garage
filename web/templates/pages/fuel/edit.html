@@ -159,7 +159,7 @@
                     <input class="form-input{{if .Errors.vehicle_reported_mpg}} is-invalid{{end}}"
                            type="number" id="vehicle_reported_mpg" name="vehicle_reported_mpg"
                            value="{{.VehicleReportedMPG}}"
-                           min="0" step="0.1"
+                           min="0.1" step="0.1"
                            placeholder="e.g. 28.5"
                            aria-describedby="mpg-error">
                     {{if .Errors.vehicle_reported_mpg}}

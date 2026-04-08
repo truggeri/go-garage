@@ -62,7 +62,7 @@
                     {{if .Record.OctaneRating}}
                     <div class="detail-item">
                         <dt class="detail-label">Octane Rating</dt>
-                        <dd class="detail-value">{{printf "%d" .Record.OctaneRating}}</dd>
+                        <dd class="detail-value">{{.Record.OctaneRating}}</dd>
                     </div>
                     {{end}}
                     {{if .Record.Location}}
