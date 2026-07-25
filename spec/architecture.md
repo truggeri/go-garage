@@ -56,7 +56,7 @@ Go-Garage is a vehicle management web application built with Go, designed to hel
 
 ### Backend
 
-- **Language**: Go (1.24+)
+- **Language**: Go (1.25+)
 - **Web Framework**: Standard library `net/http` with gorilla/mux for routing
 - **Database**: SQLite
 - **ORM/Database Driver**: database/sql with appropriate drivers
