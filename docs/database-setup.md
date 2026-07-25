@@ -6,7 +6,7 @@ Go-Garage uses SQLite as its database. This guide explains how to set up, config
 
 ## Prerequisites
 
-- Go 1.24 or later
+- Go 1.25 or later
 - SQLite3 (typically pre-installed on most systems)
 - Make (for using Makefile commands)
 

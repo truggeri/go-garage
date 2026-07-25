@@ -33,7 +33,7 @@ The application will be available at <http://localhost:8080>
 
 #### Prerequisites
 
-- Go 1.24 or later
+- Go 1.25 or later
 - SQLite3
 - Make (optional, for convenience commands)
 

@@ -15,7 +15,7 @@ Thank you for considering contributing to Go-Garage! This document provides guid
 
 Before you begin, ensure you have the following installed:
 
-- Go 1.24 or later
+- Go 1.25 or later
 - SQLite3
 - Make (optional, but recommended)
 - Docker and Docker Compose (for containerized development)

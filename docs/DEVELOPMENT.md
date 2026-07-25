@@ -19,7 +19,7 @@ This guide provides detailed instructions for setting up your development enviro
 
 ### Required Software
 
-- **Go**: Version 1.24 or later
+- **Go**: Version 1.25 or later
 - **SQLite3**: For local database
 - **Git**: For version control
 
@@ -454,7 +454,7 @@ Create or update `.vscode/settings.json`:
 
 1. Open the project folder
 2. GoLand will automatically detect the Go module
-3. Set SDK to Go 1.24+
+3. Set SDK to Go 1.25+
 4. Enable "Go Modules" in Preferences → Go → Go Modules
 
 #### GoLand Settings

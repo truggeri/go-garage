@@ -237,7 +237,7 @@ services:
 
 The Dockerfile uses a multi-stage build:
 
-1. **Builder stage** (golang:1.24-alpine):
+1. **Builder stage** (golang:1.25-alpine):
    - Installs build dependencies (gcc, musl-dev, sqlite-dev)
    - Downloads Go modules
    - Compiles the application with CGO enabled for SQLite support
