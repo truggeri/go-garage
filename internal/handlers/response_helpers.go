@@ -10,7 +10,7 @@ func respondWithProblem(w http.ResponseWriter, code int, errCode, msg string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": false, "error": map[string]string{"code": errCode, "message": msg},
+		keySuccess: false, "error": map[string]string{"code": errCode, "message": msg},
 	})
 }
 
@@ -19,7 +19,7 @@ func respondWithValidationProblems(w http.ResponseWriter, msg string, details []
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(400)
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": false, "error": map[string]interface{}{"code": "VALIDATION_ERROR", "message": msg, "details": details},
+		keySuccess: false, "error": map[string]interface{}{"code": "VALIDATION_ERROR", "message": msg, "details": details},
 	})
 }
 

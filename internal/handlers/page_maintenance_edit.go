@@ -182,7 +182,7 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
 			return
 		}
-		renderForm(http.StatusBadRequest, map[string]string{"general": "Invalid form data. Please check your input."})
+		renderForm(http.StatusBadRequest, map[string]string{keyGeneral: "Invalid form data. Please check your input."})
 		return
 	}
 
@@ -197,7 +197,7 @@ func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) 
 	}
 
 	if _, err := h.maintenanceService.UpdateMaintenance(r.Context(), record.ID, updates); err != nil {
-		renderForm(http.StatusInternalServerError, map[string]string{"general": "Failed to update maintenance record. Please try again."})
+		renderForm(http.StatusInternalServerError, map[string]string{keyGeneral: "Failed to update maintenance record. Please try again."})
 		return
 	}
 

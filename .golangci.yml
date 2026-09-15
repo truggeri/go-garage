@@ -20,6 +20,16 @@ linters:
       enable-all: true
       disable:
         - fieldalignment
+    goconst:
+      min-occurrences: 10
+  exclusions:
+    generated: lax
+    paths:
+      - vendor
+      - bin
+      - ".*_test\\.go"
+      - "cmd/seed/.*"
+      - "internal/database/seeddata/.*"
 
 formatters:
   enable:
@@ -30,14 +40,8 @@ formatters:
       simplify: true
 
 issues:
-  exclude-use-default: false
   max-issues-per-linter: 0
   max-same-issues: 0
 
 run:
   timeout: 5m
-  skip-dirs:
-    - vendor
-    - bin
-  skip-files:
-    - ".*_test.go"

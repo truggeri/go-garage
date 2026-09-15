@@ -97,7 +97,7 @@ func (h *PageHandler) RegisterSubmit(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(errors) == 0 {
-			errors["general"] = "An unexpected error occurred. Please try again."
+			errors[keyGeneral] = "An unexpected error occurred. Please try again."
 		}
 
 		w.WriteHeader(http.StatusBadRequest)

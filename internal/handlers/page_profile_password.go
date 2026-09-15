@@ -92,7 +92,7 @@ func (h *PageHandler) ChangePasswordSubmit(w http.ResponseWriter, r *http.Reques
 			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
 			return
 		}
-		renderForm(http.StatusInternalServerError, map[string]string{"general": "Failed to change password. Please try again."})
+		renderForm(http.StatusInternalServerError, map[string]string{keyGeneral: "Failed to change password. Please try again."})
 		return
 	}
 

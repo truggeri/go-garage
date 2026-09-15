@@ -23,7 +23,7 @@ Before making changes, use code search to explore:
 
 ## Technology Stack
 
-- **Language**: Go 1.25+
+- **Language**: Go 1.26+
 - **Web Framework**: Standard library `net/http` with `gorilla/mux`
 - **Database**: SQLite with `database/sql`
 - **Frontend**: Go `html/template` with htmx

@@ -57,14 +57,14 @@ func buildListPayload(recs []*models.Vehicle, pg, sz, total int) map[string]inte
 		}
 	}
 	return map[string]interface{}{
-		"success": true, "data": items,
+		keySuccess: true, "data": items,
 		"pagination": map[string]int{"page": pg, "limit": sz, "total": total, "total_pages": tp},
 	}
 }
 
 // buildSinglePayload creates a single vehicle response payload.
 func buildSinglePayload(v *models.Vehicle, msg string) map[string]interface{} {
-	p := map[string]interface{}{"success": true, "data": vehicleToResponseMap(v)}
+	p := map[string]interface{}{keySuccess: true, "data": vehicleToResponseMap(v)}
 	if msg != "" {
 		p["message"] = msg
 	}

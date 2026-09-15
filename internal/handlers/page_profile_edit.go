@@ -102,7 +102,7 @@ func (h *PageHandler) ProfileUpdate(w http.ResponseWriter, r *http.Request) {
 			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
 			return
 		}
-		renderForm(http.StatusBadRequest, map[string]string{"general": "Invalid form data."})
+		renderForm(http.StatusBadRequest, map[string]string{keyGeneral: "Invalid form data."})
 		return
 	}
 
@@ -119,7 +119,7 @@ func (h *PageHandler) ProfileUpdate(w http.ResponseWriter, r *http.Request) {
 			renderForm(http.StatusConflict, map[string]string{de.Field: de.Field + " is already taken"})
 			return
 		}
-		renderForm(http.StatusInternalServerError, map[string]string{"general": "Failed to update profile. Please try again."})
+		renderForm(http.StatusInternalServerError, map[string]string{keyGeneral: "Failed to update profile. Please try again."})
 		return
 	}
 

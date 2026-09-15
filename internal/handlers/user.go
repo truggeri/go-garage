@@ -88,8 +88,8 @@ func (h *userAPIHandler) ChangePassword(w http.ResponseWriter, r *http.Request) 
 	}
 
 	respondWithPayload(w, 200, map[string]interface{}{
-		"success": true,
-		"message": "Password changed successfully",
+		keySuccess: true,
+		"message":  "Password changed successfully",
 	})
 }
 
@@ -122,7 +122,7 @@ func (h *userAPIHandler) DeleteMe(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithPayload(w, 200, map[string]interface{}{
-		"success": true,
-		"message": "Account deleted successfully",
+		keySuccess: true,
+		"message":  "Account deleted successfully",
 	})
 }

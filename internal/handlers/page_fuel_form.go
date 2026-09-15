@@ -265,13 +265,13 @@ func (h *PageHandler) FuelCreate(w http.ResponseWriter, r *http.Request) {
 			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
 			return
 		}
-		renderForm(http.StatusBadRequest, map[string]string{"general": "Invalid form data. Please check your input."})
+		renderForm(http.StatusBadRequest, map[string]string{keyGeneral: "Invalid form data. Please check your input."})
 		return
 	}
 
 	if createErr := h.fuelService.CreateFuel(r.Context(), record); createErr != nil {
 		renderForm(http.StatusInternalServerError, map[string]string{
-			"general": "Failed to add fuel record. Please try again.",
+			keyGeneral: "Failed to add fuel record. Please try again.",
 		})
 		return
 	}

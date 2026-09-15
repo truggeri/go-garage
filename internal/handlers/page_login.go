@@ -69,9 +69,9 @@ func (h *PageHandler) LoginSubmit(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		var validationErr *models.ValidationError
 		if models.IsValidationError(err, &validationErr) {
-			errors["general"] = "Invalid email/username or password"
+			errors[keyGeneral] = "Invalid email/username or password"
 		} else {
-			errors["general"] = "An unexpected error occurred. Please try again."
+			errors[keyGeneral] = "An unexpected error occurred. Please try again."
 		}
 
 		w.WriteHeader(http.StatusUnauthorized)

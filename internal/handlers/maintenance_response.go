@@ -48,14 +48,14 @@ func buildMaintenanceListPayload(recs []*models.MaintenanceRecord, pg, sz, total
 		}
 	}
 	return map[string]interface{}{
-		"success": true, "data": items,
+		keySuccess: true, "data": items,
 		"pagination": map[string]int{"page": pg, "limit": sz, "total": total, "total_pages": tp},
 	}
 }
 
 // buildMaintenanceSinglePayload creates a single maintenance record response payload.
 func buildMaintenanceSinglePayload(m *models.MaintenanceRecord, msg string) map[string]interface{} {
-	p := map[string]interface{}{"success": true, "data": maintenanceToResponseMap(m)}
+	p := map[string]interface{}{keySuccess: true, "data": maintenanceToResponseMap(m)}
 	if msg != "" {
 		p["message"] = msg
 	}
