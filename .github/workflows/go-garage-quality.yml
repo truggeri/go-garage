@@ -45,12 +45,10 @@ jobs:
         run: go vet ./...
 
       - name: Install golangci-lint for go-garage
-        run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.13.2
-          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-
-      - name: Execute golangci-lint analysis
-        run: golangci-lint run --config .golangci.yml --timeout 5m
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: v2.13.2
+          args: --config .golangci.yml --timeout 5m
 
       - name: Run go-garage test suite with coverage
         run: |
