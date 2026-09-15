@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  GO_VERSION_SPEC: "1.25.x"
+  GO_VERSION_SPEC: "1.26.x"
   VEHICLE_APP_NAME: go-garage
 
 jobs:
