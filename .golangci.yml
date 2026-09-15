@@ -20,12 +20,16 @@ linters:
       enable-all: true
       disable:
         - fieldalignment
+    goconst:
+      min-occurrences: 10
   exclusions:
     generated: lax
     paths:
       - vendor
       - bin
       - ".*_test\\.go"
+      - "cmd/seed/.*"
+      - "internal/database/seeddata/.*"
 
 formatters:
   enable:

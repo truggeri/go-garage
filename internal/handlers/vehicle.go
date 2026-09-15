@@ -165,7 +165,7 @@ func (h *vehicleAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithPayload(w, 200, map[string]interface{}{
-		"success": true, "message": "Vehicle deleted successfully",
+		keySuccess: true, "message": "Vehicle deleted successfully",
 	})
 }
 
@@ -190,7 +190,7 @@ func (h *vehicleAPIHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithPayload(w, 200, map[string]interface{}{
-		"success": true,
+		keySuccess: true,
 		"data": map[string]interface{}{
 			"vehicle_id": targetID, "total_maintenance_cost": 0.0,
 			"maintenance_count": 0, "total_fuel_cost": 0.0,

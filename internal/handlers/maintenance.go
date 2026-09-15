@@ -219,6 +219,6 @@ func (h *maintenanceAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request
 	}
 
 	respondWithPayload(w, 200, map[string]interface{}{
-		"success": true, "message": "Maintenance record deleted successfully",
+		keySuccess: true, "message": "Maintenance record deleted successfully",
 	})
 }

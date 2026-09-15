@@ -256,7 +256,7 @@ func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.vehicleService.CreateVehicle(r.Context(), vehicle); err != nil {
-		formErrors = map[string]string{"general": "Failed to add vehicle. Please try again."}
+		formErrors = map[string]string{keyGeneral: "Failed to add vehicle. Please try again."}
 		renderForm(http.StatusInternalServerError)
 		return
 	}

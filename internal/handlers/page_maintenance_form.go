@@ -254,7 +254,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 			if models.IsValidationError(valErr, &ve) {
 				entry.Errors[ve.Field] = ve.Message
 			} else {
-				entry.Errors["general"] = "Invalid form data. Please check your input."
+				entry.Errors[keyGeneral] = "Invalid form data. Please check your input."
 			}
 			hasErrors = true
 			continue
@@ -272,7 +272,7 @@ func (h *PageHandler) MaintenanceCreate(w http.ResponseWriter, r *http.Request) 
 	for i, record := range modelRecords {
 		if createErr := h.maintenanceService.CreateMaintenance(r.Context(), record); createErr != nil {
 			renderForm(http.StatusInternalServerError, map[string]string{
-				"general": fmt.Sprintf("Failed to add record %d. Please try again.", i+1),
+				keyGeneral: fmt.Sprintf("Failed to add record %d. Please try again.", i+1),
 			})
 			return
 		}

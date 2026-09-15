@@ -134,7 +134,7 @@ func (h *PageHandler) VehicleUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := h.vehicleService.SaveVehicle(r.Context(), vehicle); err != nil {
-		formErrors = map[string]string{"general": "Failed to update vehicle. Please try again."}
+		formErrors = map[string]string{keyGeneral: "Failed to update vehicle. Please try again."}
 		renderForm(http.StatusInternalServerError)
 		return
 	}

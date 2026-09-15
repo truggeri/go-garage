@@ -8,7 +8,7 @@ import (
 // buildUserProfilePayload creates a response payload for a user profile
 func buildUserProfilePayload(user *models.User, message ...string) map[string]interface{} {
 	payload := map[string]interface{}{
-		"success": true,
+		keySuccess: true,
 		"data": map[string]interface{}{
 			"id":         user.ID,
 			"username":   user.Username,
