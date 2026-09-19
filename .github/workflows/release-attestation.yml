@@ -26,6 +26,7 @@ jobs:
       - name: Verify release tag is on main
         id: main_release
         run: |
+          git fetch --no-tags origin +refs/heads/main:refs/remotes/origin/main
           if git merge-base --is-ancestor HEAD origin/main; then
             echo "is_on_main=true" >> "$GITHUB_OUTPUT"
           else
@@ -50,7 +51,7 @@ jobs:
         if: steps.main_release.outputs.is_on_main == 'true'
         uses: anchore/sbom-action@v0.24.2
         with:
-          path: .
+          file: bin/go-garage
           format: spdx-json
           output-file: go-garage.spdx.json
           upload-artifact: true
