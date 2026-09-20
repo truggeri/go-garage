@@ -204,6 +204,7 @@ Ensure the application is production-ready through comprehensive testing, comple
 
 - [ ] Automated testing on pull requests
 - [ ] Automated builds
+- [x] Generate an SPDX SBOM and signed build provenance attestation for each release from `main`
 - [ ] Docker image publishing
 - [ ] Rollback procedures
 - [ ] Deployment notifications
