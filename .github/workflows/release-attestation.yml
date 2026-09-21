@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout released source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.release.tag_name }}
           fetch-depth: 0
@@ -36,7 +36,7 @@ jobs:
 
       - name: Set up Go
         if: steps.main_release.outputs.is_on_main == 'true'
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v6
         with:
           go-version: "1.26.x"
           cache: true
