@@ -187,7 +187,7 @@ send an `HX-Trigger` event:
 HX-Trigger: {"showFlash":{"type":"success","message":"Vehicle saved"}}
 ```
 
-The shared htmx module listens for `showFlash`, creates the same flash markup used by `web/templates/partials/flash-messages.html`, creates a `.flash-messages` region when the partial rendered none, appends the message there, and ensures that region has `role="status"` and `aria-live="polite"` for non-error notifications.
+The shared htmx module listens for `showFlash`, creates the same flash markup used by `web/templates/partials/flash-messages.html`, creates a `.flash-messages` region when the partial rendered none, appends the message there, and ensures that region has `role="status"` and `aria-live="polite"` for non-error notifications. It must also initialize the new message's close and auto-dismiss behavior (or use delegated handlers), since the existing one-time `initFlashMessages()` does not cover dynamically appended nodes.
 `aria-live="polite"` for non-error notifications. Error notifications use
 `role="alert"` and `aria-live="assertive"`.
 
