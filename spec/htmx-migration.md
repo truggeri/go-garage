@@ -85,6 +85,11 @@ its required fields. The existing PUT handlers update only fields supplied in
 the request, so omitted optional properties remain unchanged; do not describe
 or implement PUT as a full replacement.
 
+The existing maintenance creation form can submit multiple records, but
+`POST /api/v1/vehicles/{vehicleId}/maintenance` accepts one record per request.
+Migrating that form therefore requires more advanced client-side batching, with
+one POST per maintenance record.
+
 Keep existing HTML validation attributes and labels. Each field-error target
 uses the submitted API field name:
 
