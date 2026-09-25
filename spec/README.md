@@ -11,6 +11,7 @@ Go-Garage is a Go-based web application designed to help users manage their vehi
 ### Architecture
 
 - **[architecture.md](./architecture.md)** - Complete system architecture, technology stack, and design decisions
+- **[htmx-migration.md](./htmx-migration.md)** - Conventions for migrating browser mutations to the REST API with htmx
 - **[openapi.yaml](./openapi.yaml)** - API specifications in OpenAPI format
 - **[data-schema.md](./data-schema.md)** - Database schema and table definitions
 
