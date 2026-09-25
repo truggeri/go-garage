@@ -77,11 +77,13 @@ field names expected by the corresponding API request type:
       hx-swap="none">
 ```
 
-Use `hx-put` and `hx-delete` for replacement and deletion. The API URL must
+Use `hx-put` and `hx-delete` for updates and deletion. The API URL must
 contain resource identifiers that are represented by the route rather than
 the JSON body, such as a vehicle ID for nested maintenance or fuel creation.
-Forms using `PUT` must submit every field required by the API's full-replace
-contract; do not silently turn a full replacement into a partial update.
+PUT request bodies follow the corresponding OpenAPI input schema and include
+its required fields. The existing PUT handlers update only fields supplied in
+the request, so omitted optional properties remain unchanged; do not describe
+or implement PUT as a full replacement.
 
 Keep existing HTML validation attributes and labels. Each field-error target
 uses the submitted API field name:
@@ -216,7 +218,8 @@ htmx cannot provide.
 For each mutation being migrated:
 
 1. Confirm the matching API endpoint, request fields, ownership checks, and
-   full-replace semantics in `spec/openapi.yaml` and the API handler.
+   PUT's supplied-field update behavior in `spec/openapi.yaml` and the API
+   handler.
 2. Keep the GET page handler and server-rendered form; replace only the
    mutation action with `hx-post`, `hx-put`, or `hx-delete`.
 3. Add `json-enc` and `hx-swap="none"` to JSON mutation forms.
