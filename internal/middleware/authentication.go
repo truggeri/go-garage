@@ -93,7 +93,7 @@ func HybridAuthGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Handle
 				return
 			}
 
-			acctInfo, err := authenticateCookies(w, r, tokenMgr)
+			acctInfo, err := authenticateCookies(tokenMgr, w, r)
 			if err != nil {
 				writeHybridAuthError(w, r, err.Error())
 				return
@@ -130,7 +130,7 @@ func authenticateBearer(tokenMgr *auth.TokenManager, r *http.Request) (*AccountI
 
 // authenticateCookies validates the access_token cookie, refreshing it with the
 // refresh_token cookie when needed. Refreshed cookies are written to the response.
-func authenticateCookies(w http.ResponseWriter, r *http.Request, tokenMgr *auth.TokenManager) (*AccountInfo, error) {
+func authenticateCookies(tokenMgr *auth.TokenManager, w http.ResponseWriter, r *http.Request) (*AccountInfo, error) {
 	if cookie, err := r.Cookie("access_token"); err == nil {
 		if verified, err := tokenMgr.ValidateToken(cookie.Value); err == nil && verified.TokenKind == auth.AccessTokenKind {
 			return &AccountInfo{ID: verified.AccountID, Name: verified.AccountName}, nil
@@ -189,7 +189,7 @@ func authenticatedContext(r *http.Request, acctInfo *AccountInfo, method AuthMet
 func CookieAuthGuard(tokenMgr *auth.TokenManager) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			acctInfo, err := authenticateCookies(w, r, tokenMgr)
+			acctInfo, err := authenticateCookies(tokenMgr, w, r)
 			if err != nil {
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
 				return
