@@ -537,4 +537,20 @@ func TestHybridAuthGuard(t *testing.T) {
 		assert.Equal(t, http.StatusUnauthorized, rec.Code)
 		assert.Equal(t, "/login", rec.Header().Get("HX-Redirect"))
 	})
+
+	t.Run("omits HX-Redirect header when html is excluded by quality", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.Header.Set("Accept", "application/json, text/html;q=0")
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
+	})
 }

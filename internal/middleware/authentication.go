@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -216,7 +217,38 @@ func isBrowserRequest(r *http.Request) bool {
 		return true
 	}
 
-	return strings.Contains(r.Header.Get("Accept"), "text/html")
+	return acceptsHTML(r.Header.Get("Accept"))
+}
+
+// acceptsHTML reports whether an Accept header value includes a text/html
+// media range with a positive quality value
+func acceptsHTML(accept string) bool {
+	for _, entry := range strings.Split(accept, ",") {
+		parts := strings.Split(entry, ";")
+		if !strings.EqualFold(strings.TrimSpace(parts[0]), "text/html") {
+			continue
+		}
+
+		quality := 1.0
+		for _, param := range parts[1:] {
+			name, value, found := strings.Cut(strings.TrimSpace(param), "=")
+			if !found || !strings.EqualFold(strings.TrimSpace(name), "q") {
+				continue
+			}
+			parsed, err := strconv.ParseFloat(strings.TrimSpace(value), 64)
+			if err != nil {
+				quality = 0
+			} else {
+				quality = parsed
+			}
+		}
+
+		if quality > 0 {
+			return true
+		}
+	}
+
+	return false
 }
 
 // writeAuthError writes a JSON error response for authentication failures
