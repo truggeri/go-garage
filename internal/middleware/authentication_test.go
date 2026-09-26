@@ -334,3 +334,223 @@ func TestCookieAuthGuard(t *testing.T) {
 		assert.Equal(t, "user-test-123", capturedAcctInfo.ID)
 	})
 }
+
+func TestHybridAuthGuard(t *testing.T) {
+	tokenMgr := setupTokenManager(t)
+
+	payload := auth.TokenPayload{
+		AccountID:   "user-test-123",
+		AccountName: "testuser",
+	}
+	bundle, err := tokenMgr.GenerateTokenBundle(payload)
+	require.NoError(t, err)
+
+	okHandler := func(acct **AccountInfo, method *AuthMethod) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if info, ok := GetAccountFromContext(r.Context()); ok {
+				*acct = info
+			}
+			if used, ok := GetAuthMethodFromContext(r.Context()); ok {
+				*method = used
+			}
+			w.WriteHeader(http.StatusOK)
+		})
+	}
+
+	t.Run("allows request with valid bearer token", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.Header.Set("Authorization", "Bearer "+bundle.AccessToken)
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, capturedAcctInfo)
+		assert.Equal(t, "user-test-123", capturedAcctInfo.ID)
+		assert.Equal(t, AuthMethodBearer, capturedMethod)
+	})
+
+	t.Run("allows request with valid access token cookie", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: bundle.AccessToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, capturedAcctInfo)
+		assert.Equal(t, "user-test-123", capturedAcctInfo.ID)
+		assert.Equal(t, AuthMethodCookie, capturedMethod)
+	})
+
+	t.Run("refreshes expired access token cookie using refresh token", func(t *testing.T) {
+		expiredAccessMgr, err := auth.BuildTokenManager("test-secret-key-12345", auth.TokenDurations{
+			AccessValidity:  -1 * time.Hour,
+			RefreshValidity: 7 * 24 * time.Hour,
+		})
+		require.NoError(t, err)
+
+		expiredBundle, err := expiredAccessMgr.GenerateTokenBundle(payload)
+		require.NoError(t, err)
+
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: expiredBundle.AccessToken})
+		req.AddCookie(&http.Cookie{Name: "refresh_token", Value: expiredBundle.RefreshToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, capturedAcctInfo)
+		assert.Equal(t, "user-test-123", capturedAcctInfo.ID)
+		assert.Equal(t, AuthMethodCookie, capturedMethod)
+
+		var refreshedAccess bool
+		for _, cookie := range rec.Result().Cookies() {
+			if cookie.Name == "access_token" && cookie.Value != "" {
+				refreshedAccess = true
+			}
+		}
+		assert.True(t, refreshedAccess, "expected a refreshed access_token cookie")
+	})
+
+	t.Run("rejects request without any credentials", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
+		assert.Contains(t, rec.Body.String(), "AUTHENTICATION_ERROR")
+	})
+
+	t.Run("rejects invalid bearer token without falling back to cookies", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.Header.Set("Authorization", "Bearer invalid.token.here")
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: bundle.AccessToken})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Contains(t, rec.Body.String(), "invalid or expired token")
+		assert.Nil(t, capturedAcctInfo)
+	})
+
+	t.Run("rejects refresh token supplied as bearer token", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.Header.Set("Authorization", "Bearer "+bundle.RefreshToken)
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Contains(t, rec.Body.String(), "access token required")
+	})
+
+	t.Run("rejects invalid cookies and clears the refresh cookie", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.AddCookie(&http.Cookie{Name: "access_token", Value: "invalid.token.here"})
+		req.AddCookie(&http.Cookie{Name: "refresh_token", Value: "invalid.token.here"})
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Contains(t, rec.Body.String(), "invalid or expired token")
+
+		var cleared bool
+		for _, cookie := range rec.Result().Cookies() {
+			if cookie.Name == "refresh_token" && cookie.MaxAge < 0 {
+				cleared = true
+			}
+		}
+		assert.True(t, cleared, "expected the refresh_token cookie to be cleared")
+	})
+
+	t.Run("adds HX-Redirect header for htmx requests", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles", nil)
+		req.Header.Set("HX-Request", "true")
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Equal(t, "/login", rec.Header().Get("HX-Redirect"))
+		assert.Contains(t, rec.Body.String(), "AUTHENTICATION_ERROR")
+	})
+
+	t.Run("adds HX-Redirect header for html-preferring browser requests", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.Header.Set("Accept", "text/html,application/xhtml+xml")
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Equal(t, "/login", rec.Header().Get("HX-Redirect"))
+	})
+
+	t.Run("omits HX-Redirect header when html is excluded by quality", func(t *testing.T) {
+		var capturedAcctInfo *AccountInfo
+		var capturedMethod AuthMethod
+
+		guardedHandler := HybridAuthGuard(tokenMgr)(okHandler(&capturedAcctInfo, &capturedMethod))
+
+		req := httptest.NewRequest(http.MethodGet, "/api/v1/vehicles", nil)
+		req.Header.Set("Accept", "application/json, text/html;q=0")
+		rec := httptest.NewRecorder()
+
+		guardedHandler.ServeHTTP(rec, req)
+
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
+	})
+}
