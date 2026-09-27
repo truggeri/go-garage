@@ -15,7 +15,7 @@ func buildNewFuelRecord(d map[string]interface{}, vehicleID string) (*models.Fue
 	rec := &models.FuelRecord{
 		VehicleID: vehicleID,
 		FillDate:  fillDate,
-		FuelType:  stringValue(d, "fuel_type"),
+		FuelType:  stringFromFuelInput(d, "fuel_type"),
 	}
 	if v, ok := d["mileage"].(float64); ok {
 		rec.Mileage = int(v)
@@ -61,8 +61,8 @@ func buildNewFuelRecord(d map[string]interface{}, vehicleID string) (*models.Fue
 	return rec, nil
 }
 
-// extractFuelChanges extracts fuel update fields from the input data map.
-func extractFuelChanges(d map[string]interface{}, existing *models.FuelRecord) (services.FuelUpdates, error) {
+// extractAndValidateFuelChanges extracts fuel update fields and validates the resulting record.
+func extractAndValidateFuelChanges(d map[string]interface{}, existing *models.FuelRecord) (services.FuelUpdates, error) {
 	var u services.FuelUpdates
 	if v, ok := d["fill_date"]; ok {
 		t, err := parseFuelDate(v)

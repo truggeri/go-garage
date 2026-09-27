@@ -75,7 +75,7 @@ func (h *FuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	valErrs := validateRequiredKeys(inputData, "fill_date", "mileage")
+	valErrs := validateRequiredKeys(inputData, "fill_date", "mileage", "volume", "fuel_type")
 	if len(valErrs) > 0 {
 		respondWithValidationProblems(w, "Missing fields", valErrs)
 		return
@@ -118,7 +118,7 @@ func (h *FuelAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	changes, chErr := extractFuelChanges(inputData, rec)
+	changes, chErr := extractAndValidateFuelChanges(inputData, rec)
 	if chErr != nil {
 		handleDomainError(w, chErr)
 		return

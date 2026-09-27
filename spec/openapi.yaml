@@ -1154,7 +1154,7 @@ paths:
 
     put:
       summary: Update fuel record
-      description: Update an existing fuel record
+      description: Update an existing fuel record. Fields omitted from the request body are preserved.
       operationId: updateFuelRecord
       tags:
         - Fuel
@@ -1860,6 +1860,8 @@ components:
       required:
         - fill_date
         - mileage
+        - volume
+        - fuel_type
       properties:
         fill_date:
           type: string
@@ -1871,6 +1873,15 @@ components:
           minimum: 0
           description: Vehicle mileage at fill-up
           example: 47250
+        fuel_type:
+          type: string
+          enum: [gasoline, diesel, e85]
+          description: Type of fuel used
+          example: gasoline
+        partial_fill:
+          type: boolean
+          description: Whether the tank was only partially filled
+          example: false
         price:
           type: number
           format: float
@@ -1889,6 +1900,12 @@ components:
           maximum: 100
           description: Percentage of city driving (0-100)
           example: 60
+        vehicle_reported_mpg:
+          type: number
+          format: float
+          minimum: 0
+          description: MPG reported by the vehicle
+          example: 28.5
         octane_rating:
           type: integer
           description: Octane rating (87, 89, 91, 93, etc.)
@@ -1929,12 +1946,27 @@ components:
           type: integer
           description: Vehicle mileage at fill-up
           example: 47250
+        fuel_type:
+          type: string
+          enum: [gasoline, diesel, e85]
+          description: Type of fuel used
+          example: gasoline
+        partial_fill:
+          type: boolean
+          description: Whether the tank was only partially filled
+          example: false
         price:
           type: number
           format: float
           nullable: true
           description: Total price paid in USD
           example: 65.50
+        price_per_unit:
+          type: number
+          format: float
+          nullable: true
+          description: Price paid per gallon
+          example: 4.23
         volume:
           type: number
           format: float
@@ -1946,6 +1978,12 @@ components:
           nullable: true
           description: Percentage of city driving (0-100)
           example: 60
+        vehicle_reported_mpg:
+          type: number
+          format: float
+          nullable: true
+          description: MPG reported by the vehicle
+          example: 28.5
         octane_rating:
           type: integer
           nullable: true

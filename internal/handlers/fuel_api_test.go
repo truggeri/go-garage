@@ -84,6 +84,7 @@ func TestFuelHandler_CreateOne(t *testing.T) {
 		userID     string
 		vehicle    *models.Vehicle
 		body       map[string]interface{}
+		createErr  error
 		wantStatus int
 	}{
 		{
@@ -123,6 +124,14 @@ func TestFuelHandler_CreateOne(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name:       "returns internal error when create fails",
+			userID:     "u1",
+			vehicle:    testVehicle("v1", "u1"),
+			body:       validFuelBody(),
+			createErr:  assert.AnError,
+			wantStatus: http.StatusInternalServerError,
+		},
+		{
 			name:       "returns forbidden for vehicle owned by another user",
 			userID:     "u1",
 			vehicle:    testVehicle("v1", "other-user"),
@@ -138,7 +147,7 @@ func TestFuelHandler_CreateOne(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			h := MakeFuelAPIHandler(&stubFuelSvc{}, &stubVehicleSvc{getResult: tt.vehicle})
+			h := MakeFuelAPIHandler(&stubFuelSvc{createErr: tt.createErr}, &stubVehicleSvc{getResult: tt.vehicle})
 			jsonBody, _ := json.Marshal(tt.body)
 			req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles/v1/fuel", bytes.NewReader(jsonBody))
 			if tt.userID != "" {

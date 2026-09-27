@@ -21,6 +21,7 @@ func fuelToResponseMap(record *models.FuelRecord) map[string]interface{} {
 	}
 	if record.PricePerUnit != nil {
 		response["price_per_unit"] = *record.PricePerUnit
+		// The API exposes price as total fill cost, while storage keeps per-unit price.
 		response["price"] = *record.PricePerUnit * record.Volume
 	}
 	if record.OctaneRating != nil {

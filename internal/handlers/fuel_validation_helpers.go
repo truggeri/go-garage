@@ -83,7 +83,7 @@ func validateFuelChanges(existing *models.FuelRecord, updates services.FuelUpdat
 	return models.ValidateFuelRecord(&rec)
 }
 
-func stringValue(d map[string]interface{}, key string) string {
+func stringFromFuelInput(d map[string]interface{}, key string) string {
 	v, _ := d[key].(string)
 	return v
 }
