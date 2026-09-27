@@ -29,7 +29,7 @@
      * cookie-authenticated API mutations pass CSRF validation.
      */
     function initCSRFHeader() {
-        document.body.addEventListener("htmx:configRequest", function (e) {
+        document.addEventListener("htmx:configRequest", function (e) {
             var token = csrfToken();
             if (token) {
                 e.detail.headers["X-CSRF-Token"] = token;
@@ -174,11 +174,11 @@
      * conventions rather than swapping JSON into the document.
      */
     function initErrorRendering() {
-        document.body.addEventListener("htmx:responseError", function (e) {
+        document.addEventListener("htmx:responseError", function (e) {
             renderError(e.detail.elt, e.detail.xhr ? e.detail.xhr.responseText : "");
         });
 
-        document.body.addEventListener("htmx:sendError", function (e) {
+        document.addEventListener("htmx:sendError", function (e) {
             var form = requestForm(e.detail.elt);
             clearErrors(form || document);
             renderGeneralError(form, "Unable to reach the server. Please check your connection and try again.");
@@ -249,7 +249,7 @@
      * Listen for the showFlash event sent by API handlers through HX-Trigger.
      */
     function initFlashTrigger() {
-        document.body.addEventListener("showFlash", function (e) {
+        document.addEventListener("showFlash", function (e) {
             showFlash(e.detail);
         });
     }
@@ -263,14 +263,14 @@
      * htmx-request class, which the shared styles use for the spinner.
      */
     function initLoadingState() {
-        document.body.addEventListener("htmx:beforeRequest", function (e) {
+        document.addEventListener("htmx:beforeRequest", function (e) {
             var elt = e.detail.elt;
             if (elt && typeof elt.setAttribute === "function") {
                 elt.setAttribute("aria-busy", "true");
             }
         });
 
-        document.body.addEventListener("htmx:afterRequest", function (e) {
+        document.addEventListener("htmx:afterRequest", function (e) {
             var elt = e.detail.elt;
             if (elt && typeof elt.removeAttribute === "function") {
                 elt.removeAttribute("aria-busy");
