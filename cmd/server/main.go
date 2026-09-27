@@ -90,6 +90,7 @@ func main() {
 	authHandler := handlers.BuildAuthHandler(authSvc)
 	vehicleHandler := handlers.MakeVehicleAPIHandler(vehicleSvc)
 	maintenanceHandler := handlers.MakeMaintenanceAPIHandler(maintenanceSvc, vehicleSvc)
+	fuelHandler := handlers.MakeFuelAPIHandler(fuelSvc, vehicleSvc)
 	userHandler := handlers.MakeUserAPIHandler(userSvc)
 
 	// Initialize template engine
@@ -189,6 +190,13 @@ func main() {
 	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.GetOne).Methods("GET")
 	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.ReplaceOne).Methods("PUT")
 	protected.HandleFunc("/maintenance/{id}", maintenanceHandler.RemoveOne).Methods("DELETE")
+
+	// Fuel routes
+	protected.HandleFunc("/vehicles/{vehicleId}/fuel", fuelHandler.ListAll).Methods("GET")
+	protected.HandleFunc("/vehicles/{vehicleId}/fuel", fuelHandler.CreateOne).Methods("POST")
+	protected.HandleFunc("/fuel/{id}", fuelHandler.GetOne).Methods("GET")
+	protected.HandleFunc("/fuel/{id}", fuelHandler.ReplaceOne).Methods("PUT")
+	protected.HandleFunc("/fuel/{id}", fuelHandler.RemoveOne).Methods("DELETE")
 
 	// User routes
 	protected.HandleFunc("/users/me", userHandler.GetMe).Methods("GET")
