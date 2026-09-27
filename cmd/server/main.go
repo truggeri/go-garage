@@ -169,8 +169,11 @@ func main() {
 	apiV1.HandleFunc("/auth/logout", authHandler.HandleLogout).Methods("POST")
 
 	// Protected routes (require authentication)
+	// APICSRFProtection must run after HybridAuthGuard so the authentication
+	// mechanism is available: it only enforces CSRF for cookie-authenticated requests.
 	protected := apiV1.NewRoute().Subrouter()
 	protected.Use(middleware.HybridAuthGuard(tokenMgr))
+	protected.Use(middleware.APICSRFProtection(cfg.CSRF.Secret))
 
 	// Vehicle routes
 	protected.HandleFunc("/vehicles", vehicleHandler.ListAll).Methods("GET")

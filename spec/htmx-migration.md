@@ -70,6 +70,12 @@ full-page forms, including login and registration.
 CSRF failures from API requests use the normal JSON error envelope with HTTP
 `403`; they must not render an HTML error page.
 
+Implemented by `middleware.APICSRFProtection` in `internal/middleware/csrf.go`,
+applied to the protected `/api/v1` subrouter after `HybridAuthGuard`. The shared
+`CSRFProtection` middleware now accepts the token from the `X-CSRF-Token` header
+in addition to the `csrf_token` form field, and `web/templates/layouts/base.html`
+renders the `csrf-token` meta tag (PR #250).
+
 ## Request encoding and form migration
 
 Mutation forms use the `json-enc` htmx extension and submit JSON using the

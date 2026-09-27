@@ -23,6 +23,8 @@ type vehicleListPageData struct {
 	UserName string
 	// ActiveNav identifies the active navigation item for highlighting.
 	ActiveNav string
+	// CSRFToken is the CSRF protection token exposed to client-side scripts.
+	CSRFToken string
 	// Vehicles is the slice of vehicles to display on the current page.
 	Vehicles []*models.Vehicle
 	// TotalCount is the total number of vehicles matching the current filters.
@@ -95,6 +97,7 @@ func (h *PageHandler) VehicleList(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated: true,
 		UserName:        account.Name,
 		ActiveNav:       "vehicles",
+		CSRFToken:       middleware.GetCSRFToken(r.Context()),
 		Vehicles:        vehicles,
 		TotalCount:      totalCount,
 		Page:            page,
@@ -284,6 +287,8 @@ type vehicleDetailPageData struct {
 	UserName string
 	// ActiveNav identifies the active navigation item for highlighting.
 	ActiveNav string
+	// CSRFToken is the CSRF protection token exposed to client-side scripts.
+	CSRFToken string
 	// Vehicle is the vehicle to display.
 	Vehicle *models.Vehicle
 	// VehicleTitle is a short human-readable title for the page (e.g. "2020 Ford Focus").
@@ -368,6 +373,7 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated:   true,
 		UserName:          account.Name,
 		ActiveNav:         "vehicles",
+		CSRFToken:         middleware.GetCSRFToken(r.Context()),
 		Vehicle:           vehicle,
 		VehicleTitle:      title,
 		RecentMaintenance: recent,
