@@ -93,6 +93,9 @@ func intFromFuelInput(d map[string]interface{}, key string) (*int, error) {
 	if v != math.Trunc(v) {
 		return nil, models.NewValidationError(key, key+" must be a whole number")
 	}
+	if v < math.MinInt32 || v > math.MaxInt32 {
+		return nil, models.NewValidationError(key, key+" is out of the supported range")
+	}
 	i := int(v)
 	return &i, nil
 }
