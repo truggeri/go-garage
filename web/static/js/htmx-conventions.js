@@ -264,11 +264,17 @@
      */
     function initLoadingState() {
         document.body.addEventListener("htmx:beforeRequest", function (e) {
-            e.detail.elt.setAttribute("aria-busy", "true");
+            var elt = e.detail.elt;
+            if (elt && typeof elt.setAttribute === "function") {
+                elt.setAttribute("aria-busy", "true");
+            }
         });
 
         document.body.addEventListener("htmx:afterRequest", function (e) {
-            e.detail.elt.removeAttribute("aria-busy");
+            var elt = e.detail.elt;
+            if (elt && typeof elt.removeAttribute === "function") {
+                elt.removeAttribute("aria-busy");
+            }
         });
     }
 

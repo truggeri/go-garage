@@ -9,4 +9,6 @@ edited by hand. To upgrade, download the new release and replace the file.
 | `json-enc.js` | [`htmx-ext-json-enc`](https://www.npmjs.com/package/htmx-ext-json-enc) | 2.0.3 | Zero-Clause BSD |
 
 The `json-enc` extension encodes form values as JSON for mutation requests, as
-described in [`spec/htmx-migration.md`](../../../../spec/htmx-migration.md).
+described in [`spec/htmx-migration.md`](../../../../spec/htmx-migration.md). It
+is vendored unminified because the upstream source is roughly one kilobyte and
+is easier to audit on upgrade.
