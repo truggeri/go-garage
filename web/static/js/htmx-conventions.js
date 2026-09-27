@@ -148,8 +148,7 @@
      */
     function renderError(elt, responseText) {
         var form = requestForm(elt);
-        var scope = form || document;
-        clearErrors(scope);
+        clearErrors(form);
 
         var error = parseErrorEnvelope(responseText);
         if (!error) {
@@ -180,7 +179,7 @@
 
         document.addEventListener("htmx:sendError", function (e) {
             var form = requestForm(e.detail.elt);
-            clearErrors(form || document);
+            clearErrors(form);
             renderGeneralError(form, "Unable to reach the server. Please check your connection and try again.");
         });
     }
