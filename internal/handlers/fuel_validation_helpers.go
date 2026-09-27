@@ -7,6 +7,7 @@ import (
 	"github.com/truggeri/go-garage/internal/services"
 )
 
+// parseFuelDate parses RFC3339 or YYYY-MM-DD fuel date strings.
 func parseFuelDate(v interface{}) (time.Time, error) {
 	s, _ := v.(string)
 	if s == "" {
@@ -22,17 +23,19 @@ func parseFuelDate(v interface{}) (time.Time, error) {
 	return t, nil
 }
 
-func extractFuelPricePerUnit(d map[string]interface{}, volume float64) *float64 {
+// extractFuelPricePerUnit reads price_per_unit directly or derives it from total price and volume.
+func extractFuelPricePerUnit(d map[string]interface{}, volume float64) (*float64, bool) {
 	if v, ok := d["price_per_unit"].(float64); ok {
-		return &v
+		return &v, true
 	}
 	if v, ok := d["price"].(float64); ok && volume > 0 {
 		pricePerUnit := v / volume
-		return &pricePerUnit
+		return &pricePerUnit, true
 	}
-	return nil
+	return nil, false
 }
 
+// validateFuelChanges applies updates to a copy of the existing record and validates the result.
 func validateFuelChanges(existing *models.FuelRecord, updates services.FuelUpdates) error {
 	rec := *existing
 	if updates.FillDate != nil {
@@ -47,6 +50,9 @@ func validateFuelChanges(existing *models.FuelRecord, updates services.FuelUpdat
 	if updates.FuelType != nil {
 		rec.FuelType = *updates.FuelType
 	}
+	if updates.PartialFill != nil {
+		rec.PartialFill = *updates.PartialFill
+	}
 	if updates.PricePerUnit != nil {
 		rec.PricePerUnit = updates.PricePerUnit
 	}
@@ -58,6 +64,15 @@ func validateFuelChanges(existing *models.FuelRecord, updates services.FuelUpdat
 	}
 	if updates.VehicleReportedMPG != nil {
 		rec.VehicleReportedMPG = updates.VehicleReportedMPG
+	}
+	if updates.Location != nil {
+		rec.Location = *updates.Location
+	}
+	if updates.Brand != nil {
+		rec.Brand = *updates.Brand
+	}
+	if updates.Notes != nil {
+		rec.Notes = *updates.Notes
 	}
 	return models.ValidateFuelRecord(&rec)
 }

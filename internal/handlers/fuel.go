@@ -24,7 +24,7 @@ func (h *fuelAPIHandler) ListAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	caller, authOK := middleware.GetAccountFromContext(ctx)
 	if !authOK {
-		respondWithProblem(w, 401, "AUTHENTICATION_ERROR", "Not authenticated")
+		respondWithProblem(w, http.StatusUnauthorized, "AUTHENTICATION_ERROR", "Not authenticated")
 		return
 	}
 
@@ -39,7 +39,7 @@ func (h *fuelAPIHandler) ListAll(w http.ResponseWriter, r *http.Request) {
 
 	totalCount, countErr := h.svc.CountFuel(ctx, filterSpec)
 	if countErr != nil {
-		respondWithProblem(w, 500, "INTERNAL_ERROR", "Failed counting")
+		respondWithProblem(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to count fuel records")
 		return
 	}
 
@@ -47,11 +47,11 @@ func (h *fuelAPIHandler) ListAll(w http.ResponseWriter, r *http.Request) {
 		Limit: pageLen, Offset: offsetVal,
 	})
 	if fetchErr != nil {
-		respondWithProblem(w, 500, "INTERNAL_ERROR", "Failed fetching")
+		respondWithProblem(w, http.StatusInternalServerError, "INTERNAL_ERROR", "Failed to retrieve fuel records")
 		return
 	}
 
-	respondWithPayload(w, 200, buildFuelListPayload(records, pageIdx, pageLen, totalCount))
+	respondWithPayload(w, http.StatusOK, buildFuelListPayload(records, pageIdx, pageLen, totalCount))
 }
 
 // CreateOne handles POST /api/v1/vehicles/{vehicleId}/fuel
@@ -59,7 +59,7 @@ func (h *fuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	caller, authOK := middleware.GetAccountFromContext(ctx)
 	if !authOK {
-		respondWithProblem(w, 401, "AUTHENTICATION_ERROR", "Not authenticated")
+		respondWithProblem(w, http.StatusUnauthorized, "AUTHENTICATION_ERROR", "Not authenticated")
 		return
 	}
 
@@ -70,7 +70,7 @@ func (h *fuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 
 	inputData, parseErr := parseJSONBody(r)
 	if parseErr != nil {
-		respondWithProblem(w, 400, "INVALID_REQUEST", "Bad JSON")
+		respondWithProblem(w, http.StatusBadRequest, "INVALID_REQUEST", "Bad JSON")
 		return
 	}
 
@@ -91,7 +91,7 @@ func (h *fuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithPayload(w, 201, buildFuelSinglePayload(newRec, "Fuel record created successfully"))
+	respondWithPayload(w, http.StatusCreated, buildFuelSinglePayload(newRec, "Fuel record created successfully"))
 }
 
 // GetOne handles GET /api/v1/fuel/{id}
@@ -101,7 +101,7 @@ func (h *fuelAPIHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithPayload(w, 200, buildFuelSinglePayload(rec, ""))
+	respondWithPayload(w, http.StatusOK, buildFuelSinglePayload(rec, ""))
 }
 
 // ReplaceOne handles PUT /api/v1/fuel/{id}
@@ -113,7 +113,7 @@ func (h *fuelAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
 
 	inputData, parseErr := parseJSONBody(r)
 	if parseErr != nil {
-		respondWithProblem(w, 400, "INVALID_REQUEST", "Bad JSON")
+		respondWithProblem(w, http.StatusBadRequest, "INVALID_REQUEST", "Bad JSON")
 		return
 	}
 
@@ -129,7 +129,7 @@ func (h *fuelAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithPayload(w, 200, buildFuelSinglePayload(updated, "Fuel record updated successfully"))
+	respondWithPayload(w, http.StatusOK, buildFuelSinglePayload(updated, "Fuel record updated successfully"))
 }
 
 // RemoveOne handles DELETE /api/v1/fuel/{id}
@@ -144,7 +144,7 @@ func (h *fuelAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	respondWithPayload(w, 200, map[string]interface{}{
+	respondWithPayload(w, http.StatusOK, map[string]interface{}{
 		keySuccess: true, "message": "Fuel record deleted successfully",
 	})
 }

@@ -231,39 +231,58 @@ func TestFuelHandler_ReplaceOne(t *testing.T) {
 
 	tests := []struct {
 		name       string
+		userID     string
 		vehicle    *models.Vehicle
+		fuelErr    error
 		body       map[string]interface{}
 		wantStatus int
 	}{
 		{
 			name:       "updates fuel record successfully",
+			userID:     "u1",
 			vehicle:    testVehicle("v1", "u1"),
 			body:       map[string]interface{}{"mileage": 47300},
 			wantStatus: http.StatusOK,
 		},
 		{
 			name:       "returns forbidden for record on vehicle owned by another user",
+			userID:     "u1",
 			vehicle:    testVehicle("v1", "other-user"),
 			body:       map[string]interface{}{"mileage": 47300},
 			wantStatus: http.StatusForbidden,
 		},
 		{
+			name:       "returns not found for non-existent record",
+			userID:     "u1",
+			fuelErr:    models.NewNotFoundError("FuelRecord", "f999"),
+			body:       map[string]interface{}{"mileage": 47300},
+			wantStatus: http.StatusNotFound,
+		},
+		{
 			name:       "rejects invalid update",
+			userID:     "u1",
 			vehicle:    testVehicle("v1", "u1"),
 			body:       map[string]interface{}{"volume": 0},
 			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "rejects unauthenticated request",
+			body:       map[string]interface{}{"mileage": 47300},
+			wantStatus: http.StatusUnauthorized,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := MakeFuelAPIHandler(
-				&stubFuelSvc{getResult: testFuelRecord("f1", "v1", fillDate), updateRes: updated},
+				&stubFuelSvc{getResult: testFuelRecord("f1", "v1", fillDate), getErr: tt.fuelErr, updateRes: updated},
 				&stubVehicleSvc{getResult: tt.vehicle},
 			)
 			jsonBody, _ := json.Marshal(tt.body)
 			req := httptest.NewRequest(http.MethodPut, "/api/v1/fuel/f1", bytes.NewReader(jsonBody))
-			req = addAuthContext(req, "u1", "testuser")
+			if tt.userID != "" {
+				req = addAuthContext(req, tt.userID, "testuser")
+			}
 			req = mux.SetURLVars(req, map[string]string{"id": "f1"})
 			rec := httptest.NewRecorder()
 

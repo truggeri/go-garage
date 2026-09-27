@@ -12,7 +12,7 @@ func (h *fuelAPIHandler) getOwnedFuelRecord(w http.ResponseWriter, r *http.Reque
 	ctx := r.Context()
 	caller, authOK := middleware.GetAccountFromContext(ctx)
 	if !authOK {
-		respondWithProblem(w, 401, "AUTHENTICATION_ERROR", "Not authenticated")
+		respondWithProblem(w, http.StatusUnauthorized, "AUTHENTICATION_ERROR", "Not authenticated")
 		return nil, false
 	}
 
@@ -36,7 +36,7 @@ func (h *fuelAPIHandler) ensureVehicleOwnership(w http.ResponseWriter, r *http.R
 		return false
 	}
 	if vehicle.UserID != userID {
-		respondWithProblem(w, 403, "FORBIDDEN", "Not your vehicle")
+		respondWithProblem(w, http.StatusForbidden, "FORBIDDEN", "Not your vehicle")
 		return false
 	}
 	return true
