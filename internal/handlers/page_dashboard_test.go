@@ -3,6 +3,8 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -149,4 +151,29 @@ func TestPageHandler_Dashboard_ExposesCSRFMetaTag(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, rec.Code)
 	assert.Regexp(t, `<meta name="csrf-token" content="[0-9a-f]+\.[0-9a-f]+">`, rec.Body.String())
+}
+
+func TestPageHandler_Dashboard_LoadsHtmxAssets(t *testing.T) {
+	handler := newTestDashboardPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
+
+	req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+	req = addAuthContext(req, "u1", "testuser")
+	rec := httptest.NewRecorder()
+
+	handler.Dashboard(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	body := rec.Body.String()
+
+	scripts := []string{
+		"/static/js/vendor/htmx.min.js",
+		"/static/js/vendor/json-enc.js",
+		"/static/js/htmx-conventions-minified.js",
+	}
+	for _, script := range scripts {
+		assert.Contains(t, body, `<script src="`+script+`" defer></script>`)
+
+		path := filepath.Join("../../web", strings.TrimPrefix(script, "/"))
+		assert.FileExists(t, path)
+	}
 }

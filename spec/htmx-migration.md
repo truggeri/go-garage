@@ -76,6 +76,20 @@ applied to the protected `/api/v1` subrouter after `HybridAuthGuard`. The shared
 in addition to the `csrf_token` form field, and `web/templates/layouts/base.html`
 renders the `csrf-token` meta tag (PR #250).
 
+## Front-end assets
+
+htmx and its `json-enc` extension are vendored in `web/static/js/vendor/`
+(`htmx.min.js` and `json-enc.js`); see that directory's `README.md` for the
+upstream versions. `web/templates/layouts/base.html` loads both files plus the
+shared module `web/static/js/htmx-conventions.js`, so every authenticated page
+has htmx available. The login and registration layout stays a full-page cookie
+flow and does not load htmx.
+
+The shared module implements CSRF header injection, error-envelope rendering,
+`showFlash` handling, and the `aria-busy` loading hook. Flash markup reuses
+`window.GoGarage.initFlashMessage()` exported from `web/static/js/main.js` for
+close and auto-dismiss behavior rather than duplicating it (PR #251).
+
 ## Request encoding and form migration
 
 Mutation forms use the `json-enc` htmx extension and submit JSON using the

@@ -30,16 +30,28 @@ jobs:
         run: minify --type=css web/static/css/main.css -o /tmp/minified-output.css
 
       - name: Run js minifier
-        run: minify --type=js web/static/js/main.js -o /tmp/minified-output.js
+        run: |
+          find web/static/js -maxdepth 1 -type f -name '*.js' ! -name '*-minified.js' -print0 |
+            while IFS= read -r -d '' source; do
+              output="/tmp/minified-js/${source##*/}"
+              output="${output%.js}-minified.js"
+              mkdir -p "$(dirname "$output")"
+              minify --type=js "$source" -o "$output"
+            done
 
       - name: Check if minified output has changed
         id: check
         run: |
           if [ ! -f web/static/css/main-minified.css ] || ! diff -q /tmp/minified-output.css web/static/css/main-minified.css > /dev/null 2>&1; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
-          elif [ ! -f web/static/js/main-minified.js ] || ! diff -q /tmp/minified-output.js web/static/js/main-minified.js > /dev/null 2>&1; then
-            echo "changed=true" >> "$GITHUB_OUTPUT"
           else
+            for output in /tmp/minified-js/*-minified.js; do
+              target="web/static/js/${output##*/}"
+              if [ ! -f "$target" ] || ! diff -q "$output" "$target" > /dev/null 2>&1; then
+                echo "changed=true" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+            done
             echo "changed=false" >> "$GITHUB_OUTPUT"
           fi
 
@@ -47,7 +59,7 @@ jobs:
         if: steps.check.outputs.changed == 'true'
         run: |
           cp /tmp/minified-output.css web/static/css/main-minified.css &&
-          cp /tmp/minified-output.js web/static/js/main-minified.js
+          cp /tmp/minified-js/*-minified.js web/static/js/
 
       - name: Commit and push changes
         if: steps.check.outputs.changed == 'true' && github.event.pull_request.head.repo.full_name == github.repository
@@ -55,6 +67,6 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add web/static/css/main-minified.css
-          git add web/static/js/main-minified.js
+          git add web/static/js/*-minified.js
           git commit -m "Adding minified assets"
           git push
