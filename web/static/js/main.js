@@ -8,31 +8,37 @@
     // ========================================
 
     /**
-     * Initialize close buttons on flash messages.
-     * Clicking the close button removes the flash element from the DOM.
+     * Initialize a single flash message element.
+     * Clicking the close button removes the flash element from the DOM, and
+     * non-error messages dismiss themselves after a delay. Exported so that
+     * dynamically created messages can reuse the same behavior.
+     * @param {Element} flash - the .flash element to initialize.
+     */
+    function initFlashMessage(flash) {
+        var autoDismissDelay = 5000;
+        var closeBtn = flash.querySelector(".flash-close");
+        if (closeBtn) {
+            closeBtn.addEventListener("click", function () {
+                flash.remove();
+            });
+        }
+
+        // Auto-dismiss after delay; skip for error messages.
+        if (!flash.classList.contains("flash-error")) {
+            setTimeout(function () {
+                flash.classList.add("flash-dismiss");
+                flash.addEventListener("transitionend", function () {
+                    flash.remove();
+                }, { once: true });
+            }, autoDismissDelay);
+        }
+    }
+
+    /**
+     * Initialize every server-rendered flash message on the page.
      */
     function initFlashMessages() {
-        var autoDismissDelay = 5000;
-        var flashes = document.querySelectorAll(".flash");
-
-        flashes.forEach(function (flash) {
-            var closeBtn = flash.querySelector(".flash-close");
-            if (closeBtn) {
-                closeBtn.addEventListener("click", function () {
-                    flash.remove();
-                });
-            }
-
-            // Auto-dismiss after delay; skip for error messages.
-            if (!flash.classList.contains("flash-error")) {
-                setTimeout(function () {
-                    flash.classList.add("flash-dismiss");
-                    flash.addEventListener("transitionend", function () {
-                        flash.remove();
-                    }, { once: true });
-                }, autoDismissDelay);
-            }
-        });
+        document.querySelectorAll(".flash").forEach(initFlashMessage);
     }
 
     // ========================================
@@ -218,6 +224,9 @@
     // ========================================
     // Initialize on DOM Ready
     // ========================================
+
+    window.GoGarage = window.GoGarage || {};
+    window.GoGarage.initFlashMessage = initFlashMessage;
 
     document.addEventListener("DOMContentLoaded", function () {
         initFlashMessages();
