@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"math"
 	"time"
 
 	"github.com/truggeri/go-garage/internal/models"
@@ -81,6 +82,19 @@ func validateFuelChanges(existing *models.FuelRecord, updates services.FuelUpdat
 		rec.Notes = *updates.Notes
 	}
 	return models.ValidateFuelRecord(&rec)
+}
+
+// intFromFuelInput returns an integer field value, rejecting JSON numbers with a fractional part.
+func intFromFuelInput(d map[string]interface{}, key string) (*int, error) {
+	v, ok := d[key].(float64)
+	if !ok {
+		return nil, nil
+	}
+	if v != math.Trunc(v) {
+		return nil, models.NewValidationError(key, key+" must be a whole number")
+	}
+	i := int(v)
+	return &i, nil
 }
 
 // stringFromFuelInput returns a string field value or an empty string when absent or not a string.

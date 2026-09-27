@@ -155,6 +155,18 @@ func TestFuelHandler_CreateOne(t *testing.T) {
 			wantStatus: http.StatusBadRequest,
 		},
 		{
+			name:    "rejects fractional mileage",
+			userID:  "u1",
+			vehicle: testVehicle("v1", "u1"),
+			body: map[string]interface{}{
+				"fill_date": "2024-02-05",
+				"mileage":   47250.5,
+				"volume":    12.0,
+				"fuel_type": "gasoline",
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
 			name:       "returns internal error when create fails",
 			userID:     "u1",
 			vehicle:    testVehicle("v1", "u1"),
@@ -303,6 +315,13 @@ func TestFuelHandler_UpdateOne(t *testing.T) {
 			userID:     "u1",
 			vehicle:    testVehicle("v1", "u1"),
 			body:       map[string]interface{}{"volume": 0},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:       "rejects fractional mileage update",
+			userID:     "u1",
+			vehicle:    testVehicle("v1", "u1"),
+			body:       map[string]interface{}{"mileage": 47300.5},
 			wantStatus: http.StatusBadRequest,
 		},
 		{

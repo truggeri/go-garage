@@ -17,8 +17,10 @@ func buildNewFuelRecord(d map[string]interface{}, vehicleID string) (*models.Fue
 		FillDate:  fillDate,
 		FuelType:  stringFromFuelInput(d, "fuel_type"),
 	}
-	if v, ok := d["mileage"].(float64); ok {
-		rec.Mileage = int(v)
+	if v, err := intFromFuelInput(d, "mileage"); err != nil {
+		return nil, err
+	} else if v != nil {
+		rec.Mileage = *v
 	}
 	if v, ok := d["volume"].(float64); ok {
 		rec.Volume = v
@@ -33,9 +35,10 @@ func buildNewFuelRecord(d map[string]interface{}, vehicleID string) (*models.Fue
 	if hasPrice {
 		rec.PricePerUnit = pricePerUnit
 	}
-	if v, ok := d["octane_rating"].(float64); ok {
-		i := int(v)
-		rec.OctaneRating = &i
+	if v, err := intFromFuelInput(d, "octane_rating"); err != nil {
+		return nil, err
+	} else if v != nil {
+		rec.OctaneRating = v
 	}
 	if v, ok := d["location"].(string); ok {
 		rec.Location = v
@@ -46,9 +49,10 @@ func buildNewFuelRecord(d map[string]interface{}, vehicleID string) (*models.Fue
 	if v, ok := d["notes"].(string); ok {
 		rec.Notes = v
 	}
-	if v, ok := d["city_driving_percentage"].(float64); ok {
-		i := int(v)
-		rec.CityDrivingPercentage = &i
+	if v, err := intFromFuelInput(d, "city_driving_percentage"); err != nil {
+		return nil, err
+	} else if v != nil {
+		rec.CityDrivingPercentage = v
 	}
 	if v, ok := d["vehicle_reported_mpg"].(float64); ok {
 		rec.VehicleReportedMPG = &v
@@ -71,9 +75,10 @@ func extractAndValidateFuelChanges(d map[string]interface{}, existing *models.Fu
 		}
 		u.FillDate = &t
 	}
-	if v, ok := d["mileage"].(float64); ok {
-		i := int(v)
-		u.Mileage = &i
+	if v, err := intFromFuelInput(d, "mileage"); err != nil {
+		return u, err
+	} else if v != nil {
+		u.Mileage = v
 	}
 	if v, ok := d["volume"].(float64); ok {
 		u.Volume = &v
@@ -95,9 +100,10 @@ func extractAndValidateFuelChanges(d map[string]interface{}, existing *models.Fu
 	if hasPrice {
 		u.PricePerUnit = pricePerUnit
 	}
-	if v, ok := d["octane_rating"].(float64); ok {
-		i := int(v)
-		u.OctaneRating = &i
+	if v, err := intFromFuelInput(d, "octane_rating"); err != nil {
+		return u, err
+	} else if v != nil {
+		u.OctaneRating = v
 	}
 	if v, ok := d["location"].(string); ok {
 		u.Location = &v
@@ -108,9 +114,10 @@ func extractAndValidateFuelChanges(d map[string]interface{}, existing *models.Fu
 	if v, ok := d["notes"].(string); ok {
 		u.Notes = &v
 	}
-	if v, ok := d["city_driving_percentage"].(float64); ok {
-		i := int(v)
-		u.CityDrivingPercentage = &i
+	if v, err := intFromFuelInput(d, "city_driving_percentage"); err != nil {
+		return u, err
+	} else if v != nil {
+		u.CityDrivingPercentage = v
 	}
 	if v, ok := d["vehicle_reported_mpg"].(float64); ok {
 		u.VehicleReportedMPG = &v
