@@ -303,35 +303,53 @@ func TestFuelHandler_RemoveOne(t *testing.T) {
 
 	tests := []struct {
 		name       string
+		userID     string
 		vehicle    *models.Vehicle
 		fuelErr    error
+		deleteErr  error
 		wantStatus int
 	}{
 		{
 			name:       "deletes fuel record successfully",
+			userID:     "u1",
 			vehicle:    testVehicle("v1", "u1"),
 			wantStatus: http.StatusOK,
 		},
 		{
 			name:       "returns forbidden for record on vehicle owned by another user",
+			userID:     "u1",
 			vehicle:    testVehicle("v1", "other-user"),
 			wantStatus: http.StatusForbidden,
 		},
 		{
 			name:       "returns not found for non-existent record",
+			userID:     "u1",
 			fuelErr:    models.NewNotFoundError("FuelRecord", "f999"),
 			wantStatus: http.StatusNotFound,
+		},
+		{
+			name:       "returns internal error when delete fails",
+			userID:     "u1",
+			vehicle:    testVehicle("v1", "u1"),
+			deleteErr:  assert.AnError,
+			wantStatus: http.StatusInternalServerError,
+		},
+		{
+			name:       "rejects unauthenticated request",
+			wantStatus: http.StatusUnauthorized,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			h := MakeFuelAPIHandler(
-				&stubFuelSvc{getResult: testFuelRecord("f1", "v1", fillDate), getErr: tt.fuelErr},
+				&stubFuelSvc{getResult: testFuelRecord("f1", "v1", fillDate), getErr: tt.fuelErr, deleteErr: tt.deleteErr},
 				&stubVehicleSvc{getResult: tt.vehicle},
 			)
 			req := httptest.NewRequest(http.MethodDelete, "/api/v1/fuel/f1", nil)
-			req = addAuthContext(req, "u1", "testuser")
+			if tt.userID != "" {
+				req = addAuthContext(req, tt.userID, "testuser")
+			}
 			req = mux.SetURLVars(req, map[string]string{"id": "f1"})
 			rec := httptest.NewRecorder()
 

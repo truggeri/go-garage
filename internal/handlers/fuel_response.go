@@ -7,67 +7,67 @@ import (
 )
 
 // fuelToResponseMap converts a FuelRecord model to a response map for JSON encoding.
-func fuelToResponseMap(f *models.FuelRecord) map[string]interface{} {
-	r := map[string]interface{}{
-		"id":           f.ID,
-		"vehicle_id":   f.VehicleID,
-		"fill_date":    f.FillDate.Format(time.RFC3339),
-		"mileage":      f.Mileage,
-		"volume":       f.Volume,
-		"fuel_type":    f.FuelType,
-		"partial_fill": f.PartialFill,
-		"created_at":   f.CreatedAt.Format(time.RFC3339),
-		"updated_at":   f.UpdatedAt.Format(time.RFC3339),
+func fuelToResponseMap(record *models.FuelRecord) map[string]interface{} {
+	response := map[string]interface{}{
+		"id":           record.ID,
+		"vehicle_id":   record.VehicleID,
+		"fill_date":    record.FillDate.Format(time.RFC3339),
+		"mileage":      record.Mileage,
+		"volume":       record.Volume,
+		"fuel_type":    record.FuelType,
+		"partial_fill": record.PartialFill,
+		"created_at":   record.CreatedAt.Format(time.RFC3339),
+		"updated_at":   record.UpdatedAt.Format(time.RFC3339),
 	}
-	if f.PricePerUnit != nil {
-		r["price_per_unit"] = *f.PricePerUnit
-		r["price"] = *f.PricePerUnit * f.Volume
+	if record.PricePerUnit != nil {
+		response["price_per_unit"] = *record.PricePerUnit
+		response["price"] = *record.PricePerUnit * record.Volume
 	}
-	if f.OctaneRating != nil {
-		r["octane_rating"] = *f.OctaneRating
+	if record.OctaneRating != nil {
+		response["octane_rating"] = *record.OctaneRating
 	}
-	if f.Location != "" {
-		r["location"] = f.Location
+	if record.Location != "" {
+		response["location"] = record.Location
 	}
-	if f.Brand != "" {
-		r["brand"] = f.Brand
+	if record.Brand != "" {
+		response["brand"] = record.Brand
 	}
-	if f.Notes != "" {
-		r["notes"] = f.Notes
+	if record.Notes != "" {
+		response["notes"] = record.Notes
 	}
-	if f.CityDrivingPercentage != nil {
-		r["city_driving_percentage"] = *f.CityDrivingPercentage
+	if record.CityDrivingPercentage != nil {
+		response["city_driving_percentage"] = *record.CityDrivingPercentage
 	}
-	if f.VehicleReportedMPG != nil {
-		r["vehicle_reported_mpg"] = *f.VehicleReportedMPG
+	if record.VehicleReportedMPG != nil {
+		response["vehicle_reported_mpg"] = *record.VehicleReportedMPG
 	}
-	return r
+	return response
 }
 
 // buildFuelListPayload creates a paginated list response payload for fuel records.
-func buildFuelListPayload(recs []*models.FuelRecord, pg, sz, total int) map[string]interface{} {
-	items := make([]map[string]interface{}, len(recs))
-	for i, f := range recs {
-		items[i] = fuelToResponseMap(f)
+func buildFuelListPayload(records []*models.FuelRecord, page, pageSize, total int) map[string]interface{} {
+	items := make([]map[string]interface{}, len(records))
+	for idx, record := range records {
+		items[idx] = fuelToResponseMap(record)
 	}
-	tp := 0
-	if total > 0 && sz > 0 {
-		tp = total / sz
-		if total%sz != 0 {
-			tp++
+	totalPages := 0
+	if total > 0 && pageSize > 0 {
+		totalPages = total / pageSize
+		if total%pageSize != 0 {
+			totalPages++
 		}
 	}
 	return map[string]interface{}{
 		keySuccess: true, "data": items,
-		"pagination": map[string]int{"page": pg, "limit": sz, "total": total, "total_pages": tp},
+		"pagination": map[string]int{"page": page, "limit": pageSize, "total": total, "total_pages": totalPages},
 	}
 }
 
 // buildFuelSinglePayload creates a single fuel record response payload.
-func buildFuelSinglePayload(f *models.FuelRecord, msg string) map[string]interface{} {
-	p := map[string]interface{}{keySuccess: true, "data": fuelToResponseMap(f)}
-	if msg != "" {
-		p["message"] = msg
+func buildFuelSinglePayload(record *models.FuelRecord, message string) map[string]interface{} {
+	payload := map[string]interface{}{keySuccess: true, "data": fuelToResponseMap(record)}
+	if message != "" {
+		payload["message"] = message
 	}
-	return p
+	return payload
 }

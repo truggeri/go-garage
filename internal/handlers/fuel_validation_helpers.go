@@ -9,7 +9,10 @@ import (
 
 // parseFuelDate parses RFC3339 or YYYY-MM-DD fuel date strings.
 func parseFuelDate(v interface{}) (time.Time, error) {
-	s, _ := v.(string)
+	s, ok := v.(string)
+	if !ok {
+		return time.Time{}, models.NewValidationError("fill_date", "fill date must be a string in RFC3339 or YYYY-MM-DD format")
+	}
 	if s == "" {
 		return time.Time{}, models.NewValidationError("fill_date", "fill date is required")
 	}
@@ -24,15 +27,18 @@ func parseFuelDate(v interface{}) (time.Time, error) {
 }
 
 // extractFuelPricePerUnit reads price_per_unit directly or derives it from total price and volume.
-func extractFuelPricePerUnit(d map[string]interface{}, volume float64) (*float64, bool) {
+func extractFuelPricePerUnit(d map[string]interface{}, volume float64) (*float64, bool, error) {
 	if v, ok := d["price_per_unit"].(float64); ok {
-		return &v, true
+		return &v, true, nil
 	}
-	if v, ok := d["price"].(float64); ok && volume > 0 {
+	if v, ok := d["price"].(float64); ok {
+		if volume <= 0 {
+			return nil, false, models.NewValidationError("price", "price requires volume greater than zero")
+		}
 		pricePerUnit := v / volume
-		return &pricePerUnit, true
+		return &pricePerUnit, true, nil
 	}
-	return nil, false
+	return nil, false, nil
 }
 
 // validateFuelChanges applies updates to a copy of the existing record and validates the result.

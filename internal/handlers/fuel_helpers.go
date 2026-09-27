@@ -26,7 +26,11 @@ func buildNewFuelRecord(d map[string]interface{}, vehicleID string) (*models.Fue
 	if v, ok := d["partial_fill"].(bool); ok {
 		rec.PartialFill = v
 	}
-	if pricePerUnit, ok := extractFuelPricePerUnit(d, rec.Volume); ok {
+	pricePerUnit, hasPrice, priceErr := extractFuelPricePerUnit(d, rec.Volume)
+	if priceErr != nil {
+		return nil, priceErr
+	}
+	if hasPrice {
 		rec.PricePerUnit = pricePerUnit
 	}
 	if v, ok := d["octane_rating"].(float64); ok {
@@ -74,7 +78,7 @@ func extractFuelChanges(d map[string]interface{}, existing *models.FuelRecord) (
 	if v, ok := d["volume"].(float64); ok {
 		u.Volume = &v
 	}
-	if v, ok := d["fuel_type"].(string); ok && v != "" {
+	if v, ok := d["fuel_type"].(string); ok {
 		u.FuelType = &v
 	}
 	if v, ok := d["partial_fill"].(bool); ok {
@@ -84,7 +88,11 @@ func extractFuelChanges(d map[string]interface{}, existing *models.FuelRecord) (
 	if u.Volume != nil {
 		volume = *u.Volume
 	}
-	if pricePerUnit, ok := extractFuelPricePerUnit(d, volume); ok {
+	pricePerUnit, hasPrice, priceErr := extractFuelPricePerUnit(d, volume)
+	if priceErr != nil {
+		return u, priceErr
+	}
+	if hasPrice {
 		u.PricePerUnit = pricePerUnit
 	}
 	if v, ok := d["octane_rating"].(float64); ok {

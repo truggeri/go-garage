@@ -9,18 +9,19 @@ import (
 	"github.com/truggeri/go-garage/internal/services"
 )
 
-type fuelAPIHandler struct {
+// FuelAPIHandler handles Fuel REST API requests.
+type FuelAPIHandler struct {
 	svc        services.FuelService
 	vehicleSvc services.VehicleService
 }
 
 // MakeFuelAPIHandler creates a new fuel API handler.
-func MakeFuelAPIHandler(svc services.FuelService, vehicleSvc services.VehicleService) *fuelAPIHandler {
-	return &fuelAPIHandler{svc: svc, vehicleSvc: vehicleSvc}
+func MakeFuelAPIHandler(svc services.FuelService, vehicleSvc services.VehicleService) *FuelAPIHandler {
+	return &FuelAPIHandler{svc: svc, vehicleSvc: vehicleSvc}
 }
 
 // ListAll handles GET /api/v1/vehicles/{vehicleId}/fuel
-func (h *fuelAPIHandler) ListAll(w http.ResponseWriter, r *http.Request) {
+func (h *FuelAPIHandler) ListAll(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	caller, authOK := middleware.GetAccountFromContext(ctx)
 	if !authOK {
@@ -55,7 +56,7 @@ func (h *fuelAPIHandler) ListAll(w http.ResponseWriter, r *http.Request) {
 }
 
 // CreateOne handles POST /api/v1/vehicles/{vehicleId}/fuel
-func (h *fuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
+func (h *FuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	caller, authOK := middleware.GetAccountFromContext(ctx)
 	if !authOK {
@@ -95,7 +96,7 @@ func (h *fuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetOne handles GET /api/v1/fuel/{id}
-func (h *fuelAPIHandler) GetOne(w http.ResponseWriter, r *http.Request) {
+func (h *FuelAPIHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 	rec, ok := h.getOwnedFuelRecord(w, r)
 	if !ok {
 		return
@@ -104,8 +105,8 @@ func (h *fuelAPIHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 	respondWithPayload(w, http.StatusOK, buildFuelSinglePayload(rec, ""))
 }
 
-// ReplaceOne handles PUT /api/v1/fuel/{id}
-func (h *fuelAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
+// ReplaceOne handles PUT /api/v1/fuel/{id} using the existing partial-update API semantics.
+func (h *FuelAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
 	rec, ok := h.getOwnedFuelRecord(w, r)
 	if !ok {
 		return
@@ -133,7 +134,7 @@ func (h *fuelAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
 }
 
 // RemoveOne handles DELETE /api/v1/fuel/{id}
-func (h *fuelAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request) {
+func (h *FuelAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request) {
 	rec, ok := h.getOwnedFuelRecord(w, r)
 	if !ok {
 		return
