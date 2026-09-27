@@ -143,8 +143,8 @@
     }
 
     /**
-     * Render an error envelope into the page. Field messages are written to
-     * their targets and anything else becomes a general error message.
+     * Render an error envelope into the originating form. Formless requests
+     * leave existing form errors untouched and show a general error flash.
      */
     function renderError(elt, responseText) {
         var form = requestForm(elt);
