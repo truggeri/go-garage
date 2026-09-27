@@ -942,7 +942,7 @@ paths:
   /api/v1/vehicles/{vehicleId}/fuel:
     get:
       summary: List fuel records
-      description: Get all fuel records for a specific vehicle
+      description: Get all fuel records for a specific vehicle, ordered by fill date (newest first)
       operationId: listFuelRecords
       tags:
         - Fuel
@@ -970,24 +970,6 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
-        - name: from_date
-          in: query
-          description: Filter records from this date (ISO 8601)
-          schema:
-            type: string
-            format: date
-        - name: to_date
-          in: query
-          description: Filter records to this date (ISO 8601)
-          schema:
-            type: string
-            format: date
-        - name: sort
-          in: query
-          description: Sort field and direction (e.g., 'fill_date:desc')
-          schema:
-            type: string
-            default: fill_date:desc
       responses:
         '200':
           description: List of fuel records
