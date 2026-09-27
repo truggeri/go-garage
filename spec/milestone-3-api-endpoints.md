@@ -126,7 +126,32 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
   - Delete maintenance record
   - Verify ownership
 
-### 5. User API Endpoints
+### 5. Fuel API Endpoints
+
+- [x] GET /api/v1/vehicles/{vehicleId}/fuel (PR #252)
+  - List fuel records for a vehicle
+  - Verify vehicle ownership
+  - Support pagination
+
+- [x] POST /api/v1/vehicles/{vehicleId}/fuel (PR #252)
+  - Create fuel record
+  - Verify vehicle ownership
+  - Validate input
+
+- [x] GET /api/v1/fuel/{id} (PR #252)
+  - Get specific fuel record
+  - Verify ownership through vehicle
+
+- [x] PUT /api/v1/fuel/{id} (PR #252)
+  - Update fuel record
+  - Verify ownership
+  - Validate updates
+
+- [x] DELETE /api/v1/fuel/{id} (PR #252)
+  - Delete fuel record
+  - Verify ownership
+
+### 6. User API Endpoints
 
 - [x] GET /api/v1/users/me
   - Get current user profile
@@ -147,7 +172,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
   - Require password confirmation
   - Cascade delete vehicles and maintenance
 
-### 6. Request/Response Handling
+### 7. Request/Response Handling
 
 #### Request Parsing
 
@@ -185,7 +210,7 @@ Implement a complete RESTful API for managing vehicles and maintenance records, 
 }
 ```
 
-### 7. Error Handling
+### 8. Error Handling
 
 - [ ] Create standardized error responses
 - [ ] Map internal errors to HTTP status codes
@@ -208,7 +233,7 @@ Error response format:
 }
 ```
 
-### 8. API Middleware Stack
+### 9. API Middleware Stack
 
 - [ ] Request logging
 - [ ] CORS headers
@@ -217,7 +242,7 @@ Error response format:
 - [ ] Panic recovery
 - [ ] Security headers (X-Content-Type-Options, etc.)
 
-### 9. Input Validation
+### 10. Input Validation
 
 - [ ] Validate all input fields
 - [ ] Implement custom validators
@@ -225,7 +250,7 @@ Error response format:
 - [ ] Validate pagination parameters
 - [ ] Sanitize user input
 
-### 10. API Testing
+### 11. API Testing
 
 #### Unit Tests
 

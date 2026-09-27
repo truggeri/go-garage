@@ -1888,6 +1888,12 @@ components:
           minimum: 0
           description: Total price paid in USD
           example: 65.50
+        price_per_unit:
+          type: number
+          format: float
+          minimum: 0
+          description: Price paid per gallon
+          example: 4.23
         volume:
           type: number
           format: float
