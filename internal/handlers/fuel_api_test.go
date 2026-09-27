@@ -22,6 +22,8 @@ func TestFuelHandler_ListAll(t *testing.T) {
 		userID     string
 		vehicle    *models.Vehicle
 		vehicleErr error
+		countErr   error
+		listErr    error
 		wantStatus int
 	}{
 		{
@@ -43,6 +45,20 @@ func TestFuelHandler_ListAll(t *testing.T) {
 			wantStatus: http.StatusNotFound,
 		},
 		{
+			name:       "returns internal error when count fails",
+			userID:     "u1",
+			vehicle:    testVehicle("v1", "u1"),
+			countErr:   assert.AnError,
+			wantStatus: http.StatusInternalServerError,
+		},
+		{
+			name:       "returns internal error when list fails",
+			userID:     "u1",
+			vehicle:    testVehicle("v1", "u1"),
+			listErr:    assert.AnError,
+			wantStatus: http.StatusInternalServerError,
+		},
+		{
 			name:       "rejects unauthenticated request",
 			wantStatus: http.StatusUnauthorized,
 		},
@@ -54,6 +70,8 @@ func TestFuelHandler_ListAll(t *testing.T) {
 			fuelStub := &stubFuelSvc{
 				countResult: 1,
 				listResult:  []*models.FuelRecord{testFuelRecord("f1", "v1", fillDate)},
+				countErr:    tt.countErr,
+				listErr:     tt.listErr,
 			}
 			h := MakeFuelAPIHandler(fuelStub, vehicleStub)
 
@@ -120,6 +138,19 @@ func TestFuelHandler_CreateOne(t *testing.T) {
 				"mileage":   47250,
 				"volume":    12.0,
 				"fuel_type": "invalid",
+			},
+			wantStatus: http.StatusBadRequest,
+		},
+		{
+			name:    "rejects price when volume is zero",
+			userID:  "u1",
+			vehicle: testVehicle("v1", "u1"),
+			body: map[string]interface{}{
+				"fill_date": "2024-02-05",
+				"mileage":   47250,
+				"volume":    0,
+				"fuel_type": "gasoline",
+				"price":     60.0,
 			},
 			wantStatus: http.StatusBadRequest,
 		},
@@ -233,7 +264,7 @@ func TestFuelHandler_GetOne(t *testing.T) {
 	}
 }
 
-func TestFuelHandler_ReplaceOne(t *testing.T) {
+func TestFuelHandler_UpdateOne(t *testing.T) {
 	fillDate := time.Date(2024, 2, 5, 14, 30, 0, 0, time.UTC)
 	updated := testFuelRecord("f1", "v1", fillDate)
 	updated.Mileage = 47300
@@ -295,7 +326,7 @@ func TestFuelHandler_ReplaceOne(t *testing.T) {
 			req = mux.SetURLVars(req, map[string]string{"id": "f1"})
 			rec := httptest.NewRecorder()
 
-			h.ReplaceOne(rec, req)
+			h.UpdateOne(rec, req)
 
 			assert.Equal(t, tt.wantStatus, rec.Code)
 			if tt.wantStatus == http.StatusOK {

@@ -105,8 +105,8 @@ func (h *FuelAPIHandler) GetOne(w http.ResponseWriter, r *http.Request) {
 	respondWithPayload(w, http.StatusOK, buildFuelSinglePayload(rec, ""))
 }
 
-// ReplaceOne handles PUT /api/v1/fuel/{id} using the existing partial-update API semantics.
-func (h *FuelAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
+// UpdateOne handles PUT /api/v1/fuel/{id} using the existing partial-update API semantics.
+func (h *FuelAPIHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 	rec, ok := h.getOwnedFuelRecord(w, r)
 	if !ok {
 		return

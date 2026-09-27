@@ -33,7 +33,7 @@ func extractFuelPricePerUnit(d map[string]interface{}, volume float64) (*float64
 	}
 	if v, ok := d["price"].(float64); ok {
 		if volume <= 0 {
-			return nil, false, models.NewValidationError("price", "price requires volume greater than zero")
+			return nil, false, models.NewValidationError("volume", "volume must be greater than zero when deriving price per unit from price")
 		}
 		pricePerUnit := v / volume
 		return &pricePerUnit, true, nil
@@ -83,6 +83,7 @@ func validateFuelChanges(existing *models.FuelRecord, updates services.FuelUpdat
 	return models.ValidateFuelRecord(&rec)
 }
 
+// stringFromFuelInput returns a string field value or an empty string when absent or not a string.
 func stringFromFuelInput(d map[string]interface{}, key string) string {
 	v, _ := d[key].(string)
 	return v

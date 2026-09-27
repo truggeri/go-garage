@@ -195,7 +195,7 @@ func main() {
 	protected.HandleFunc("/vehicles/{vehicleId}/fuel", fuelHandler.ListAll).Methods("GET")
 	protected.HandleFunc("/vehicles/{vehicleId}/fuel", fuelHandler.CreateOne).Methods("POST")
 	protected.HandleFunc("/fuel/{id}", fuelHandler.GetOne).Methods("GET")
-	protected.HandleFunc("/fuel/{id}", fuelHandler.ReplaceOne).Methods("PUT")
+	protected.HandleFunc("/fuel/{id}", fuelHandler.UpdateOne).Methods("PUT")
 	protected.HandleFunc("/fuel/{id}", fuelHandler.RemoveOne).Methods("DELETE")
 
 	// User routes
