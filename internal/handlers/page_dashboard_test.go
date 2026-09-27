@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/templateengine"
 )
@@ -134,4 +135,18 @@ func TestVehicleName(t *testing.T) {
 	t.Run("returns Unknown for nil vehicle", func(t *testing.T) {
 		assert.Equal(t, "Unknown", vehicleName(nil))
 	})
+}
+
+func TestPageHandler_Dashboard_ExposesCSRFMetaTag(t *testing.T) {
+	handler := newTestDashboardPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
+
+	req := httptest.NewRequest(http.MethodGet, "/dashboard", nil)
+	req = addAuthContext(req, "u1", "testuser")
+	rec := httptest.NewRecorder()
+
+	protected := middleware.CSRFProtection("test-csrf-secret")(http.HandlerFunc(handler.Dashboard))
+	protected.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Regexp(t, `<meta name="csrf-token" content="[0-9a-f]+\.[0-9a-f]+">`, rec.Body.String())
 }

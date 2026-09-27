@@ -18,6 +18,8 @@ type maintenanceListPageData struct {
 	UserName string
 	// ActiveNav identifies the active navigation item for highlighting.
 	ActiveNav string
+	// CSRFToken is the CSRF protection token exposed to client-side scripts.
+	CSRFToken string
 	// Records is the slice of maintenance records to display on the current page.
 	Records []*models.MaintenanceRecord
 	// Vehicles is the list of user's vehicles, used to populate the vehicle filter dropdown.
@@ -88,6 +90,7 @@ func (h *PageHandler) MaintenanceList(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated:   true,
 		UserName:          account.Name,
 		ActiveNav:         "maintenance",
+		CSRFToken:         middleware.GetCSRFToken(r.Context()),
 		Records:           records,
 		Vehicles:          userVehicles,
 		VehicleNames:      buildVehicleNameMap(userVehicles),

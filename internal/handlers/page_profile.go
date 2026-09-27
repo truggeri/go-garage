@@ -18,6 +18,8 @@ type profilePageData struct {
 	UserName string
 	// ActiveNav identifies the active navigation item for highlighting.
 	ActiveNav string
+	// CSRFToken is the CSRF protection token exposed to client-side scripts.
+	CSRFToken string
 	// User is the full user model for the authenticated user.
 	User *models.User
 	// CreatedAt is the formatted account creation date.
@@ -61,6 +63,7 @@ func (h *PageHandler) ViewProfile(w http.ResponseWriter, r *http.Request) {
 		IsAuthenticated:  true,
 		UserName:         account.Name,
 		ActiveNav:        "profile",
+		CSRFToken:        middleware.GetCSRFToken(r.Context()),
 		User:             user,
 		CreatedAt:        user.CreatedAt,
 		VehicleCount:     len(vehicles),

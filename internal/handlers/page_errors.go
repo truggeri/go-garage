@@ -16,11 +16,13 @@ type errorPageData struct {
 	UserName string
 	// ActiveNav identifies the active navigation item (empty for error pages).
 	ActiveNav string
+	// CSRFToken is the CSRF protection token exposed to client-side scripts.
+	CSRFToken string
 }
 
 // buildErrorPageData constructs template data for error pages, detecting authentication from the request context.
 func (h *PageHandler) buildErrorPageData(r *http.Request) errorPageData {
-	data := errorPageData{}
+	data := errorPageData{CSRFToken: middleware.GetCSRFToken(r.Context())}
 	if account, ok := middleware.GetAccountFromContext(r.Context()); ok {
 		data.IsAuthenticated = true
 		data.UserName = account.Name
