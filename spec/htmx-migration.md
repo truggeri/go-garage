@@ -49,6 +49,10 @@ When authentication fails:
 
 No existing bearer-token response shape or status code is changed.
 
+Implemented by `middleware.HybridAuthGuard` in
+`internal/middleware/authentication.go` and applied to the protected
+`/api/v1` subrouter (PR #249).
+
 ## CSRF protection
 
 Cookie-authenticated `POST`, `PUT`, and `DELETE` requests to `/api/v1` must include a valid `X-CSRF-Token` header. The API router must apply CSRF middleware after hybrid authentication; that middleware must validate this header for JSON requests while retaining `csrf_token` form-field validation for full-page forms. Bearer-authenticated requests skip this additional check.

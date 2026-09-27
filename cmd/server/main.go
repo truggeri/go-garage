@@ -170,7 +170,7 @@ func main() {
 
 	// Protected routes (require authentication)
 	protected := apiV1.NewRoute().Subrouter()
-	protected.Use(middleware.AuthenticationGuard(tokenMgr))
+	protected.Use(middleware.HybridAuthGuard(tokenMgr))
 
 	// Vehicle routes
 	protected.HandleFunc("/vehicles", vehicleHandler.ListAll).Methods("GET")
