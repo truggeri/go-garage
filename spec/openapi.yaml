@@ -942,7 +942,7 @@ paths:
   /api/v1/vehicles/{vehicleId}/fuel:
     get:
       summary: List fuel records
-      description: Get all fuel records for a specific vehicle
+      description: Get all fuel records for a specific vehicle, ordered by fill date (newest first)
       operationId: listFuelRecords
       tags:
         - Fuel
@@ -970,24 +970,6 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
-        - name: from_date
-          in: query
-          description: Filter records from this date (ISO 8601)
-          schema:
-            type: string
-            format: date
-        - name: to_date
-          in: query
-          description: Filter records to this date (ISO 8601)
-          schema:
-            type: string
-            format: date
-        - name: sort
-          in: query
-          description: Sort field and direction (e.g., 'fill_date:desc')
-          schema:
-            type: string
-            default: fill_date:desc
       responses:
         '200':
           description: List of fuel records
@@ -1154,7 +1136,7 @@ paths:
 
     put:
       summary: Update fuel record
-      description: Update an existing fuel record
+      description: Update an existing fuel record. Fields omitted from the request body are preserved.
       operationId: updateFuelRecord
       tags:
         - Fuel
@@ -1860,6 +1842,8 @@ components:
       required:
         - fill_date
         - mileage
+        - volume
+        - fuel_type
       properties:
         fill_date:
           type: string
@@ -1871,12 +1855,27 @@ components:
           minimum: 0
           description: Vehicle mileage at fill-up
           example: 47250
+        fuel_type:
+          type: string
+          enum: [gasoline, diesel, e85]
+          description: Type of fuel used
+          example: gasoline
+        partial_fill:
+          type: boolean
+          description: Whether the tank was only partially filled
+          example: false
         price:
           type: number
           format: float
           minimum: 0
           description: Total price paid in USD
           example: 65.50
+        price_per_unit:
+          type: number
+          format: float
+          minimum: 0
+          description: Price paid per gallon
+          example: 4.23
         volume:
           type: number
           format: float
@@ -1889,6 +1888,12 @@ components:
           maximum: 100
           description: Percentage of city driving (0-100)
           example: 60
+        vehicle_reported_mpg:
+          type: number
+          format: float
+          minimum: 0
+          description: MPG reported by the vehicle
+          example: 28.5
         octane_rating:
           type: integer
           description: Octane rating (87, 89, 91, 93, etc.)
@@ -1929,12 +1934,27 @@ components:
           type: integer
           description: Vehicle mileage at fill-up
           example: 47250
+        fuel_type:
+          type: string
+          enum: [gasoline, diesel, e85]
+          description: Type of fuel used
+          example: gasoline
+        partial_fill:
+          type: boolean
+          description: Whether the tank was only partially filled
+          example: false
         price:
           type: number
           format: float
           nullable: true
           description: Total price paid in USD
           example: 65.50
+        price_per_unit:
+          type: number
+          format: float
+          nullable: true
+          description: Price paid per gallon
+          example: 4.23
         volume:
           type: number
           format: float
@@ -1946,6 +1966,12 @@ components:
           nullable: true
           description: Percentage of city driving (0-100)
           example: 60
+        vehicle_reported_mpg:
+          type: number
+          format: float
+          nullable: true
+          description: MPG reported by the vehicle
+          example: 28.5
         octane_rating:
           type: integer
           nullable: true
