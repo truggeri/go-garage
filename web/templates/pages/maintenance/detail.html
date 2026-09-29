@@ -110,6 +110,7 @@
 </div>
 
 <form id="delete-form" method="POST" action="/maintenance/{{.Record.ID}}/delete" style="display: none;">
+    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
     <input type="hidden" name="_method" value="DELETE">
 </form>
 {{end}}

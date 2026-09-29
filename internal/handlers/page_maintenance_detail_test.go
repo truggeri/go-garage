@@ -8,6 +8,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/templateengine"
 )
@@ -20,6 +22,21 @@ func newTestMaintenanceDetailPageHandler(
 	t.Helper()
 	engine := templateengine.NewEngine("../../web/templates", true)
 	return NewPageHandler(engine, &mockAuthService{}, vehicleSvc, maintenanceSvc, nil, nil, nil)
+}
+
+func TestPageHandler_MaintenanceDeleteFormCSRF(t *testing.T) {
+	vehicle := &models.Vehicle{ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020}
+	record := &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", ServiceType: "oil_change", ServiceDate: time.Now()}
+	handler := newTestMaintenanceDetailPageHandler(t, &stubVehicleSvc{getResult: vehicle}, &stubMaintenanceSvc{getResult: record})
+	req := mux.SetURLVars(httptest.NewRequest(http.MethodGet, "/maintenance/m1", nil), map[string]string{"id": "m1"})
+	req = addAuthContext(req, "u1", "testuser")
+	rec := httptest.NewRecorder()
+
+	middleware.CSRFProtection("test-secret")(http.HandlerFunc(handler.MaintenanceDetail)).ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	assert.Contains(t, rec.Body.String(), `action="/maintenance/m1/delete"`)
+	assert.Len(t, deleteFormToken.FindStringSubmatch(rec.Body.String()), 2, "maintenance delete form must contain a CSRF token")
 }
 
 func TestPageHandler_MaintenanceDetail(t *testing.T) {
