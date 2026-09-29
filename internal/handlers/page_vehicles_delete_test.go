@@ -56,6 +56,30 @@ func TestPageHandler_VehicleDelete(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rec.Code)
 	})
 
+	t.Run("requires an account", func(t *testing.T) {
+		vehicleSvc := &stubVehicleSvc{}
+		handler := newTestVehicleDetailPageHandler(t, vehicleSvc, &stubMaintenanceSvc{})
+		req := addResourceContext(httptest.NewRequest(http.MethodPost, "/vehicles/v1/delete", nil), vehicle)
+		rec := httptest.NewRecorder()
+
+		handler.VehicleDelete(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.Empty(t, vehicleSvc.deletedID)
+	})
+
+	t.Run("rejects a loaded resource that is not a vehicle", func(t *testing.T) {
+		vehicleSvc := &stubVehicleSvc{}
+		handler := newTestVehicleDetailPageHandler(t, vehicleSvc, &stubMaintenanceSvc{})
+		req := addResourceContext(addAuthContext(httptest.NewRequest(http.MethodPost, "/vehicles/v1/delete", nil), "u1", "testuser"), "v1")
+		rec := httptest.NewRecorder()
+
+		handler.VehicleDelete(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.Empty(t, vehicleSvc.deletedID)
+	})
+
 	t.Run("reports deletion failure", func(t *testing.T) {
 		vehicleSvc := &stubVehicleSvc{deleteErr: assert.AnError}
 		handler := newTestVehicleDetailPageHandler(t, vehicleSvc, &stubMaintenanceSvc{})
@@ -78,7 +102,10 @@ func TestPageHandler_VehicleDeleteFormCSRF(t *testing.T) {
 	pages := router.NewRoute().Subrouter()
 	pages.Use(middleware.CSRFProtection("test-secret"))
 	vehiclePages := pages.PathPrefix("/vehicles/{id}").Subrouter()
-	vehiclePages.Use(middleware.PageResourceOwnershipGuard(func(_ context.Context, _ *http.Request) (interface{}, string, error) {
+	vehiclePages.Use(middleware.PageResourceOwnershipGuard(func(_ context.Context, r *http.Request) (interface{}, string, error) {
+		if mux.Vars(r)["id"] == "v2" {
+			return &models.Vehicle{ID: "v2", UserID: "other"}, "other", nil
+		}
 		return vehicle, vehicle.UserID, nil
 	}))
 	vehiclePages.HandleFunc("", handler.VehicleDetail).Methods(http.MethodGet)
@@ -105,6 +132,13 @@ func TestPageHandler_VehicleDeleteFormCSRF(t *testing.T) {
 	vehicleSvc.deletedID = ""
 	rec = httptest.NewRecorder()
 	authedRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/vehicles/v1/delete", nil))
+	assert.Equal(t, http.StatusForbidden, rec.Code)
+	assert.Empty(t, vehicleSvc.deletedID)
+
+	post = httptest.NewRequest(http.MethodPost, "/vehicles/v2/delete", strings.NewReader(url.Values{"csrf_token": {matches[1]}}.Encode()))
+	post.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	rec = httptest.NewRecorder()
+	authedRouter.ServeHTTP(rec, post)
 	assert.Equal(t, http.StatusForbidden, rec.Code)
 	assert.Empty(t, vehicleSvc.deletedID)
 }
