@@ -161,6 +161,10 @@ Recommended destinations:
 | Profile edit | Profile |
 | Change password | Profile |
 
+Vehicle deletion from the list card and detail page uses `hx-delete` with
+`hx-swap="none"` and redirects to `/vehicles` via the API's `HX-Redirect`
+header. The old `/vehicles/{id}/delete` page POST route is removed (PR #255).
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:

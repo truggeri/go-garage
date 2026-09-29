@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 	"time"
 
@@ -36,6 +37,7 @@ func TestPageHandler_MaintenanceDeleteFormCSRF(t *testing.T) {
 
 	require.Equal(t, http.StatusOK, rec.Code)
 	assert.Contains(t, rec.Body.String(), `action="/maintenance/m1/delete"`)
+	deleteFormToken := regexp.MustCompile(`<form id="delete-form"[^>]*>\s*<input type="hidden" name="csrf_token" value="([^"]+)">`)
 	assert.Len(t, deleteFormToken.FindStringSubmatch(rec.Body.String()), 2, "maintenance delete form must contain a CSRF token")
 }
 

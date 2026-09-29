@@ -285,6 +285,7 @@ func TestVehicleHandler_RemoveOne(t *testing.T) {
 		h.RemoveOne(rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
 		var resp map[string]interface{}
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.Equal(t, "Vehicle deleted successfully", resp["message"])

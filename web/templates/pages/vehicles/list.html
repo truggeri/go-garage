@@ -46,6 +46,10 @@
         <div class="vehicle-card-actions">
             <a href="/vehicles/{{.ID}}/edit" class="btn btn-secondary btn-sm">Edit</a>
             <a href="/maintenance/new?vehicle={{.ID}}" class="btn btn-secondary btn-sm">Add Record</a>
+            <button type="button" class="btn btn-danger btn-sm"
+                    hx-delete="/api/v1/vehicles/{{.ID}}"
+                    hx-confirm="Are you sure you want to delete this vehicle? This action cannot be undone."
+                    hx-swap="none">Delete</button>
         </div>
     </div>
     {{end}}
