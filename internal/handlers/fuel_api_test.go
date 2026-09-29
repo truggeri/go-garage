@@ -424,6 +424,55 @@ func TestFuelHandler_RemoveOne(t *testing.T) {
 	}
 }
 
+func TestFuelHandler_MalformedJSON_ReturnsBadRequest(t *testing.T) {
+	fillDate := time.Date(2024, 2, 5, 14, 30, 0, 0, time.UTC)
+
+	t.Run("create rejects malformed body", func(t *testing.T) {
+		h := MakeFuelAPIHandler(&stubFuelSvc{}, &stubVehicleSvc{getResult: testVehicle("v1", "u1")})
+		req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles/v1/fuel", bytes.NewReader([]byte("{invalid")))
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"vehicleId": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.CreateOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+
+	t.Run("update rejects malformed body", func(t *testing.T) {
+		h := MakeFuelAPIHandler(
+			&stubFuelSvc{getResult: testFuelRecord("f1", "v1", fillDate)},
+			&stubVehicleSvc{getResult: testVehicle("v1", "u1")},
+		)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/fuel/f1", bytes.NewReader([]byte("{invalid")))
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "f1"})
+		rec := httptest.NewRecorder()
+
+		h.UpdateOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+}
+
+func TestFuelHandler_UpdateOne_ServiceError_ReturnsInternalError(t *testing.T) {
+	fillDate := time.Date(2024, 2, 5, 14, 30, 0, 0, time.UTC)
+	h := MakeFuelAPIHandler(
+		&stubFuelSvc{getResult: testFuelRecord("f1", "v1", fillDate), updateErr: assert.AnError},
+		&stubVehicleSvc{getResult: testVehicle("v1", "u1")},
+	)
+	body, err := json.Marshal(map[string]interface{}{"mileage": 47300})
+	require.NoError(t, err)
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/fuel/f1", bytes.NewReader(body))
+	req = addAuthContext(req, "u1", "testuser")
+	req = mux.SetURLVars(req, map[string]string{"id": "f1"})
+	rec := httptest.NewRecorder()
+
+	h.UpdateOne(rec, req)
+
+	assert.Equal(t, http.StatusInternalServerError, rec.Code)
+}
+
 func testVehicle(id, userID string) *models.Vehicle {
 	return &models.Vehicle{
 		ID:     id,
