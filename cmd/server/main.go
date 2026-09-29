@@ -159,6 +159,7 @@ func main() {
 	vehiclePages.HandleFunc("", pageHandler.VehicleDetail).Methods("GET")
 	vehiclePages.HandleFunc("/edit", pageHandler.VehicleEdit).Methods("GET")
 	vehiclePages.HandleFunc("/edit", pageHandler.VehicleUpdate).Methods("POST")
+	vehiclePages.HandleFunc("/delete", pageHandler.VehicleDelete).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()

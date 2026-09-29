@@ -28,6 +28,7 @@ type stubVehicleSvc struct {
 	updateRes   *models.Vehicle
 	updateErr   error
 	deleteErr   error
+	deletedID   string
 }
 
 func (s *stubVehicleSvc) CreateVehicle(_ context.Context, v *models.Vehicle) error {
@@ -54,7 +55,8 @@ func (s *stubVehicleSvc) ArchiveVehicle(_ context.Context, _ string, _ models.Ve
 	return nil, nil
 }
 
-func (s *stubVehicleSvc) DeleteVehicle(_ context.Context, _ string) error {
+func (s *stubVehicleSvc) DeleteVehicle(_ context.Context, id string) error {
+	s.deletedID = id
 	return s.deleteErr
 }
 
