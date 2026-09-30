@@ -137,7 +137,7 @@ web/static/
 
 - [x] Display all vehicle information
 - [x] Show formatted data (currency, dates)
-- [x] Edit and delete buttons (vehicle delete flow fixed in PR #254)
+- [x] Edit and delete buttons (vehicle delete flow fixed in PR #254; migrated to htmx in PR #256)
 - [x] Link to vehicle's maintenance records
 - [x] Vehicle statistics section
 - [x] Maintenance history preview (recent 5)
