@@ -288,6 +288,39 @@ func TestVehicleHandler_RemoveOne(t *testing.T) {
 		var resp map[string]interface{}
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.Equal(t, "Vehicle deleted successfully", resp["message"])
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
+		assert.Equal(t, "v1", stub.deletedID)
+	})
+
+	t.Run("redirects htmx delete to vehicle list", func(t *testing.T) {
+		stub := &stubVehicleSvc{getResult: &models.Vehicle{ID: "v1", UserID: "u1"}}
+		h := MakeVehicleAPIHandler(stub)
+		req := mux.SetURLVars(addAuthContext(httptest.NewRequest(http.MethodDelete, "/api/v1/vehicles/v1", nil), "u1", "testuser"), map[string]string{"id": "v1"})
+		req.Header.Set("HX-Request", "true")
+		rec := httptest.NewRecorder()
+
+		h.RemoveOne(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "/vehicles", rec.Header().Get("HX-Redirect"))
+		assert.Equal(t, "v1", stub.deletedID)
+	})
+
+	t.Run("preserves the API error without redirect", func(t *testing.T) {
+		stub := &stubVehicleSvc{
+			getResult: &models.Vehicle{ID: "v1", UserID: "u1"},
+			deleteErr: models.NewValidationError("", "Vehicle cannot be deleted"),
+		}
+		h := MakeVehicleAPIHandler(stub)
+		req := mux.SetURLVars(addAuthContext(httptest.NewRequest(http.MethodDelete, "/api/v1/vehicles/v1", nil), "u1", "testuser"), map[string]string{"id": "v1"})
+		req.Header.Set("HX-Request", "true")
+		rec := httptest.NewRecorder()
+
+		h.RemoveOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
+		assert.Contains(t, rec.Body.String(), "Vehicle cannot be deleted")
 	})
 }
 

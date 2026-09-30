@@ -164,6 +164,9 @@ func (h *vehicleAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", "/vehicles")
+	}
 	respondWithPayload(w, 200, map[string]interface{}{
 		keySuccess: true, "message": "Vehicle deleted successfully",
 	})

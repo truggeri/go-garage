@@ -120,7 +120,7 @@ web/static/
 - [ ] Sort options (by year, make, model)
 - [x] Pagination controls
 - [x] "Add New Vehicle" button
-- [x] Actions per vehicle (view, edit, delete)
+- [x] Actions per vehicle (view, edit, delete via htmx REST API, PR #257)
 
 #### Add Vehicle Page
 
@@ -137,7 +137,7 @@ web/static/
 
 - [x] Display all vehicle information
 - [x] Show formatted data (currency, dates)
-- [x] Edit and delete buttons (vehicle delete flow fixed in PR #254)
+- [x] Edit and delete buttons (vehicle delete migrated to htmx REST API, PR #257)
 - [x] Link to vehicle's maintenance records
 - [x] Vehicle statistics section
 - [x] Maintenance history preview (recent 5)

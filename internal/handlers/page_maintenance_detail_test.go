@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
+	"regexp"
 	"testing"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/templateengine"
 )
+
+var deleteFormToken = regexp.MustCompile(`<form id="delete-form"[^>]*>\s*<input type="hidden" name="csrf_token" value="([^"]+)">`)
 
 func newTestMaintenanceDetailPageHandler(
 	t *testing.T,
