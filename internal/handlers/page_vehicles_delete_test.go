@@ -56,12 +56,22 @@ func TestVehicleDeleteHTMX_CSRF(t *testing.T) {
 			authedRouter.ServeHTTP(rec, req)
 			assert.Equal(t, http.StatusOK, rec.Code)
 			assert.Equal(t, "/vehicles", rec.Header().Get("HX-Redirect"))
+			assert.JSONEq(t, `{"showFlash":{"type":"success","message":"Vehicle deleted successfully"}}`, rec.Header().Get("HX-Trigger"))
 			assert.Equal(t, "v1", vehicleSvc.deletedID)
 
 			vehicleSvc.deletedID = ""
 			rec = httptest.NewRecorder()
 			authedRouter.ServeHTTP(rec, httptest.NewRequest(http.MethodDelete, "/api/v1/vehicles/v1", nil))
 			assert.Equal(t, http.StatusForbidden, rec.Code)
+			assert.Empty(t, vehicleSvc.deletedID)
+
+			req = httptest.NewRequest(http.MethodDelete, "/api/v1/vehicles/v1", nil)
+			req.Header.Set("HX-Request", "true")
+			req.Header.Set("X-CSRF-Token", "invalid")
+			rec = httptest.NewRecorder()
+			authedRouter.ServeHTTP(rec, req)
+			assert.Equal(t, http.StatusForbidden, rec.Code)
+			assert.Empty(t, rec.Header().Get("HX-Redirect"))
 			assert.Empty(t, vehicleSvc.deletedID)
 		})
 	}
