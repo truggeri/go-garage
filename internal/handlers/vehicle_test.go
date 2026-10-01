@@ -183,7 +183,7 @@ func TestVehicleHandler_CreateOne(t *testing.T) {
 	t.Run("htmx form creates vehicle with numeric inputs and redirects", func(t *testing.T) {
 		h := MakeVehicleAPIHandler(&stubVehicleSvc{})
 		req := httptest.NewRequest(http.MethodPost, "/api/v1/vehicles", bytes.NewBufferString(
-			`{"vin":"1HGBH41JXMN109186","make":"Honda","model":"Civic","year":"2021","purchase_price":"25000.50","purchase_mileage":"12000","current_mileage":"15000","purchase_date":""}`))
+			`{"vin":"1HGBH41JXMN109186","make":" Honda ","model":" Civic ","year":"2021","purchase_price":"25000.50","purchase_mileage":"12000","current_mileage":"15000","purchase_date":"","display_name":" My Civic "}`))
 		req.Header.Set("HX-Request", "true")
 		rec := httptest.NewRecorder()
 
@@ -199,6 +199,9 @@ func TestVehicleHandler_CreateOne(t *testing.T) {
 		assert.Equal(t, float64(25000.50), resp.Data["purchase_price"])
 		assert.Equal(t, float64(12000), resp.Data["purchase_mileage"])
 		assert.Equal(t, float64(15000), resp.Data["current_mileage"])
+		assert.Equal(t, "Honda", resp.Data["make"])
+		assert.Equal(t, "Civic", resp.Data["model"])
+		assert.Equal(t, "My Civic", resp.Data["display_name"])
 	})
 
 	t.Run("htmx form returns field errors for missing and invalid inputs", func(t *testing.T) {
@@ -208,6 +211,7 @@ func TestVehicleHandler_CreateOne(t *testing.T) {
 			field string
 		}{
 			{`{"vin":"1HGBH41JXMN109186","make":"","model":"Civic","year":"2021"}`, "make"},
+			{`{"vin":"1HGBH41JXMN109186","make":"  ","model":"Civic","year":"2021"}`, "make"},
 			{`{"vin":"1HGBH41JXMN109186","make":"Honda","model":"Civic","year":"abc"}`, "year"},
 			{`{"vin":"1HGBH41JXMN109186","make":"Honda","model":"Civic","year":"2021","purchase_date":"bad"}`, "purchase_date"},
 			{`{"vin":"1HGBH41JXMN109186","make":"Honda","model":"Civic","year":"2021","current_mileage":"-1"}`, "current_mileage"},

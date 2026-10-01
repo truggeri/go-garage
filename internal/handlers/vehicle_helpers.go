@@ -111,11 +111,12 @@ func buildNewVehicleRecord(d map[string]interface{}, ownerID string) (*models.Ve
 
 	rec := &models.Vehicle{
 		UserID: ownerID, VIN: strings.ToUpper(strings.TrimSpace(vinStr)),
-		Make: makeStr, Model: modelStr, Year: int(yearNum), Status: st, PurchaseDate: pdt,
+		Make: strings.TrimSpace(makeStr), Model: strings.TrimSpace(modelStr),
+		Year: int(yearNum), Status: st, PurchaseDate: pdt,
 	}
 
 	if dn, ok := d["display_name"].(string); ok {
-		rec.DisplayName = dn
+		rec.DisplayName = strings.TrimSpace(dn)
 	}
 	if c, ok := d["color"].(string); ok {
 		rec.Color = c
