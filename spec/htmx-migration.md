@@ -166,6 +166,14 @@ Vehicle list and detail delete controls use `hx-delete` against
 `HX-Redirect: /vehicles`; API clients without `HX-Request` still receive the
 JSON success envelope without a redirect (PR #257).
 
+The add-vehicle form uses `hx-post="/api/v1/vehicles"` with `json-enc` and
+`hx-swap="none"`. The create API converts htmx's string-valued numeric inputs
+and returns field-level errors, including duplicate VIN errors. Successful
+htmx creation redirects to `/vehicles/{id}?added=true`; the detail page renders
+the success flash after navigation. The old `POST /vehicles/new` route is
+removed; the now-unused `VehicleCreate` page handler remains for cleanup in
+#246 (PR #258).
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:
