@@ -57,6 +57,10 @@ func TestPageHandler_VehicleList(t *testing.T) {
 		assert.Contains(t, body, "Ford")
 		assert.Contains(t, body, "Toyota")
 		assert.Contains(t, body, "45,000 mi")
+		assert.Contains(t, body, `hx-delete="/api/v1/vehicles/v1"`)
+		assert.Contains(t, body, `hx-delete="/api/v1/vehicles/v2"`)
+		assert.Contains(t, body, `hx-swap="none"`)
+		assert.Contains(t, body, `hx-confirm="Are you sure you want to delete this vehicle? This action cannot be undone."`)
 	})
 
 	t.Run("renders empty state when no vehicles", func(t *testing.T) {
@@ -390,6 +394,10 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 		assert.Contains(t, body, "Focus")
 		assert.Contains(t, body, "2020")
 		assert.Contains(t, body, "Oil Change")
+		assert.Contains(t, body, `hx-delete="/api/v1/vehicles/v1"`)
+		assert.Contains(t, body, `hx-swap="none"`)
+		assert.Contains(t, body, `hx-confirm="Are you sure you want to delete this vehicle? This action cannot be undone."`)
+		assert.NotContains(t, body, `id="delete-form"`)
 	})
 
 	t.Run("returns 500 when account missing from context", func(t *testing.T) {

@@ -161,6 +161,11 @@ Recommended destinations:
 | Profile edit | Profile |
 | Change password | Profile |
 
+Vehicle list and detail delete controls use `hx-delete` against
+`/api/v1/vehicles/{id}` with `hx-swap="none"`. Successful htmx deletes return
+`HX-Redirect: /vehicles`; API clients without `HX-Request` still receive the
+JSON success envelope without a redirect (PR #257).
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:
