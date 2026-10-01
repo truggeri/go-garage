@@ -387,7 +387,7 @@ func (h *PageHandler) VehicleDetail(w http.ResponseWriter, r *http.Request) {
 		}
 	} else if r.URL.Query().Get("added") == queryTrue {
 		data.Flash = []flashMessage{
-			{Type: "success", Message: "Vehicle added successfully."},
+			{Type: keySuccess, Message: "Vehicle added successfully."},
 		}
 	}
 

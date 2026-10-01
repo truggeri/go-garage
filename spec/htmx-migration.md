@@ -174,6 +174,9 @@ the success flash after navigation. The old `POST /vehicles/new` route is
 removed; the now-unused `VehicleCreate` page handler remains for cleanup in
 #246 (PR #258).
 
+The [add-vehicle form preview](../docs/screenshots/vehicle-create-htmx.png)
+shows the inline duplicate-VIN error state.
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:
