@@ -13,8 +13,8 @@
 {{end}}
 
 <div class="card">
-    <form method="POST" action="/vehicles/new" novalidate>
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <form hx-post="/api/v1/vehicles" hx-ext="json-enc" hx-swap="none" novalidate>
+        <div data-form-errors role="alert" aria-live="assertive"></div>
         <div class="form-section">
             <h2 class="form-section-title">Vehicle Information</h2>
 
@@ -26,9 +26,7 @@
                            value="{{.Make}}"
                            required placeholder="e.g. Toyota"
                            {{if .Errors.make}}aria-invalid="true" {{end}}aria-describedby="make-error">
-                    {{if .Errors.make}}
-                    <p class="form-error" id="make-error">{{.Errors.make}}</p>
-                    {{end}}
+                    <p class="form-error" id="make-error" data-field="make" aria-live="polite">{{.Errors.make}}</p>
                 </div>
 
                 <div class="form-group">
@@ -38,9 +36,7 @@
                            value="{{.Model}}"
                            required placeholder="e.g. Camry"
                            {{if .Errors.model}}aria-invalid="true" {{end}}aria-describedby="model-error">
-                    {{if .Errors.model}}
-                    <p class="form-error" id="model-error">{{.Errors.model}}</p>
-                    {{end}}
+                    <p class="form-error" id="model-error" data-field="model" aria-live="polite">{{.Errors.model}}</p>
                 </div>
 
                 <div class="form-group">
@@ -51,24 +47,20 @@
                            required min="1900" max="2100"
                            placeholder="e.g. 2020"
                            {{if .Errors.year}}aria-invalid="true" {{end}}aria-describedby="year-error">
-                    {{if .Errors.year}}
-                    <p class="form-error" id="year-error">{{.Errors.year}}</p>
-                    {{end}}
+                    <p class="form-error" id="year-error" data-field="year" aria-live="polite">{{.Errors.year}}</p>
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label" for="vin">VIN</label>
+                    <label class="form-label" for="vin">VIN <span class="required" aria-hidden="true">*</span></label>
                     <input class="form-input{{if .Errors.vin}} is-invalid{{end}}"
                            type="text" id="vin" name="vin"
                            value="{{.VIN}}"
-                           placeholder="17-character VIN"
+                           required placeholder="17-character VIN"
                            maxlength="17"
                            aria-describedby="vin-error">
-                    {{if .Errors.vin}}
-                    <p class="form-error" id="vin-error">{{.Errors.vin}}</p>
-                    {{end}}
+                    <p class="form-error" id="vin-error" data-field="vin" aria-live="polite">{{.Errors.vin}}</p>
                 </div>
 
                 <div class="form-group">
@@ -104,9 +96,7 @@
                        min="0"
                        placeholder="e.g. 45000"
                        aria-describedby="current-mileage-error">
-                {{if .Errors.current_mileage}}
-                <p class="form-error" id="current-mileage-error">{{.Errors.current_mileage}}</p>
-                {{end}}
+                <p class="form-error" id="current-mileage-error" data-field="current_mileage" aria-live="polite">{{.Errors.current_mileage}}</p>
             </div>
         </div>
 
@@ -118,7 +108,8 @@
                     <label class="form-label" for="purchase_date">Purchase Date</label>
                     <input class="form-input"
                            type="date" id="purchase_date" name="purchase_date"
-                           value="{{.PurchaseDate}}">
+                           value="{{.PurchaseDate}}" aria-describedby="purchase-date-error">
+                    <p class="form-error" id="purchase-date-error" data-field="purchase_date" aria-live="polite"></p>
                 </div>
 
                 <div class="form-group">
@@ -129,9 +120,7 @@
                            min="0" step="0.01"
                            placeholder="e.g. 25000.00"
                            aria-describedby="purchase-price-error">
-                    {{if .Errors.purchase_price}}
-                    <p class="form-error" id="purchase-price-error">{{.Errors.purchase_price}}</p>
-                    {{end}}
+                    <p class="form-error" id="purchase-price-error" data-field="purchase_price" aria-live="polite">{{.Errors.purchase_price}}</p>
                 </div>
 
                 <div class="form-group">
@@ -142,9 +131,7 @@
                            min="0"
                            placeholder="e.g. 12000"
                            aria-describedby="purchase-mileage-error">
-                    {{if .Errors.purchase_mileage}}
-                    <p class="form-error" id="purchase-mileage-error">{{.Errors.purchase_mileage}}</p>
-                    {{end}}
+                    <p class="form-error" id="purchase-mileage-error" data-field="purchase_mileage" aria-live="polite">{{.Errors.purchase_mileage}}</p>
                 </div>
             </div>
         </div>

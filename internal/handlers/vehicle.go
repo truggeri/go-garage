@@ -1,10 +1,13 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
 	"github.com/truggeri/go-garage/internal/middleware"
+	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/repositories"
 	"github.com/truggeri/go-garage/internal/services"
 )
@@ -60,6 +63,13 @@ func (h *vehicleAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		if errs := normalizeVehicleFormNumbers(inputData); len(errs) > 0 {
+			respondWithValidationProblems(w, "Invalid vehicle fields", errs)
+			return
+		}
+	}
+
 	valErrs := validateRequiredKeys(inputData, "vin", "make", "model", "year")
 	if len(valErrs) > 0 {
 		respondWithValidationProblems(w, "Missing fields", valErrs)
@@ -68,15 +78,39 @@ func (h *vehicleAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 
 	newRec, buildErr := buildNewVehicleRecord(inputData, caller.ID)
 	if buildErr != nil {
-		respondWithProblem(w, 400, "VALIDATION_ERROR", buildErr.Error())
+		handleDomainError(w, buildErr)
+		return
+	}
+
+	for field, message := range models.ValidateVehicleAll(newRec) {
+		valErrs = append(valErrs, FieldError{Field: field, Message: message})
+	}
+	if len(valErrs) > 0 {
+		respondWithValidationProblems(w, "Invalid vehicle fields", valErrs)
 		return
 	}
 
 	if svcErr := h.svc.CreateVehicle(ctx, newRec); svcErr != nil {
+		var duplicate *models.DuplicateError
+		if models.IsDuplicateError(svcErr, &duplicate) && duplicate.Field == "vin" {
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusConflict)
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{
+				keySuccess: false,
+				"error": map[string]interface{}{
+					"code": "DUPLICATE_ERROR", "message": duplicate.Error(),
+					"details": []FieldError{{Field: "vin", Message: "VIN already exists"}},
+				},
+			})
+			return
+		}
 		handleDomainError(w, svcErr)
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", fmt.Sprintf("/vehicles/%s?added=true", newRec.ID))
+	}
 	respondWithPayload(w, 201, buildSinglePayload(newRec, "Vehicle created successfully"))
 }
 

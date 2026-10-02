@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"math"
 	"net/http"
 	"strconv"
 	"strings"
@@ -11,6 +12,32 @@ import (
 	"github.com/truggeri/go-garage/internal/repositories"
 	"github.com/truggeri/go-garage/internal/services"
 )
+
+// normalizeVehicleFormNumbers converts json-enc's string-valued number inputs
+// to the JSON numbers expected by the vehicle API.
+func normalizeVehicleFormNumbers(data map[string]interface{}) []FieldError {
+	var errs []FieldError
+	for _, field := range []string{"year", "purchase_price", "purchase_mileage", "current_mileage"} {
+		value, ok := data[field].(string)
+		if !ok {
+			continue
+		}
+		if value == "" {
+			if field != "year" {
+				delete(data, field)
+			}
+			continue
+		}
+		number, err := strconv.ParseFloat(value, 64)
+		if err != nil || math.IsNaN(number) || math.IsInf(number, 0) ||
+			field != "purchase_price" && (number != math.Trunc(number) || number > math.MaxInt32 || number < math.MinInt32) {
+			errs = append(errs, FieldError{Field: field, Message: "must be a valid number"})
+			continue
+		}
+		data[field] = number
+	}
+	return errs
+}
 
 // buildVehicleFilterSpec creates a VehicleFilters struct from request query parameters.
 func buildVehicleFilterSpec(r *http.Request, ownerID string) repositories.VehicleFilters {
@@ -77,18 +104,19 @@ func buildNewVehicleRecord(d map[string]interface{}, ownerID string) (*models.Ve
 	if pdStr, ok := d["purchase_date"].(string); ok && pdStr != "" {
 		t, e := time.Parse("2006-01-02", pdStr)
 		if e != nil {
-			return nil, e
+			return nil, models.NewValidationError("purchase_date", "purchase date must be a valid date")
 		}
 		pdt = &t
 	}
 
 	rec := &models.Vehicle{
 		UserID: ownerID, VIN: strings.ToUpper(strings.TrimSpace(vinStr)),
-		Make: makeStr, Model: modelStr, Year: int(yearNum), Status: st, PurchaseDate: pdt,
+		Make: strings.TrimSpace(makeStr), Model: strings.TrimSpace(modelStr),
+		Year: int(yearNum), Status: st, PurchaseDate: pdt,
 	}
 
 	if dn, ok := d["display_name"].(string); ok {
-		rec.DisplayName = dn
+		rec.DisplayName = strings.TrimSpace(dn)
 	}
 	if c, ok := d["color"].(string); ok {
 		rec.Color = c
