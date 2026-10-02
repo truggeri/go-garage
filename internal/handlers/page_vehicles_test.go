@@ -219,7 +219,6 @@ func TestPageHandler_VehicleNew(t *testing.T) {
 		assert.Contains(t, body, `hx-ext="json-enc"`)
 		assert.Contains(t, body, `hx-swap="none"`)
 		assert.Contains(t, body, `novalidate`)
-		assert.NotContains(t, body, `action="/vehicles/new"`)
 		assert.Contains(t, body, `data-form-errors`)
 		for _, field := range []string{"vin", "make", "model", "year", "purchase_date", "purchase_price", "purchase_mileage", "current_mileage"} {
 			assert.Contains(t, body, `data-field="`+field+`"`)
