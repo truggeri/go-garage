@@ -263,7 +263,7 @@ becomes `false`) and returns inline field errors. Success redirects with
 `/fuel/{id}?updated=true`, delete to `/fuel?vehicle={vehicleId}`. The
 `POST /fuel/new`, `POST /fuel/{id}/edit`, and `POST /fuel/{id}/delete` routes
 and their `FuelCreate`/`FuelUpdate`/`FuelDelete` page handlers are removed
-(PR #TBD). The [fuel form preview](../docs/screenshots/fuel-create-htmx.png) shows an inline validation error.
+(PR #264). The [fuel form preview](../docs/screenshots/fuel-create-htmx.png) shows an inline validation error.
 
 ## Error responses and rendering
 
