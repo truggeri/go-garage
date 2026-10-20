@@ -133,7 +133,6 @@ func main() {
 	protectedPages.HandleFunc("/dashboard", pageHandler.Dashboard).Methods("GET")
 	protectedPages.HandleFunc("/vehicles", pageHandler.VehicleList).Methods("GET")
 	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleNew).Methods("GET")
-	protectedPages.HandleFunc("/vehicles/new", pageHandler.VehicleCreate).Methods("POST")
 	protectedPages.HandleFunc("/maintenance", pageHandler.MaintenanceList).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/new", pageHandler.MaintenanceNew).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/new", pageHandler.MaintenanceCreate).Methods("POST")

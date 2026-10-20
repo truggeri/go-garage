@@ -215,7 +215,16 @@ func TestPageHandler_VehicleNew(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Add Vehicle")
-		assert.Contains(t, body, `action="/vehicles/new"`)
+		assert.Contains(t, body, `hx-post="/api/v1/vehicles"`)
+		assert.Contains(t, body, `hx-ext="json-enc"`)
+		assert.Contains(t, body, `hx-swap="none"`)
+		assert.Contains(t, body, `novalidate`)
+		assert.Contains(t, body, `data-form-errors`)
+		for _, field := range []string{"vin", "make", "model", "year", "purchase_date", "purchase_price", "purchase_mileage", "current_mileage"} {
+			assert.Contains(t, body, `data-field="`+field+`"`)
+		}
+		assert.Contains(t, body, `name="vin"`)
+		assert.Contains(t, body, `required placeholder="17-character VIN"`)
 	})
 
 	t.Run("returns 500 when account missing from context", func(t *testing.T) {
@@ -437,6 +446,18 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Vehicle updated successfully")
+	})
+
+	t.Run("shows success flash after htmx creation redirect", func(t *testing.T) {
+		handler := newTestVehicleDetailPageHandler(t, &stubVehicleSvc{}, &stubMaintenanceSvc{})
+		req := httptest.NewRequest(http.MethodGet, "/vehicles/v1?added=true", nil)
+		req = addResourceContext(addAuthContext(req, "u1", "testuser"), baseVehicle)
+		rec := httptest.NewRecorder()
+
+		handler.VehicleDetail(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Contains(t, rec.Body.String(), "Vehicle added successfully.")
 	})
 
 	t.Run("uses display name as title when present", func(t *testing.T) {
