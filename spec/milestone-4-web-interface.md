@@ -163,7 +163,7 @@ web/static/
 - [ ] Sort by date, cost
 - [x] Pagination
 - [x] "Add New Record" button
-- [x] Actions per record (view, edit, delete)
+- [x] Actions per record (view, edit, delete via htmx REST API, issue #242)
 
 #### Add Maintenance Page
 
@@ -183,7 +183,7 @@ web/static/
 - [x] Display all maintenance info
 - [x] Show associated vehicle info
 - [x] Formatted dates and currency
-- [x] Edit and delete buttons
+- [x] Edit and delete buttons (maintenance delete migrated to htmx REST API, issue #242)
 - [x] Link back to vehicle
 
 #### Edit Maintenance Page

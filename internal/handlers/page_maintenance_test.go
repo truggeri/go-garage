@@ -53,6 +53,9 @@ func TestPageHandler_MaintenanceList(t *testing.T) {
 		assert.Contains(t, body, "Oil Change")
 		assert.Contains(t, body, "Quick Lube")
 		assert.Contains(t, body, "Ford Focus")
+		assert.Contains(t, body, `hx-delete="/api/v1/maintenance/m1"`)
+		assert.Contains(t, body, `hx-confirm="Are you sure you want to delete this maintenance record? This action cannot be undone."`)
+		assert.Contains(t, body, `hx-swap="none"`)
 	})
 
 	t.Run("renders empty state when no records", func(t *testing.T) {

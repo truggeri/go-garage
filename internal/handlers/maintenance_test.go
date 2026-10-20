@@ -29,6 +29,7 @@ type stubMaintenanceSvc struct {
 	updateErr   error
 	deleteErr   error
 	updates     *services.MaintenanceUpdates
+	deletedID   string
 }
 
 func (s *stubMaintenanceSvc) CreateMaintenance(_ context.Context, m *models.MaintenanceRecord) error {
@@ -60,7 +61,8 @@ func (s *stubMaintenanceSvc) UpdateMaintenance(_ context.Context, _ string, upda
 	return s.updateRes, s.updateErr
 }
 
-func (s *stubMaintenanceSvc) DeleteMaintenance(_ context.Context, _ string) error {
+func (s *stubMaintenanceSvc) DeleteMaintenance(_ context.Context, id string) error {
+	s.deletedID = id
 	return s.deleteErr
 }
 
@@ -351,6 +353,8 @@ func TestMaintenanceHandler_RemoveOne(t *testing.T) {
 		var resp map[string]interface{}
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.Equal(t, "Maintenance record deleted successfully", resp["message"])
+		assert.Equal(t, "m1", maintStub.deletedID)
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
 	})
 
 	t.Run("returns forbidden for record on vehicle owned by another user", func(t *testing.T) {
