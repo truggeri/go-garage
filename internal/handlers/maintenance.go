@@ -182,6 +182,11 @@ func (h *maintenanceAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		h.replaceFromForm(w, r, targetID, existing.VehicleID, inputData)
+		return
+	}
+
 	changes, chErr := extractMaintenanceChanges(inputData)
 	if chErr != nil {
 		handleDomainError(w, chErr)

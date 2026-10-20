@@ -11,6 +11,26 @@ import (
 	"github.com/truggeri/go-garage/internal/repositories"
 )
 
+func TestUpdateMaintenance_OptionalNumbers_ClearOrPreserve(t *testing.T) {
+	for _, clear := range []bool{false, true} {
+		repo := newMockMaintenanceRepository()
+		cost, mileage := 10.0, 100
+		repo.records["m1"] = &models.MaintenanceRecord{ID: "m1", VehicleID: "v1", Cost: &cost, MileageAtService: &mileage}
+		service := NewMaintenanceService(repo, nil, nil)
+		updated, err := service.UpdateMaintenance(context.Background(), "m1", MaintenanceUpdates{
+			ClearCost: clear, ClearMileageAtService: clear,
+		})
+		require.NoError(t, err)
+		if clear {
+			assert.Nil(t, updated.Cost)
+			assert.Nil(t, updated.MileageAtService)
+		} else {
+			assert.Equal(t, &cost, updated.Cost)
+			assert.Equal(t, &mileage, updated.MileageAtService)
+		}
+	}
+}
+
 // mockMaintenanceRepository is a mock implementation of MaintenanceRepository for testing
 type mockMaintenanceRepository struct {
 	records    map[string]*models.MaintenanceRecord

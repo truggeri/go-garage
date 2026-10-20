@@ -28,6 +28,7 @@ type stubMaintenanceSvc struct {
 	updateRes   *models.MaintenanceRecord
 	updateErr   error
 	deleteErr   error
+	updates     *services.MaintenanceUpdates
 }
 
 func (s *stubMaintenanceSvc) CreateMaintenance(_ context.Context, m *models.MaintenanceRecord) error {
@@ -54,7 +55,8 @@ func (s *stubMaintenanceSvc) CountMaintenance(_ context.Context, _ repositories.
 	return s.countResult, s.countErr
 }
 
-func (s *stubMaintenanceSvc) UpdateMaintenance(_ context.Context, _ string, _ services.MaintenanceUpdates) (*models.MaintenanceRecord, error) {
+func (s *stubMaintenanceSvc) UpdateMaintenance(_ context.Context, _ string, updates services.MaintenanceUpdates) (*models.MaintenanceRecord, error) {
+	s.updates = &updates
 	return s.updateRes, s.updateErr
 }
 
