@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -245,4 +246,90 @@ func TestExtractVehicleChanges(t *testing.T) {
 		changes := extractVehicleChanges(data)
 		assert.Nil(t, changes.Year)
 	})
+}
+
+func TestApplyVehicleFormData_InvalidValues(t *testing.T) {
+	vehicle := &models.Vehicle{}
+	errs := applyVehicleFormData(vehicle, map[string]interface{}{
+		"vin":              123,
+		"year":             "2020",
+		"purchase_date":    123,
+		"purchase_price":   "25000",
+		"purchase_mileage": "12000",
+		"current_mileage":  1.5,
+	})
+
+	fields := make([]string, 0, len(errs))
+	for _, err := range errs {
+		fields = append(fields, err.Field)
+	}
+	assert.ElementsMatch(t, []string{
+		"vin", "year", "purchase_date", "purchase_price",
+		"purchase_mileage", "current_mileage",
+	}, fields)
+}
+
+func TestNormalizeVehicleFormNumbers_InvalidNumbers(t *testing.T) {
+	for _, tc := range []struct {
+		field string
+		value string
+	}{
+		{field: "year", value: "NaN"},
+		{field: "year", value: "+Inf"},
+		{field: "year", value: "2020.5"},
+		{field: "year", value: "2147483648"},
+		{field: "year", value: "-2147483649"},
+	} {
+		t.Run(tc.value, func(t *testing.T) {
+			errs := normalizeVehicleFormNumbers(map[string]interface{}{
+				tc.field: tc.value,
+			})
+
+			require.Len(t, errs, 1)
+			assert.Equal(t, tc.field, errs[0].Field)
+		})
+	}
+}
+
+func TestApplyVehicleFormData_InvalidNumberBounds(t *testing.T) {
+	for _, tc := range []struct {
+		field string
+		value float64
+	}{
+		{field: "year", value: float64(1 << 31)},
+		{field: "year", value: float64(-(1 << 31) - 1)},
+		{field: "purchase_mileage", value: float64(1 << 31)},
+		{field: "current_mileage", value: float64(-(1 << 31) - 1)},
+	} {
+		t.Run(tc.field, func(t *testing.T) {
+			errs := applyVehicleFormData(&models.Vehicle{}, map[string]interface{}{
+				tc.field: tc.value,
+			})
+
+			require.Len(t, errs, 1)
+			assert.Equal(t, tc.field, errs[0].Field)
+		})
+	}
+}
+
+func TestApplyVehicleFormData_InvalidPurchaseDate(t *testing.T) {
+	vehicle := &models.Vehicle{}
+	errs := applyVehicleFormData(vehicle, map[string]interface{}{
+		"purchase_date": "not-a-date",
+	})
+
+	require.Len(t, errs, 1)
+	assert.Equal(t, "purchase_date", errs[0].Field)
+	assert.Equal(t, "must be a valid date", errs[0].Message)
+}
+
+func TestApplyVehicleFormData_ClearsNilPurchaseDate(t *testing.T) {
+	purchaseDate := time.Date(2021, 6, 15, 0, 0, 0, 0, time.UTC)
+	vehicle := &models.Vehicle{PurchaseDate: &purchaseDate}
+	errs := applyVehicleFormData(vehicle, map[string]interface{}{
+		"purchase_date": nil,
+	})
+
+	assert.Empty(t, errs)
+	assert.Nil(t, vehicle.PurchaseDate)
 }

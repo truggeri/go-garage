@@ -177,6 +177,19 @@ removed; the now-unused `VehicleCreate` page handler remains for cleanup in
 The [add-vehicle form preview](../docs/screenshots/vehicle-create-htmx.png)
 shows the inline duplicate-VIN error state.
 
+The edit-vehicle form uses `hx-put="/api/v1/vehicles/{id}"` with `json-enc` and
+`hx-swap="none"`. It submits every editable form field, including unchanged
+values, so the server-rendered form remains a complete edit representation.
+The API's supplied-field update behavior remains unchanged for other clients;
+the htmx form applies all submitted fields, treating blank optional values as
+clears. Numeric inputs are normalized from `json-enc` strings and validation
+errors use the shared inline field-error rendering. Successful edits redirect
+to `/vehicles/{id}?updated=true`, where the detail page displays the success
+flash. The old `POST /vehicles/{id}/edit` route is removed; the now-unused
+`VehicleUpdate` page handler remains for cleanup in #246 (PR #263).
+The [vehicle edit form preview](../docs/screenshots/vehicle-edit-htmx.png)
+shows the pre-populated htmx form.
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:
