@@ -248,7 +248,7 @@ envelope without a redirect. Cookie-authenticated deletion requires the shared
 `X-CSRF-Token` header. The old hidden POST delete form is removed; there is no
 registered maintenance page-delete route or handler to retain for #246.
 The [maintenance delete preview](../docs/screenshots/maintenance-delete-htmx.png)
-shows the migrated controls (issue #242).
+shows the migrated controls (PR #267).
 
 ## Error responses and rendering
 
