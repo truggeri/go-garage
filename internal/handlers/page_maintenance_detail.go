@@ -80,7 +80,11 @@ func (h *PageHandler) MaintenanceDetail(w http.ResponseWriter, r *http.Request) 
 		VehicleTitle:    title,
 	}
 
-	if r.URL.Query().Get("updated") == queryTrue {
+	if r.URL.Query().Get("added") == queryTrue {
+		data.Flash = []flashMessage{
+			{Type: keySuccess, Message: "Maintenance record created successfully."},
+		}
+	} else if r.URL.Query().Get("updated") == queryTrue {
 		data.Flash = []flashMessage{
 			{Type: "success", Message: "Maintenance record updated successfully."},
 		}

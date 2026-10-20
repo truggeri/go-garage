@@ -13,8 +13,8 @@
 {{end}}
 
 {{if .Vehicles}}
-<form method="POST" action="/maintenance/new" id="bulk-maintenance-form" novalidate>
-    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+<div id="bulk-maintenance-form">
+    <div data-bulk-status role="status" aria-live="polite"></div>
 
     <div class="card">
         <div class="form-group" style="margin-bottom: 0;">
@@ -28,15 +28,17 @@
                 <option value="{{.ID}}"{{if eq $.VehicleID .ID}} selected{{end}}>{{index $.VehicleNames .ID}}</option>
                 {{end}}
             </select>
-            {{if .Errors.vehicle_id}}
-            <p class="form-error" id="vehicle-error">{{.Errors.vehicle_id}}</p>
-            {{end}}
+            <p class="form-error" id="vehicle-error" data-field="vehicle_id">{{.Errors.vehicle_id}}</p>
         </div>
     </div>
 
     <div id="records-container">
         {{range $i, $rec := .Records}}
-        <div class="card record-card">
+        <form class="card record-card"
+              hx-post="/api/v1/vehicles/{{$.VehicleID}}/maintenance"
+              hx-ext="json-enc" hx-swap="none" hx-trigger="maintenance-submit"
+              hx-validate="true" novalidate>
+            <div data-form-errors role="alert" aria-live="assertive"></div>
             <div class="card-header card-header--flex record-card-header">
                 <h3 class="card-title record-title">Record #{{add $i 1}}</h3>
                 {{if gt $i 0}}
@@ -56,9 +58,7 @@
                         <option value="{{.}}"{{if eq (print .) $rec.ServiceType}} selected{{end}}>{{serviceTypeDisplayName (print .)}}</option>
                         {{end}}
                     </select>
-                    {{if index $rec.Errors "service_type"}}
-                    <p class="form-error" id="service-type-error-{{$i}}">{{index $rec.Errors "service_type"}}</p>
-                    {{end}}
+                    <p class="form-error" id="service-type-error-{{$i}}" data-field="service_type">{{index $rec.Errors "service_type"}}</p>
                 </div>
 
                 <div class="form-group custom-service-type-group{{if ne $rec.ServiceType "other"}} hidden{{end}}">
@@ -68,9 +68,7 @@
                            value="{{$rec.CustomServiceType}}"
                            {{if eq $rec.ServiceType "other"}}required {{end}}placeholder="Describe the service"
                            {{if index $rec.Errors "custom_service_type"}}aria-invalid="true" {{end}}aria-describedby="custom-service-type-error-{{$i}}">
-                    {{if index $rec.Errors "custom_service_type"}}
-                    <p class="form-error" id="custom-service-type-error-{{$i}}">{{index $rec.Errors "custom_service_type"}}</p>
-                    {{end}}
+                    <p class="form-error" id="custom-service-type-error-{{$i}}" data-field="custom_service_type">{{index $rec.Errors "custom_service_type"}}</p>
                 </div>
 
                 <div class="form-group">
@@ -80,9 +78,7 @@
                            value="{{$rec.ServiceDate}}"
                            required
                            {{if index $rec.Errors "service_date"}}aria-invalid="true" {{end}}aria-describedby="service-date-error-{{$i}}">
-                    {{if index $rec.Errors "service_date"}}
-                    <p class="form-error" id="service-date-error-{{$i}}">{{index $rec.Errors "service_date"}}</p>
-                    {{end}}
+                    <p class="form-error" id="service-date-error-{{$i}}" data-field="service_date">{{index $rec.Errors "service_date"}}</p>
                 </div>
             </div>
 
@@ -95,9 +91,7 @@
                            min="0"
                            placeholder="e.g. 45000"
                            aria-describedby="mileage-error-{{$i}}">
-                    {{if index $rec.Errors "mileage_at_service"}}
-                    <p class="form-error" id="mileage-error-{{$i}}">{{index $rec.Errors "mileage_at_service"}}</p>
-                    {{end}}
+                    <p class="form-error" id="mileage-error-{{$i}}" data-field="mileage_at_service">{{index $rec.Errors "mileage_at_service"}}</p>
                 </div>
 
                 <div class="form-group">
@@ -108,9 +102,7 @@
                            min="0" step="0.01"
                            placeholder="e.g. 49.99"
                            aria-describedby="cost-error-{{$i}}">
-                    {{if index $rec.Errors "cost"}}
-                    <p class="form-error" id="cost-error-{{$i}}">{{index $rec.Errors "cost"}}</p>
-                    {{end}}
+                    <p class="form-error" id="cost-error-{{$i}}" data-field="cost">{{index $rec.Errors "cost"}}</p>
                 </div>
 
                 <div class="form-group">
@@ -118,7 +110,8 @@
                     <input class="form-input"
                            type="text" id="service_provider_{{$i}}" name="service_provider"
                            value="{{$rec.ServiceProvider}}"
-                           placeholder="e.g. Quick Lube">
+                           placeholder="e.g. Quick Lube" aria-describedby="provider-error-{{$i}}">
+                    <p class="form-error" id="provider-error-{{$i}}" data-field="service_provider"></p>
                 </div>
             </div>
 
@@ -127,18 +120,19 @@
                 <textarea class="form-input"
                           id="notes_{{$i}}" name="notes"
                           rows="3"
-                          placeholder="Any additional notes about this service">{{$rec.Notes}}</textarea>
+                          placeholder="Any additional notes about this service" aria-describedby="notes-error-{{$i}}">{{$rec.Notes}}</textarea>
+                <p class="form-error" id="notes-error-{{$i}}" data-field="notes"></p>
             </div>
-        </div>
+        </form>
         {{end}}
     </div>
 
     <div class="form-actions">
-        <button type="submit" class="btn btn-primary">Add Record</button>
+        <button type="button" class="btn btn-primary" id="submit-records-btn">Add Record</button>
         <button type="button" class="btn btn-secondary" id="add-record-btn">Include More Records</button>
         <a href="/maintenance" class="btn btn-secondary">Cancel</a>
     </div>
-</form>
+</div>
 {{else}}
 <div class="empty-state">
     <h2>No Vehicles Found</h2>
@@ -150,28 +144,5 @@
 
 {{define "extra_scripts"}}
 <script src="/static/js/bulk-maintenance-minified.js" defer></script>
-<script defer>
-document.addEventListener("DOMContentLoaded", function() {
-    function toggleCustomServiceType(select) {
-        var card = select.closest(".record-card");
-        if (!card) return;
-        var group = card.querySelector(".custom-service-type-group");
-        var input = group ? group.querySelector("input") : null;
-        if (!group || !input) return;
-        if (select.value === "other") {
-            group.classList.remove("hidden");
-            input.setAttribute("required", "");
-        } else {
-            group.classList.add("hidden");
-            input.removeAttribute("required");
-            input.value = "";
-        }
-    }
-    document.getElementById("bulk-maintenance-form").addEventListener("change", function(e) {
-        if (e.target.name === "service_type") {
-            toggleCustomServiceType(e.target);
-        }
-    });
-});
-</script>
+<script src="/static/js/maintenance-create-minified.js" defer></script>
 {{end}}

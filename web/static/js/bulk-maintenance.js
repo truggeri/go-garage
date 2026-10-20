@@ -24,7 +24,9 @@
          */
         function updateRecordNumbers() {
             var cards = getRecordCards();
+            addBtn.disabled = cards.length >= 50;
             cards.forEach(function (card, index) {
+                updateFieldIds(card, index);
                 var title = card.querySelector(".record-title");
                 if (title) {
                     title.textContent = "Record #" + (index + 1);
@@ -81,6 +83,9 @@
          * Remove a record card and re-number the remaining cards.
          */
         function removeRecord(card) {
+            if (getRecordCards().length <= 1) {
+                return;
+            }
             card.remove();
             updateRecordNumbers();
         }
@@ -90,6 +95,9 @@
          */
         function addRecord() {
             var cards = getRecordCards();
+            if (cards.length >= 50) {
+                return;
+            }
             var template = cards[0];
             var newCard = template.cloneNode(true);
             var newIndex = cards.length;
@@ -119,10 +127,9 @@
                 }
             }
 
-            // Remove any server-rendered error messages.
-            var errors = newCard.querySelectorAll(".form-error");
+            var errors = newCard.querySelectorAll("[data-field], [data-form-errors]");
             errors.forEach(function (el) {
-                el.remove();
+                el.textContent = "";
             });
 
             // Clear validation states.
@@ -163,6 +170,7 @@
             }
 
             container.appendChild(newCard);
+            htmx.process(newCard);
             updateRecordNumbers();
 
             // Focus the first select or text input in the new card.
@@ -174,6 +182,7 @@
 
         // Attach click handler to "Include More Records" button.
         addBtn.addEventListener("click", addRecord);
+        container.addEventListener("maintenance:recordsChanged", updateRecordNumbers);
 
         // Attach click handlers to any existing remove buttons (server-rendered).
         var existingRemoveBtns = container.querySelectorAll(".record-remove-btn");
@@ -182,6 +191,7 @@
                 removeRecord(btn.closest(".record-card"));
             });
         });
+        updateRecordNumbers();
     }
 
     document.addEventListener("DOMContentLoaded", initBulkMaintenance);

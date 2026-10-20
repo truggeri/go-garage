@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -88,6 +89,13 @@ func (h *maintenanceAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		if errs := normalizeMaintenanceFormNumbers(inputData); len(errs) > 0 {
+			respondWithValidationProblems(w, "Invalid maintenance fields", errs)
+			return
+		}
+	}
+
 	valErrs := validateRequiredKeys(inputData, "service_type", "service_date")
 	if len(valErrs) > 0 {
 		respondWithValidationProblems(w, "Missing fields", valErrs)
@@ -105,6 +113,9 @@ func (h *maintenanceAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", fmt.Sprintf("/maintenance/%s?added=true", newRec.ID))
+	}
 	respondWithPayload(w, 201, buildMaintenanceSinglePayload(newRec, "Maintenance record created successfully"))
 }
 

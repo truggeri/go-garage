@@ -190,6 +190,34 @@ flash. The old `POST /vehicles/{id}/edit` route is removed; the now-unused
 The [vehicle edit form preview](../docs/screenshots/vehicle-edit-htmx.png)
 shows the pre-populated htmx form.
 
+### Maintenance creation
+
+The add-maintenance page preserves the shared vehicle dropdown (including
+`vehicle` and `vehicle_id` query preselection) and "Include More Records" flow.
+Each record card is a separate form with `hx-post`, `json-enc`, and
+`hx-swap="none"`. `maintenance-create.js` validates the vehicle and all cards
+before saving, sets the nested API URL from the current dropdown selection
+during `htmx:configRequest`, and submits one record at a time. Numeric form
+strings are normalized by the create API; blank cost and mileage stay unset.
+
+Intermediate successful responses do not follow `HX-Redirect`. Their saved
+cards are removed, and the next card is submitted only after the previous
+request completes. Errors stop the batch, render through the shared inline
+error handler on the failing card, preserve unsaved values, and re-enable
+controls. A retry submits only the remaining cards, not confirmed saves.
+As with any non-idempotent POST, a lost response after a server commit has an
+ambiguous outcome; users should check existing records before retrying a
+network failure. The final success follows
+`HX-Redirect: /maintenance/{id}?added=true`; the detail page displays the
+creation flash once through the shared layout.
+
+The old `POST /maintenance/new` route is removed. The unused
+`MaintenanceCreate` page handler and its parsing helpers remain for #246,
+consistent with the vehicle migrations. The [maintenance creation preview](../docs/screenshots/maintenance-create-htmx.png)
+shows a stopped bulk submission with a field error and only unsaved cards
+remaining. Focused JavaScript batching tests run with
+`node --test tests/maintenance-create.test.cjs` (PR #265).
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:
