@@ -448,6 +448,89 @@ func TestVehicleHandler_ReplaceOne(t *testing.T) {
 		assert.Nil(t, stub.savedVehicle)
 	})
 
+	t.Run("returns required field errors inline for htmx forms", func(t *testing.T) {
+		stub := &stubVehicleSvc{getResult: &models.Vehicle{
+			ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186", Make: "Ford",
+			Model: "Focus", Year: 2020, Status: models.VehicleStatusActive,
+		}}
+		h := MakeVehicleAPIHandler(stub)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewBufferString(
+			`{"vin":"1HGBH41JXMN109186","make":"","model":"Focus","year":"2020"}`))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Contains(t, rec.Body.String(), `"field":"make"`)
+		assert.Nil(t, stub.savedVehicle)
+	})
+
+	t.Run("returns string field errors inline for htmx forms", func(t *testing.T) {
+		stub := &stubVehicleSvc{getResult: &models.Vehicle{
+			ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186", Make: "Ford",
+			Model: "Focus", Year: 2020, Status: models.VehicleStatusActive,
+		}}
+		h := MakeVehicleAPIHandler(stub)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewBufferString(
+			`{"vin":"1HGBH41JXMN109186","make":123,"model":"Focus","year":"2020"}`))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Contains(t, rec.Body.String(), `"field":"make"`)
+		assert.Nil(t, stub.savedVehicle)
+	})
+
+	t.Run("returns model validation errors inline for htmx forms", func(t *testing.T) {
+		stub := &stubVehicleSvc{getResult: &models.Vehicle{
+			ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186", Make: "Ford",
+			Model: "Focus", Year: 2020, Status: "invalid",
+		}}
+		h := MakeVehicleAPIHandler(stub)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewBufferString(
+			`{"vin":"1HGBH41JXMN109186","make":"Ford","model":"Focus","year":"2020","purchase_price":"-1"}`))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Contains(t, rec.Body.String(), `"field":"purchase_price"`)
+		assert.Nil(t, stub.savedVehicle)
+	})
+
+	t.Run("returns save errors for htmx forms", func(t *testing.T) {
+		stub := &stubVehicleSvc{
+			getResult: &models.Vehicle{
+				ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186",
+				Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive,
+			},
+			updateErr: assert.AnError,
+		}
+		h := MakeVehicleAPIHandler(stub)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewBufferString(
+			`{"vin":"1HGBH41JXMN109186","make":"Ford","model":"Focus","year":"2020"}`))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		assert.Equal(t, http.StatusInternalServerError, rec.Code)
+		assert.NotEmpty(t, stub.savedVehicle)
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
+	})
+
 	t.Run("returns duplicate VIN errors inline for htmx forms", func(t *testing.T) {
 		stub := &stubVehicleSvc{
 			getResult: &models.Vehicle{
