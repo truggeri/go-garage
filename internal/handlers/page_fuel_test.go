@@ -208,6 +208,8 @@ func TestPageHandler_FuelDetail(t *testing.T) {
 		assert.Contains(t, body, "Ford")
 		assert.Contains(t, body, "Focus")
 		assert.Contains(t, body, "2020")
+		assert.Contains(t, body, `hx-delete="/api/v1/fuel/f1"`)
+		assert.NotContains(t, body, "/fuel/f1/delete")
 	})
 
 	t.Run("returns 404 when record not found", func(t *testing.T) {
@@ -254,84 +256,6 @@ func TestPageHandler_FuelDetail(t *testing.T) {
 	})
 }
 
-func TestPageHandler_FuelDelete(t *testing.T) {
-	fillDate := time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC)
-
-	baseRecord := &models.FuelRecord{
-		ID: "f1", VehicleID: "v1", FuelType: "gasoline",
-		FillDate: fillDate, Volume: 12.5, Mileage: 45000,
-	}
-	baseVehicle := &models.Vehicle{
-		ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020,
-		Status: models.VehicleStatusActive,
-	}
-
-	t.Run("deletes fuel record and redirects", func(t *testing.T) {
-		fuelStub := &stubFuelSvc{getResult: baseRecord}
-		vehicleStub := &stubVehicleSvc{getResult: baseVehicle}
-		handler := newTestFuelPageHandler(t, vehicleStub, fuelStub)
-
-		req := httptest.NewRequest(http.MethodPost, "/fuel/f1/delete", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "f1"})
-		req = addAuthContext(req, "u1", "testuser")
-		rec := httptest.NewRecorder()
-
-		handler.FuelDelete(rec, req)
-
-		assert.Equal(t, http.StatusSeeOther, rec.Code)
-		assert.Contains(t, rec.Header().Get("Location"), "/fuel?vehicle=v1")
-	})
-
-	t.Run("returns 404 when record not found", func(t *testing.T) {
-		fuelStub := &stubFuelSvc{getErr: models.NewNotFoundError("FuelRecord", "f99")}
-		handler := newTestFuelPageHandler(t, &stubVehicleSvc{}, fuelStub)
-
-		req := httptest.NewRequest(http.MethodPost, "/fuel/f99/delete", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "f99"})
-		req = addAuthContext(req, "u1", "testuser")
-		rec := httptest.NewRecorder()
-
-		handler.FuelDelete(rec, req)
-
-		assert.Equal(t, http.StatusNotFound, rec.Code)
-	})
-
-	t.Run("returns 403 when vehicle belongs to another user", func(t *testing.T) {
-		fuelStub := &stubFuelSvc{getResult: baseRecord}
-		vehicleStub := &stubVehicleSvc{
-			getResult: &models.Vehicle{ID: "v1", UserID: "other-user", Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive},
-		}
-		handler := newTestFuelPageHandler(t, vehicleStub, fuelStub)
-
-		req := httptest.NewRequest(http.MethodPost, "/fuel/f1/delete", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "f1"})
-		req = addAuthContext(req, "u1", "testuser")
-		rec := httptest.NewRecorder()
-
-		handler.FuelDelete(rec, req)
-
-		assert.Equal(t, http.StatusForbidden, rec.Code)
-	})
-
-	t.Run("returns 500 when delete fails", func(t *testing.T) {
-		fuelStub := &stubFuelSvc{
-			getResult: baseRecord,
-			deleteErr: models.NewDatabaseError("delete fuel", assert.AnError),
-		}
-		vehicleStub := &stubVehicleSvc{getResult: baseVehicle}
-		handler := newTestFuelPageHandler(t, vehicleStub, fuelStub)
-
-		req := httptest.NewRequest(http.MethodPost, "/fuel/f1/delete", nil)
-		req = mux.SetURLVars(req, map[string]string{"id": "f1"})
-		req = addAuthContext(req, "u1", "testuser")
-		rec := httptest.NewRecorder()
-
-		handler.FuelDelete(rec, req)
-
-		assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	})
-}
-
 func TestPageHandler_FuelNew(t *testing.T) {
 	baseVehicle := &models.Vehicle{
 		ID: "v1", UserID: "u1", Make: "Ford", Model: "Focus", Year: 2020,
@@ -352,6 +276,22 @@ func TestPageHandler_FuelNew(t *testing.T) {
 		body := rec.Body.String()
 		assert.Contains(t, body, "Add Fuel Record")
 		assert.Contains(t, body, "Ford Focus")
+		assert.Contains(t, body, `hx-post="/api/v1/vehicles//fuel"`)
+		assert.Contains(t, body, "event.detail.path")
+		assert.NotContains(t, body, `action="/fuel/new"`)
+	})
+
+	t.Run("targets preselected vehicle", func(t *testing.T) {
+		vehicleStub := &stubVehicleSvc{listResult: []*models.Vehicle{baseVehicle}}
+		handler := newTestFuelPageHandler(t, vehicleStub, &stubFuelSvc{})
+
+		req := httptest.NewRequest(http.MethodGet, "/fuel/new?vehicle=v1", nil)
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.FuelNew(rec, req)
+
+		assert.Contains(t, rec.Body.String(), `hx-post="/api/v1/vehicles/v1/fuel"`)
 	})
 
 	t.Run("renders empty state with no vehicles", func(t *testing.T) {
@@ -409,6 +349,7 @@ func TestPageHandler_FuelEdit(t *testing.T) {
 		body := rec.Body.String()
 		assert.Contains(t, body, "Edit Fuel Record")
 		assert.Contains(t, body, "2020 Ford Focus")
+		assert.Contains(t, body, `hx-put="/api/v1/fuel/f1"`)
 	})
 
 	t.Run("returns 404 when record not found", func(t *testing.T) {

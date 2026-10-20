@@ -13,9 +13,11 @@
 {{end}}
 
 {{if .Vehicles}}
-<form method="POST" action="/fuel/new" novalidate>
-    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-
+<form hx-post="/api/v1/vehicles/{{.VehicleID}}/fuel" hx-ext="json-enc" hx-swap="none" hx-validate="true"
+      hx-on::config-request="event.detail.path = '/api/v1/vehicles/' + encodeURIComponent(this.elements.vehicle_id.value) + '/fuel'"
+      novalidate>
+    <div data-form-errors role="alert" aria-live="assertive"></div>
+    
     <div class="card">
         <div class="form-section">
             <h2 class="form-section-title">Fill-up Details</h2>
@@ -31,9 +33,7 @@
                     <option value="{{.ID}}"{{if eq $.VehicleID .ID}} selected{{end}}>{{index $.VehicleNames .ID}}</option>
                     {{end}}
                 </select>
-                {{if .Errors.vehicle_id}}
-                <p class="form-error" id="vehicle-error">{{.Errors.vehicle_id}}</p>
-                {{end}}
+                <p class="form-error" id="vehicle-error" data-field="vehicle_id" aria-live="polite">{{.Errors.vehicle_id}}</p>
             </div>
 
             <div class="form-row">
@@ -44,9 +44,7 @@
                            value="{{.FillDate}}"
                            required
                            {{if .Errors.fill_date}}aria-invalid="true" {{end}}aria-describedby="fill-date-error">
-                    {{if .Errors.fill_date}}
-                    <p class="form-error" id="fill-date-error">{{.Errors.fill_date}}</p>
-                    {{end}}
+                    <p class="form-error" id="fill-date-error" data-field="fill_date" aria-live="polite">{{.Errors.fill_date}}</p>
                 </div>
 
                 <div class="form-group">
@@ -60,9 +58,7 @@
                         <option value="{{.}}"{{if eq (print .) $.FuelType}} selected{{end}}>{{fuelTypeDisplayName (print .)}}</option>
                         {{end}}
                     </select>
-                    {{if .Errors.fuel_type}}
-                    <p class="form-error" id="fuel-type-error">{{.Errors.fuel_type}}</p>
-                    {{end}}
+                    <p class="form-error" id="fuel-type-error" data-field="fuel_type" aria-live="polite">{{.Errors.fuel_type}}</p>
                 </div>
 
                 <div class="form-group">
@@ -73,9 +69,7 @@
                            min="1" required
                            placeholder="e.g. 45000"
                            {{if .Errors.mileage}}aria-invalid="true" {{end}}aria-describedby="mileage-error">
-                    {{if .Errors.mileage}}
-                    <p class="form-error" id="mileage-error">{{.Errors.mileage}}</p>
-                    {{end}}
+                    <p class="form-error" id="mileage-error" data-field="mileage" aria-live="polite">{{.Errors.mileage}}</p>
                 </div>
             </div>
 
@@ -88,9 +82,7 @@
                            min="0.01" step="0.01" required
                            placeholder="e.g. 12.5"
                            {{if .Errors.volume}}aria-invalid="true" {{end}}aria-describedby="volume-error">
-                    {{if .Errors.volume}}
-                    <p class="form-error" id="volume-error">{{.Errors.volume}}</p>
-                    {{end}}
+                    <p class="form-error" id="volume-error" data-field="volume" aria-live="polite">{{.Errors.volume}}</p>
                 </div>
 
                 <div class="form-group">
@@ -101,9 +93,7 @@
                            min="0" step="0.001"
                            placeholder="e.g. 3.499"
                            aria-describedby="price-error">
-                    {{if .Errors.price_per_unit}}
-                    <p class="form-error" id="price-error">{{.Errors.price_per_unit}}</p>
-                    {{end}}
+                    <p class="form-error" id="price-error" data-field="price_per_unit" aria-live="polite">{{.Errors.price_per_unit}}</p>
                 </div>
 
                 <div class="form-group">
@@ -114,9 +104,7 @@
                            min="1"
                            placeholder="e.g. 87"
                            aria-describedby="octane-error">
-                    {{if .Errors.octane_rating}}
-                    <p class="form-error" id="octane-error">{{.Errors.octane_rating}}</p>
-                    {{end}}
+                    <p class="form-error" id="octane-error" data-field="octane_rating" aria-live="polite">{{.Errors.octane_rating}}</p>
                 </div>
             </div>
 
@@ -162,9 +150,7 @@
                            min="0" max="100"
                            placeholder="e.g. 60"
                            aria-describedby="city-driving-error">
-                    {{if .Errors.city_driving_percentage}}
-                    <p class="form-error" id="city-driving-error">{{.Errors.city_driving_percentage}}</p>
-                    {{end}}
+                    <p class="form-error" id="city-driving-error" data-field="city_driving_percentage" aria-live="polite">{{.Errors.city_driving_percentage}}</p>
                 </div>
 
                 <div class="form-group">
@@ -175,9 +161,7 @@
                            min="0.1" step="0.1"
                            placeholder="e.g. 28.5"
                            aria-describedby="mpg-error">
-                    {{if .Errors.vehicle_reported_mpg}}
-                    <p class="form-error" id="mpg-error">{{.Errors.vehicle_reported_mpg}}</p>
-                    {{end}}
+                    <p class="form-error" id="mpg-error" data-field="vehicle_reported_mpg" aria-live="polite">{{.Errors.vehicle_reported_mpg}}</p>
                 </div>
             </div>
         </div>

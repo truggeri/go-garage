@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -75,6 +76,14 @@ func (h *FuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isHTMX := r.Header.Get("HX-Request") == "true"
+	if isHTMX {
+		if errs := normalizeFuelFormData(inputData); len(errs) > 0 {
+			respondWithValidationProblems(w, "Invalid fuel fields", errs)
+			return
+		}
+	}
+
 	valErrs := validateRequiredKeys(inputData, "fill_date", "mileage", "volume", "fuel_type")
 	if len(valErrs) > 0 {
 		respondWithValidationProblems(w, "Missing fields", valErrs)
@@ -92,6 +101,9 @@ func (h *FuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if isHTMX {
+		w.Header().Set("HX-Redirect", "/fuel?added=true")
+	}
 	respondWithPayload(w, http.StatusCreated, buildFuelSinglePayload(newRec, "Fuel record created successfully"))
 }
 
@@ -118,6 +130,18 @@ func (h *FuelAPIHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	isHTMX := r.Header.Get("HX-Request") == "true"
+	if isHTMX {
+		if errs := normalizeFuelFormData(inputData); len(errs) > 0 {
+			respondWithValidationProblems(w, "Invalid fuel fields", errs)
+			return
+		}
+		if errs := validateRequiredKeys(inputData, "fill_date", "mileage", "volume", "fuel_type"); len(errs) > 0 {
+			respondWithValidationProblems(w, "Missing fields", errs)
+			return
+		}
+	}
+
 	changes, chErr := extractAndValidateFuelChanges(inputData, rec)
 	if chErr != nil {
 		handleDomainError(w, chErr)
@@ -130,6 +154,9 @@ func (h *FuelAPIHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if isHTMX {
+		w.Header().Set("HX-Redirect", fmt.Sprintf("/fuel/%s?updated=true", updated.ID))
+	}
 	respondWithPayload(w, http.StatusOK, buildFuelSinglePayload(updated, "Fuel record updated successfully"))
 }
 
@@ -145,6 +172,9 @@ func (h *FuelAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", "/fuel?vehicle="+rec.VehicleID)
+	}
 	respondWithPayload(w, http.StatusOK, map[string]interface{}{
 		keySuccess: true, "message": "Fuel record deleted successfully",
 	})

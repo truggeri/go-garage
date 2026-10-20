@@ -250,6 +250,21 @@ registered maintenance page-delete route or handler to retain for #246.
 The [maintenance delete preview](../docs/screenshots/maintenance-delete-htmx.png)
 shows the migrated controls (PR #267).
 
+The fuel forms and delete button use the Fuel REST API. The add form uses
+`hx-post="/api/v1/vehicles/{vehicleId}/fuel"`; its vehicle `<select>` rewrites
+the request path in `hx-on::config-request`, so the URL always targets the
+selected vehicle (and honors the `?vehicle=` preselection). The edit form uses
+`hx-put="/api/v1/fuel/{id}"` and the detail page uses
+`hx-delete="/api/v1/fuel/{id}"` with `hx-confirm`; the fuel list has no per-row
+delete. For `HX-Request` calls the API normalizes `json-enc` string values
+(blank optional numbers are omitted, an unchecked `partial_fill` checkbox
+becomes `false`) and returns inline field errors. Success redirects with
+`HX-Redirect` are preserved: create to `/fuel?added=true`, edit to
+`/fuel/{id}?updated=true`, delete to `/fuel?vehicle={vehicleId}`. The
+`POST /fuel/new`, `POST /fuel/{id}/edit`, and `POST /fuel/{id}/delete` routes
+and their `FuelCreate`/`FuelUpdate`/`FuelDelete` page handlers are removed
+(PR #TBD). The [fuel form preview](../docs/screenshots/fuel-create-htmx.png) shows an inline validation error.
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:
