@@ -24,7 +24,7 @@ func normalizeVehicleFormNumbers(data map[string]interface{}) []FieldError {
 		}
 		if value == "" {
 			if field != "year" {
-				delete(data, field)
+				data[field] = nil
 			}
 			continue
 		}
@@ -176,4 +176,91 @@ func extractVehicleChanges(d map[string]interface{}) services.VehicleUpdates {
 		u.Notes = &v
 	}
 	return u
+}
+
+func applyVehicleFormData(vehicle *models.Vehicle, data map[string]interface{}) []FieldError {
+	var errs []FieldError
+	for field, target := range map[string]*string{
+		"vin": &vehicle.VIN, "make": &vehicle.Make, "model": &vehicle.Model,
+		"display_name": &vehicle.DisplayName, "color": &vehicle.Color,
+		"license_plate": &vehicle.LicensePlate, "notes": &vehicle.Notes,
+	} {
+		value, ok := data[field]
+		if !ok {
+			continue
+		}
+		text, ok := value.(string)
+		if !ok {
+			errs = append(errs, FieldError{Field: field, Message: "must be a valid string"})
+			continue
+		}
+		switch field {
+		case "vin":
+			*target = strings.ToUpper(strings.TrimSpace(text))
+		case "make", "model", "display_name":
+			*target = strings.TrimSpace(text)
+		default:
+			*target = text
+		}
+	}
+
+	if value, ok := data["year"]; ok {
+		year, valid := value.(float64)
+		if !valid || year != math.Trunc(year) || year < math.MinInt32 || year > math.MaxInt32 {
+			errs = append(errs, FieldError{Field: "year", Message: "must be a valid number"})
+		} else {
+			vehicle.Year = int(year)
+		}
+	}
+
+	if value, ok := data["purchase_date"]; ok {
+		switch date := value.(type) {
+		case nil:
+			vehicle.PurchaseDate = nil
+		case string:
+			if date == "" {
+				vehicle.PurchaseDate = nil
+			} else if parsed, err := time.Parse("2006-01-02", date); err != nil {
+				errs = append(errs, FieldError{Field: "purchase_date", Message: "must be a valid date"})
+			} else {
+				vehicle.PurchaseDate = &parsed
+			}
+		default:
+			errs = append(errs, FieldError{Field: "purchase_date", Message: "must be a valid date"})
+		}
+	}
+
+	if value, ok := data["purchase_price"]; ok {
+		switch price := value.(type) {
+		case nil:
+			vehicle.PurchasePrice = nil
+		case float64:
+			vehicle.PurchasePrice = &price
+		default:
+			errs = append(errs, FieldError{Field: "purchase_price", Message: "must be a valid number"})
+		}
+	}
+
+	for field, target := range map[string]**int{
+		"purchase_mileage": &vehicle.PurchaseMileage,
+		"current_mileage":  &vehicle.CurrentMileage,
+	} {
+		value, ok := data[field]
+		if !ok {
+			continue
+		}
+		if value == nil {
+			*target = nil
+			continue
+		}
+		mileage, valid := value.(float64)
+		if !valid || mileage != math.Trunc(mileage) || mileage < math.MinInt32 || mileage > math.MaxInt32 {
+			errs = append(errs, FieldError{Field: field, Message: "must be a valid number"})
+			continue
+		}
+		mileageInt := int(mileage)
+		*target = &mileageInt
+	}
+
+	return errs
 }

@@ -430,7 +430,10 @@ paths:
 
     put:
       summary: Update vehicle
-      description: Update an existing vehicle
+      description: >-
+        Update an existing vehicle. Only supplied properties are changed;
+        omitted optional properties remain unchanged. The browser edit form
+        submits all editable properties, including unchanged values.
       operationId: updateVehicle
       tags:
         - Vehicles

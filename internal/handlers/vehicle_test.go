@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
@@ -18,17 +19,18 @@ import (
 )
 
 type stubVehicleSvc struct {
-	createErr   error
-	getResult   *models.Vehicle
-	getErr      error
-	listResult  []*models.Vehicle
-	listErr     error
-	countResult int
-	countErr    error
-	updateRes   *models.Vehicle
-	updateErr   error
-	deleteErr   error
-	deletedID   string
+	createErr    error
+	getResult    *models.Vehicle
+	getErr       error
+	listResult   []*models.Vehicle
+	listErr      error
+	countResult  int
+	countErr     error
+	updateRes    *models.Vehicle
+	updateErr    error
+	savedVehicle *models.Vehicle
+	deleteErr    error
+	deletedID    string
 }
 
 func (s *stubVehicleSvc) CreateVehicle(_ context.Context, v *models.Vehicle) error {
@@ -60,7 +62,8 @@ func (s *stubVehicleSvc) DeleteVehicle(_ context.Context, id string) error {
 	return s.deleteErr
 }
 
-func (s *stubVehicleSvc) SaveVehicle(_ context.Context, _ *models.Vehicle) error {
+func (s *stubVehicleSvc) SaveVehicle(_ context.Context, vehicle *models.Vehicle) error {
+	s.savedVehicle = vehicle
 	return s.updateErr
 }
 
@@ -335,6 +338,141 @@ func TestVehicleHandler_ReplaceOne(t *testing.T) {
 		var resp map[string]interface{}
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.Equal(t, "Vehicle updated successfully", resp["message"])
+	})
+
+	t.Run("updates the complete vehicle from an htmx form and redirects with a flash", func(t *testing.T) {
+		purchaseDate := time.Date(2021, 6, 15, 0, 0, 0, 0, time.UTC)
+		purchasePrice := 25000.0
+		purchaseMileage := 12000
+		currentMileage := 45000
+		existing := &models.Vehicle{
+			ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186",
+			Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive,
+			DisplayName: "Daily driver", Color: "Blue", LicensePlate: "ABC-1234",
+			PurchaseDate: &purchaseDate, PurchasePrice: &purchasePrice,
+			PurchaseMileage: &purchaseMileage, CurrentMileage: &currentMileage, Notes: "Good car",
+		}
+		stub := &stubVehicleSvc{getResult: existing}
+		h := MakeVehicleAPIHandler(stub)
+		body := map[string]interface{}{
+			"vin": "1HGCM82633A004352", "make": "Toyota", "model": "Camry", "year": "2021",
+			"display_name": "Daily driver", "color": "Blue", "license_plate": "ABC-1234",
+			"purchase_date": "2021-06-15", "purchase_price": "25000",
+			"purchase_mileage": "12000", "current_mileage": "45000", "notes": "Good car",
+		}
+		jsonBody, err := json.Marshal(body)
+		require.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewReader(jsonBody))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		require.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, "/vehicles/v1?updated=true", rec.Header().Get("HX-Redirect"))
+		require.NotNil(t, stub.savedVehicle)
+		assert.Equal(t, "u1", stub.savedVehicle.UserID)
+		assert.Equal(t, models.VehicleStatusActive, stub.savedVehicle.Status)
+		assert.Equal(t, "1HGCM82633A004352", stub.savedVehicle.VIN)
+		assert.Equal(t, "Toyota", stub.savedVehicle.Make)
+		assert.Equal(t, "Camry", stub.savedVehicle.Model)
+		assert.Equal(t, 2021, stub.savedVehicle.Year)
+		assert.Equal(t, "Daily driver", stub.savedVehicle.DisplayName)
+		assert.Equal(t, "Blue", stub.savedVehicle.Color)
+		assert.Equal(t, "ABC-1234", stub.savedVehicle.LicensePlate)
+		assert.Equal(t, &purchaseDate, stub.savedVehicle.PurchaseDate)
+		assert.Equal(t, &purchasePrice, stub.savedVehicle.PurchasePrice)
+		assert.Equal(t, &purchaseMileage, stub.savedVehicle.PurchaseMileage)
+		assert.Equal(t, &currentMileage, stub.savedVehicle.CurrentMileage)
+		assert.Equal(t, "Good car", stub.savedVehicle.Notes)
+	})
+
+	t.Run("clears optional fields when the htmx form submits them empty", func(t *testing.T) {
+		purchaseDate := time.Date(2021, 6, 15, 0, 0, 0, 0, time.UTC)
+		purchasePrice := 25000.0
+		purchaseMileage := 12000
+		currentMileage := 45000
+		stub := &stubVehicleSvc{getResult: &models.Vehicle{
+			ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186", Make: "Ford",
+			Model: "Focus", Year: 2020, Status: models.VehicleStatusActive,
+			PurchaseDate: &purchaseDate, PurchasePrice: &purchasePrice,
+			PurchaseMileage: &purchaseMileage, CurrentMileage: &currentMileage,
+		}}
+		h := MakeVehicleAPIHandler(stub)
+		body := map[string]interface{}{
+			"vin": "1HGBH41JXMN109186", "make": "Ford", "model": "Focus", "year": "2020",
+			"purchase_date": "", "purchase_price": "", "purchase_mileage": "", "current_mileage": "",
+		}
+		jsonBody, err := json.Marshal(body)
+		require.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewReader(jsonBody))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		require.Equal(t, http.StatusOK, rec.Code)
+		require.NotNil(t, stub.savedVehicle)
+		assert.Nil(t, stub.savedVehicle.PurchaseDate)
+		assert.Nil(t, stub.savedVehicle.PurchasePrice)
+		assert.Nil(t, stub.savedVehicle.PurchaseMileage)
+		assert.Nil(t, stub.savedVehicle.CurrentMileage)
+	})
+
+	t.Run("returns numeric input errors inline for htmx forms", func(t *testing.T) {
+		stub := &stubVehicleSvc{getResult: &models.Vehicle{
+			ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186", Make: "Ford",
+			Model: "Focus", Year: 2020, Status: models.VehicleStatusActive,
+		}}
+		h := MakeVehicleAPIHandler(stub)
+		body := map[string]interface{}{
+			"vin": "1HGBH41JXMN109186", "make": "Ford", "model": "Focus", "year": "2020",
+			"current_mileage": "not-a-number",
+		}
+		jsonBody, err := json.Marshal(body)
+		require.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewReader(jsonBody))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Contains(t, rec.Body.String(), `"field":"current_mileage"`)
+		assert.Nil(t, stub.savedVehicle)
+	})
+
+	t.Run("returns duplicate VIN errors inline for htmx forms", func(t *testing.T) {
+		stub := &stubVehicleSvc{
+			getResult: &models.Vehicle{
+				ID: "v1", UserID: "u1", VIN: "1HGBH41JXMN109186",
+				Make: "Ford", Model: "Focus", Year: 2020, Status: models.VehicleStatusActive,
+			},
+			updateErr: models.NewDuplicateError("Vehicle", "vin", "1HGCM82633A004352"),
+		}
+		h := MakeVehicleAPIHandler(stub)
+		body := map[string]interface{}{
+			"vin": "1HGCM82633A004352", "make": "Ford", "model": "Focus", "year": "2020",
+		}
+		jsonBody, err := json.Marshal(body)
+		require.NoError(t, err)
+		req := httptest.NewRequest(http.MethodPut, "/api/v1/vehicles/v1", bytes.NewReader(jsonBody))
+		req.Header.Set("HX-Request", "true")
+		req = addAuthContext(req, "u1", "testuser")
+		req = mux.SetURLVars(req, map[string]string{"id": "v1"})
+		rec := httptest.NewRecorder()
+
+		h.ReplaceOne(rec, req)
+
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Contains(t, rec.Body.String(), `"field":"vin"`)
+		assert.Contains(t, rec.Body.String(), "VIN already exists")
 	})
 }
 

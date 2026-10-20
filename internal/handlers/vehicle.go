@@ -163,6 +163,51 @@ func (h *vehicleAPIHandler) ReplaceOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		if errs := normalizeVehicleFormNumbers(inputData); len(errs) > 0 {
+			respondWithValidationProblems(w, "Invalid vehicle fields", errs)
+			return
+		}
+		if errs := validateRequiredKeys(inputData, "vin", "make", "model", "year"); len(errs) > 0 {
+			respondWithValidationProblems(w, "Missing fields", errs)
+			return
+		}
+		if errs := applyVehicleFormData(existing, inputData); len(errs) > 0 {
+			respondWithValidationProblems(w, "Invalid vehicle fields", errs)
+			return
+		}
+
+		validationErrors := models.ValidateVehicleAll(existing)
+		if len(validationErrors) > 0 {
+			errs := make([]FieldError, 0, len(validationErrors))
+			for field, message := range validationErrors {
+				if field != "user_id" && field != "status" {
+					errs = append(errs, FieldError{Field: field, Message: message})
+				}
+			}
+			if len(errs) > 0 {
+				respondWithValidationProblems(w, "Invalid vehicle fields", errs)
+				return
+			}
+		}
+
+		if saveErr := h.svc.SaveVehicle(ctx, existing); saveErr != nil {
+			var duplicate *models.DuplicateError
+			if models.IsDuplicateError(saveErr, &duplicate) && duplicate.Field == "vin" {
+				respondWithValidationProblems(w, "Invalid vehicle fields", []FieldError{
+					{Field: "vin", Message: "VIN already exists"},
+				})
+				return
+			}
+			handleDomainError(w, saveErr)
+			return
+		}
+
+		w.Header().Set("HX-Redirect", fmt.Sprintf("/vehicles/%s?updated=true", targetID))
+		respondWithPayload(w, 200, buildSinglePayload(existing, "Vehicle updated successfully"))
+		return
+	}
+
 	changes := extractVehicleChanges(inputData)
 	updated, updateErr := h.svc.UpdateVehicle(ctx, targetID, changes)
 	if updateErr != nil {

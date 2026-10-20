@@ -39,7 +39,13 @@ func TestPageHandler_VehicleEdit(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Edit Vehicle")
-		assert.Contains(t, body, `action="/vehicles/v1/edit"`)
+		assert.Contains(t, body, `hx-put="/api/v1/vehicles/v1"`)
+		assert.Contains(t, body, `hx-ext="json-enc"`)
+		assert.Contains(t, body, `hx-swap="none"`)
+		assert.Contains(t, body, `data-form-errors`)
+		for _, field := range []string{"vin", "make", "model", "year", "display_name", "color", "license_plate", "purchase_date", "purchase_price", "purchase_mileage", "current_mileage", "notes"} {
+			assert.Contains(t, body, `data-field="`+field+`"`)
+		}
 		assert.Contains(t, body, "Ford")
 		assert.Contains(t, body, "Focus")
 		assert.Contains(t, body, "2020")

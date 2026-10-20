@@ -157,7 +157,6 @@ func main() {
 	vehiclePages.Use(middleware.PageResourceOwnershipGuard(newVehicleLookup(vehicleSvc), pageHandler.RenderError))
 	vehiclePages.HandleFunc("", pageHandler.VehicleDetail).Methods("GET")
 	vehiclePages.HandleFunc("/edit", pageHandler.VehicleEdit).Methods("GET")
-	vehiclePages.HandleFunc("/edit", pageHandler.VehicleUpdate).Methods("POST")
 
 	// API v1 routes
 	apiV1 := router.PathPrefix("/api/v1").Subrouter()
