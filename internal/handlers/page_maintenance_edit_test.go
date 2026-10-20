@@ -54,7 +54,16 @@ func TestPageHandler_MaintenanceEdit(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Edit Maintenance Record")
-		assert.Contains(t, body, `action="/maintenance/m1/edit"`)
+		assert.Contains(t, body, `hx-put="/api/v1/maintenance/m1"`)
+		assert.Contains(t, body, `hx-ext="json-enc"`)
+		assert.Contains(t, body, `hx-swap="none"`)
+		assert.Contains(t, body, `hx-validate="true"`)
+		assert.NotContains(t, body, `novalidate`)
+		assert.Contains(t, body, `data-form-errors role="alert" aria-live="assertive"`)
+		assert.NotContains(t, body, `action="/maintenance/m1/edit"`)
+		for _, field := range []string{"service_type", "custom_service_type", "service_date", "mileage_at_service", "cost", "service_provider", "notes"} {
+			assert.Contains(t, body, `data-field="`+field+`"`)
+		}
 		assert.Contains(t, body, "Oil Change")
 		assert.Contains(t, body, "2024-06-01")
 		assert.Contains(t, body, "30000")

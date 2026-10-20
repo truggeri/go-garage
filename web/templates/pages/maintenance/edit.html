@@ -13,8 +13,8 @@
 {{end}}
 
 <div class="card">
-    <form method="POST" action="/maintenance/{{.RecordID}}/edit" novalidate>
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <form hx-put="/api/v1/maintenance/{{.RecordID}}" hx-ext="json-enc" hx-swap="none" hx-validate="true">
+        <div data-form-errors role="alert" aria-live="assertive"></div>
         <div class="form-section">
             <h2 class="form-section-title">Record Details</h2>
 
@@ -35,9 +35,7 @@
                         <option value="{{.}}"{{if eq (print .) $.ServiceType}} selected{{end}}>{{serviceTypeDisplayName (print .)}}</option>
                         {{end}}
                     </select>
-                    {{if .Errors.service_type}}
-                    <p class="form-error" id="service-type-error">{{.Errors.service_type}}</p>
-                    {{end}}
+                    <p class="form-error" id="service-type-error" data-field="service_type">{{.Errors.service_type}}</p>
                 </div>
 
                 <div class="form-group custom-service-type-group{{if ne .ServiceType "other"}} hidden{{end}}">
@@ -47,9 +45,7 @@
                            value="{{.CustomServiceType}}"
                            {{if eq .ServiceType "other"}}required {{end}}placeholder="Describe the service"
                            {{if .Errors.custom_service_type}}aria-invalid="true" {{end}}aria-describedby="custom-service-type-error">
-                    {{if .Errors.custom_service_type}}
-                    <p class="form-error" id="custom-service-type-error">{{.Errors.custom_service_type}}</p>
-                    {{end}}
+                    <p class="form-error" id="custom-service-type-error" data-field="custom_service_type">{{.Errors.custom_service_type}}</p>
                 </div>
 
                 <div class="form-group">
@@ -59,9 +55,7 @@
                            value="{{.ServiceDate}}"
                            required
                            {{if .Errors.service_date}}aria-invalid="true" {{end}}aria-describedby="service-date-error">
-                    {{if .Errors.service_date}}
-                    <p class="form-error" id="service-date-error">{{.Errors.service_date}}</p>
-                    {{end}}
+                    <p class="form-error" id="service-date-error" data-field="service_date">{{.Errors.service_date}}</p>
                 </div>
             </div>
 
@@ -74,9 +68,7 @@
                            min="0"
                            placeholder="e.g. 45000"
                            aria-describedby="mileage-error">
-                    {{if .Errors.mileage_at_service}}
-                    <p class="form-error" id="mileage-error">{{.Errors.mileage_at_service}}</p>
-                    {{end}}
+                    <p class="form-error" id="mileage-error" data-field="mileage_at_service">{{.Errors.mileage_at_service}}</p>
                 </div>
 
                 <div class="form-group">
@@ -87,9 +79,7 @@
                            min="0" step="0.01"
                            placeholder="e.g. 49.99"
                            aria-describedby="cost-error">
-                    {{if .Errors.cost}}
-                    <p class="form-error" id="cost-error">{{.Errors.cost}}</p>
-                    {{end}}
+                    <p class="form-error" id="cost-error" data-field="cost">{{.Errors.cost}}</p>
                 </div>
 
                 <div class="form-group">
@@ -97,7 +87,8 @@
                     <input class="form-input"
                            type="text" id="service_provider" name="service_provider"
                            value="{{.ServiceProvider}}"
-                           placeholder="e.g. Quick Lube">
+                           placeholder="e.g. Quick Lube" aria-describedby="service-provider-error">
+                    <p class="form-error" id="service-provider-error" data-field="service_provider"></p>
                 </div>
             </div>
         </div>
@@ -109,8 +100,9 @@
                 <label class="form-label" for="notes">Notes</label>
                 <textarea class="form-input"
                           id="notes" name="notes"
-                          rows="4"
+                          rows="4" aria-describedby="notes-error"
                           placeholder="Any additional notes about this service">{{.Notes}}</textarea>
+                <p class="form-error" id="notes-error" data-field="notes"></p>
             </div>
         </div>
 

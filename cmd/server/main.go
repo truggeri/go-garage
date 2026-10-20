@@ -137,7 +137,6 @@ func main() {
 	protectedPages.HandleFunc("/maintenance/new", pageHandler.MaintenanceNew).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}", pageHandler.MaintenanceDetail).Methods("GET")
 	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceEdit).Methods("GET")
-	protectedPages.HandleFunc("/maintenance/{id}/edit", pageHandler.MaintenanceUpdate).Methods("POST")
 	protectedPages.HandleFunc("/fuel", pageHandler.FuelList).Methods("GET")
 	protectedPages.HandleFunc("/fuel/new", pageHandler.FuelNew).Methods("GET")
 	protectedPages.HandleFunc("/fuel/new", pageHandler.FuelCreate).Methods("POST")

@@ -218,6 +218,25 @@ shows a stopped bulk submission with a field error and only unsaved cards
 remaining. Focused JavaScript batching tests run with
 `node --test tests/maintenance-create.test.cjs` (PR #265).
 
+### Maintenance editing
+
+The edit-maintenance form uses `hx-put="/api/v1/maintenance/{id}"` with
+`json-enc`, `hx-swap="none"`, and native HTML validation. It submits all seven
+editable fields, including unchanged custom service type, provider, and notes;
+the disabled vehicle display is not submitted and ownership stays unchanged.
+The htmx API path parses string-valued numeric inputs, validates the complete
+record, and treats blank optional values as clears. Explicit service update
+flags clear nullable cost and mileage without changing the existing
+supplied-field behavior for non-htmx API clients.
+
+Successful edits return `HX-Redirect: /maintenance/{id}?updated=true`; the
+detail page uses the layout's flash partial to show one success notification.
+API validation errors use the shared inline targets without replacing the
+form. The old `POST /maintenance/{id}/edit` route is removed; the unused
+`MaintenanceUpdate` page handler remains for cleanup in #246.
+The [maintenance edit preview](../docs/screenshots/maintenance-edit-htmx.png)
+shows a future-date validation error with the submitted values preserved.
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:

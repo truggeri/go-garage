@@ -192,6 +192,7 @@ web/static/
 - [x] Same fields as add page (PR #88)
 - [x] Update validation (PR #88)
 - [x] Save and cancel buttons (PR #88)
+- [x] Migrate edit submission to htmx REST API (issue #241)
 
 ### 7. User Profile Pages
 

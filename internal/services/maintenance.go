@@ -34,13 +34,15 @@ type MaintenanceService interface {
 
 // MaintenanceUpdates contains the fields that can be updated for a maintenance record
 type MaintenanceUpdates struct {
-	ServiceType       *string
-	CustomServiceType *string
-	ServiceDate       *time.Time
-	MileageAtService  *int
-	Cost              *float64
-	ServiceProvider   *string
-	Notes             *string
+	ServiceType           *string
+	CustomServiceType     *string
+	ServiceDate           *time.Time
+	MileageAtService      *int
+	Cost                  *float64
+	ServiceProvider       *string
+	Notes                 *string
+	ClearMileageAtService bool
+	ClearCost             bool
 }
 
 // DefaultMaintenanceService implements MaintenanceService using a MaintenanceRepository
@@ -115,9 +117,13 @@ func (s *DefaultMaintenanceService) UpdateMaintenance(ctx context.Context, id st
 	}
 	if updates.MileageAtService != nil {
 		record.MileageAtService = updates.MileageAtService
+	} else if updates.ClearMileageAtService {
+		record.MileageAtService = nil
 	}
 	if updates.Cost != nil {
 		record.Cost = updates.Cost
+	} else if updates.ClearCost {
+		record.Cost = nil
 	}
 	if updates.ServiceProvider != nil {
 		record.ServiceProvider = *updates.ServiceProvider
