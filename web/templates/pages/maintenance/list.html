@@ -60,6 +60,10 @@
             <td data-label="Actions">
                 <a href="/maintenance/{{.ID}}" class="btn btn-secondary btn-sm">View</a>
                 <a href="/maintenance/{{.ID}}/edit" class="btn btn-secondary btn-sm">Edit</a>
+                <button type="button" class="btn btn-danger btn-sm"
+                        hx-delete="/api/v1/maintenance/{{.ID}}"
+                        hx-confirm="Are you sure you want to delete this maintenance record? This action cannot be undone."
+                        hx-swap="none">Delete</button>
             </td>
         </tr>
         {{end}}

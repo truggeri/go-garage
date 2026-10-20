@@ -238,6 +238,18 @@ The [maintenance edit preview](../docs/screenshots/maintenance-edit-htmx.png)
 shows a future-date validation error with the submitted values preserved
 (PR #266).
 
+### Maintenance deletion
+
+Maintenance list and detail delete controls use
+`hx-delete="/api/v1/maintenance/{id}"`, the irreversible-action `hx-confirm`,
+and `hx-swap="none"`. Successful htmx deletion redirects to the parent vehicle
+detail at `/vehicles/{vehicleId}`; non-htmx API clients retain the JSON success
+envelope without a redirect. Cookie-authenticated deletion requires the shared
+`X-CSRF-Token` header. The old hidden POST delete form is removed; there is no
+registered maintenance page-delete route or handler to retain for #246.
+The [maintenance delete preview](../docs/screenshots/maintenance-delete-htmx.png)
+shows the migrated controls (PR #267).
+
 ## Error responses and rendering
 
 API handlers use the existing JSON envelope:

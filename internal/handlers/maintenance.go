@@ -234,6 +234,9 @@ func (h *maintenanceAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("HX-Redirect", fmt.Sprintf("/vehicles/%s", existing.VehicleID))
+	}
 	respondWithPayload(w, 200, map[string]interface{}{
 		keySuccess: true, "message": "Maintenance record deleted successfully",
 	})
