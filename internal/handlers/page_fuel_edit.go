@@ -3,11 +3,9 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
-	"github.com/truggeri/go-garage/internal/services"
 )
 
 // fuelEditPageData holds the data passed to the edit-fuel template.
@@ -108,126 +106,4 @@ func (h *PageHandler) FuelEdit(w http.ResponseWriter, r *http.Request) {
 	if err := h.engine.Render(w, "fuel/edit.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-}
-
-// FuelUpdate handles the edit fuel record form submission (POST /fuel/{id}/edit).
-func (h *PageHandler) FuelUpdate(w http.ResponseWriter, r *http.Request) {
-	account, ok := middleware.GetAccountFromContext(r.Context())
-	if !ok {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	record, vehicle, err := h.getFuelRecordAndVehicle(r)
-	if err != nil {
-		writeFuelRecordError(w, err)
-		return
-	}
-
-	if vehicle.UserID != account.ID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	fillDateStr := r.FormValue("fill_date")
-	mileageStr := r.FormValue("mileage")
-	volumeStr := r.FormValue("volume")
-	fuelType := strings.TrimSpace(r.FormValue("fuel_type"))
-	partialFill := r.FormValue("partial_fill") == "on"
-	pricePerUnitStr := r.FormValue("price_per_unit")
-	octaneRatingStr := r.FormValue("octane_rating")
-	location := strings.TrimSpace(r.FormValue("location"))
-	brand := strings.TrimSpace(r.FormValue("brand"))
-	notes := r.FormValue("notes")
-	cityDrivingStr := r.FormValue("city_driving_percentage")
-	reportedMPGStr := r.FormValue("vehicle_reported_mpg")
-
-	vehicleTitle := fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model)
-
-	renderForm := func(status int, formErrors map[string]string) {
-		w.WriteHeader(status)
-		data := fuelEditPageData{
-			IsAuthenticated:       true,
-			UserName:              account.Name,
-			ActiveNav:             "fuel",
-			RecordID:              record.ID,
-			VehicleTitle:          vehicleTitle,
-			Errors:                formErrors,
-			CSRFToken:             middleware.GetCSRFToken(r.Context()),
-			FuelTypes:             models.AllFuelTypes(),
-			FillDate:              fillDateStr,
-			Mileage:               mileageStr,
-			Volume:                volumeStr,
-			FuelType:              fuelType,
-			PartialFill:           partialFill,
-			PricePerUnit:          pricePerUnitStr,
-			OctaneRating:          octaneRatingStr,
-			Location:              location,
-			Brand:                 brand,
-			Notes:                 notes,
-			CityDrivingPercentage: cityDrivingStr,
-			VehicleReportedMPG:    reportedMPGStr,
-		}
-		_ = h.engine.Render(w, "fuel/edit.html", "base", data)
-	}
-
-	parseResult := parseFuelForm(fillDateStr, mileageStr, volumeStr, pricePerUnitStr, octaneRatingStr, cityDrivingStr, reportedMPGStr)
-	if len(parseResult.Errors) > 0 {
-		renderForm(http.StatusBadRequest, parseResult.Errors)
-		return
-	}
-
-	// Build a temporary record for validation.
-	validationRecord := &models.FuelRecord{
-		VehicleID:             record.VehicleID,
-		FillDate:              parseResult.FillDate,
-		Mileage:               parseResult.Mileage,
-		Volume:                parseResult.Volume,
-		FuelType:              fuelType,
-		PartialFill:           partialFill,
-		PricePerUnit:          parseResult.PricePerUnit,
-		OctaneRating:          parseResult.OctaneRating,
-		Location:              location,
-		Brand:                 brand,
-		Notes:                 notes,
-		CityDrivingPercentage: parseResult.CityDrivingPercentage,
-		VehicleReportedMPG:    parseResult.VehicleReportedMPG,
-	}
-
-	if valErr := models.ValidateFuelRecord(validationRecord); valErr != nil {
-		var ve *models.ValidationError
-		if models.IsValidationError(valErr, &ve) {
-			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
-			return
-		}
-		renderForm(http.StatusBadRequest, map[string]string{keyGeneral: "Invalid form data. Please check your input."})
-		return
-	}
-
-	updates := services.FuelUpdates{
-		FillDate:              &parseResult.FillDate,
-		Mileage:               &parseResult.Mileage,
-		Volume:                &parseResult.Volume,
-		FuelType:              &fuelType,
-		PartialFill:           &partialFill,
-		PricePerUnit:          parseResult.PricePerUnit,
-		OctaneRating:          parseResult.OctaneRating,
-		Location:              &location,
-		Brand:                 &brand,
-		Notes:                 &notes,
-		CityDrivingPercentage: parseResult.CityDrivingPercentage,
-		VehicleReportedMPG:    parseResult.VehicleReportedMPG,
-	}
-
-	if _, err := h.fuelService.UpdateFuel(r.Context(), record.ID, updates); err != nil {
-		renderForm(http.StatusInternalServerError, map[string]string{keyGeneral: "Failed to update fuel record. Please try again."})
-		return
-	}
-
-	http.Redirect(w, r, fmt.Sprintf("/fuel/%s?updated=true", record.ID), http.StatusSeeOther)
 }

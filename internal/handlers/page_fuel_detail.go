@@ -78,30 +78,3 @@ func (h *PageHandler) FuelDetail(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
 }
-
-// FuelDelete handles the fuel record deletion (POST /fuel/{id}/delete).
-func (h *PageHandler) FuelDelete(w http.ResponseWriter, r *http.Request) {
-	account, ok := middleware.GetAccountFromContext(r.Context())
-	if !ok {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	record, vehicle, err := h.getFuelRecordAndVehicle(r)
-	if err != nil {
-		writeFuelRecordError(w, err)
-		return
-	}
-
-	if vehicle.UserID != account.ID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	if err := h.fuelService.DeleteFuel(r.Context(), record.ID); err != nil {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/fuel?vehicle="+vehicle.ID, http.StatusSeeOther)
-}
