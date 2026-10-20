@@ -216,7 +216,7 @@ The old `POST /maintenance/new` route is removed. The unused
 consistent with the vehicle migrations. The [maintenance creation preview](../docs/screenshots/maintenance-create-htmx.png)
 shows a stopped bulk submission with a field error and only unsaved cards
 remaining. Focused JavaScript batching tests run with
-`node --test tests/maintenance-create.test.cjs` (issue #240).
+`node --test tests/maintenance-create.test.cjs` (PR #265).
 
 ## Error responses and rendering
 
