@@ -235,7 +235,8 @@ API validation errors use the shared inline targets without replacing the
 form. The old `POST /maintenance/{id}/edit` route is removed; the unused
 `MaintenanceUpdate` page handler remains for cleanup in #246.
 The [maintenance edit preview](../docs/screenshots/maintenance-edit-htmx.png)
-shows a future-date validation error with the submitted values preserved.
+shows a future-date validation error with the submitted values preserved
+(PR #266).
 
 ## Error responses and rendering
 
