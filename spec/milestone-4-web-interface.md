@@ -176,6 +176,7 @@ web/static/
 - [x] Notes textarea (PR #87)
 - [x] Form validation (PR #87)
 - [x] Submit and cancel buttons (PR #87)
+- [x] Migrate create submission to htmx REST API, preserving vehicle selection and bulk records (issue #240)
 
 #### Maintenance Detail Page
 
