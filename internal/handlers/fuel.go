@@ -76,7 +76,7 @@ func (h *FuelAPIHandler) CreateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isHTMX := r.Header.Get("HX-Request") == "true"
+	isHTMX := r.Header.Get("HX-Request") == queryTrue
 	if isHTMX {
 		if errs := normalizeFuelFormData(inputData); len(errs) > 0 {
 			respondWithValidationProblems(w, "Invalid fuel fields", errs)
@@ -130,7 +130,7 @@ func (h *FuelAPIHandler) UpdateOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isHTMX := r.Header.Get("HX-Request") == "true"
+	isHTMX := r.Header.Get("HX-Request") == queryTrue
 	if isHTMX {
 		if errs := normalizeFuelFormData(inputData); len(errs) > 0 {
 			respondWithValidationProblems(w, "Invalid fuel fields", errs)
@@ -172,7 +172,7 @@ func (h *FuelAPIHandler) RemoveOne(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if r.Header.Get("HX-Request") == "true" {
+	if r.Header.Get("HX-Request") == queryTrue {
 		w.Header().Set("HX-Redirect", "/fuel?vehicle="+rec.VehicleID)
 	}
 	respondWithPayload(w, http.StatusOK, map[string]interface{}{

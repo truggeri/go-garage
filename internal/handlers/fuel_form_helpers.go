@@ -34,7 +34,7 @@ func normalizeFuelFormData(data map[string]interface{}) []FieldError {
 
 	switch v := data["partial_fill"].(type) {
 	case string:
-		data["partial_fill"] = v == "on" || v == "true"
+		data["partial_fill"] = v == "on" || v == queryTrue
 	case bool:
 	default:
 		data["partial_fill"] = false
