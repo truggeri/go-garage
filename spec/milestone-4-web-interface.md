@@ -149,7 +149,7 @@ web/static/
 - [x] Same fields as add page
 - [x] Update validation
 - [x] Cancel and save buttons
-- [x] Migrate edit submission to htmx REST API (PR #TBD)
+- [x] Migrate edit submission to htmx REST API (PR #263)
 - [ ] Confirmation on save
 
 ### 6. Maintenance Management Pages

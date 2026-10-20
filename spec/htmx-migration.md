@@ -186,7 +186,7 @@ clears. Numeric inputs are normalized from `json-enc` strings and validation
 errors use the shared inline field-error rendering. Successful edits redirect
 to `/vehicles/{id}?updated=true`, where the detail page displays the success
 flash. The old `POST /vehicles/{id}/edit` route is removed; the now-unused
-`VehicleUpdate` page handler remains for cleanup in #246 (PR #TBD).
+`VehicleUpdate` page handler remains for cleanup in #246 (PR #263).
 The [vehicle edit form preview](../docs/screenshots/vehicle-edit-htmx.png)
 shows the pre-populated htmx form.
 
