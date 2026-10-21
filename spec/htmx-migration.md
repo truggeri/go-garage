@@ -190,6 +190,26 @@ flash. The old `POST /vehicles/{id}/edit` route is removed; the now-unused
 The [vehicle edit form preview](../docs/screenshots/vehicle-edit-htmx.png)
 shows the pre-populated htmx form.
 
+### Profile editing
+
+- [x] Migrate profile editing to `PUT /api/v1/users/me` (PR #269).
+
+The edit-profile form uses `hx-put="/api/v1/users/me"` with `json-enc` and
+`hx-swap="none"`. It submits `username`, `email`, `first_name`, and `last_name`
+as strings. Supplied strings are trimmed; blank optional names clear their
+values, while blank usernames or emails are validated rather than ignored.
+Omitted fields remain unchanged for partial API updates. Validation errors and
+htmx duplicate username/email conflicts include field details for the shared
+inline error renderer. Other API clients retain the existing JSON response
+shape without redirect headers.
+
+Successful htmx edits return `HX-Redirect: /profile?updated=true`, where the
+profile page displays the success flash. The legacy `POST /profile/edit` route
+and `ProfileUpdate` page handler are removed.
+
+The [profile edit form preview](../docs/screenshots/profile-edit-htmx.png)
+shows the inline duplicate-username error state.
+
 ### Maintenance creation
 
 The add-maintenance page preserves the shared vehicle dropdown (including

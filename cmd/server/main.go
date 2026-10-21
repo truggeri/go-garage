@@ -143,7 +143,6 @@ func main() {
 	protectedPages.HandleFunc("/fuel/{id}/edit", pageHandler.FuelEdit).Methods("GET")
 	protectedPages.HandleFunc("/profile", pageHandler.ViewProfile).Methods("GET")
 	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileEdit).Methods("GET")
-	protectedPages.HandleFunc("/profile/edit", pageHandler.ProfileUpdate).Methods("POST")
 	protectedPages.HandleFunc("/profile/password", pageHandler.ChangePassword).Methods("GET")
 	protectedPages.HandleFunc("/profile/password", pageHandler.ChangePasswordSubmit).Methods("POST")
 

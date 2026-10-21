@@ -20,6 +20,7 @@ type stubUserSvc struct {
 	getErr        error
 	updateResult  *models.User
 	updateErr     error
+	updates       *services.UserUpdates
 	changePassErr error
 	deleteErr     error
 }
@@ -32,7 +33,8 @@ func (s *stubUserSvc) GetUser(_ context.Context, _ string) (*models.User, error)
 	return s.getResult, s.getErr
 }
 
-func (s *stubUserSvc) UpdateUser(_ context.Context, _ string, _ services.UserUpdates) (*models.User, error) {
+func (s *stubUserSvc) UpdateUser(_ context.Context, _ string, updates services.UserUpdates) (*models.User, error) {
+	s.updates = &updates
 	return s.updateResult, s.updateErr
 }
 
@@ -139,6 +141,7 @@ func TestUserHandler_UpdateMe(t *testing.T) {
 		h.UpdateMe(rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
 		var resp map[string]interface{}
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.True(t, resp["success"].(bool))

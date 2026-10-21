@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/truggeri/go-garage/internal/middleware"
+	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/services"
 )
 
@@ -51,10 +52,25 @@ func (h *userAPIHandler) UpdateMe(w http.ResponseWriter, r *http.Request) {
 	updates := extractUserUpdates(inputData)
 	updatedUser, updateErr := h.svc.UpdateUser(ctx, caller.ID, updates)
 	if updateErr != nil {
+		var duplicate *models.DuplicateError
+		if r.Header.Get("HX-Request") == queryTrue && models.IsDuplicateError(updateErr, &duplicate) {
+			respondWithPayload(w, http.StatusConflict, map[string]interface{}{
+				keySuccess: false,
+				"error": map[string]interface{}{
+					"code":    "DUPLICATE_ERROR",
+					"message": duplicate.Error(),
+					"details": []FieldError{{Field: duplicate.Field, Message: duplicate.Field + " is already taken"}},
+				},
+			})
+			return
+		}
 		handleDomainError(w, updateErr)
 		return
 	}
 
+	if r.Header.Get("HX-Request") == queryTrue {
+		w.Header().Set("HX-Redirect", "/profile?updated="+queryTrue)
+	}
 	respondWithPayload(w, 200, buildUserProfilePayload(updatedUser, "Profile updated successfully"))
 }
 
