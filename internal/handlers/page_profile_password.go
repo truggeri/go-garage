@@ -2,10 +2,8 @@ package handlers
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/truggeri/go-garage/internal/middleware"
-	"github.com/truggeri/go-garage/internal/models"
 )
 
 // changePasswordPageData holds the data passed to the change-password template.
@@ -18,9 +16,7 @@ type changePasswordPageData struct {
 	UserName string
 	// ActiveNav identifies the active navigation item for highlighting.
 	ActiveNav string
-	// Errors holds field-level and general validation error messages.
-	Errors map[string]string
-	// CSRFToken is the CSRF protection token to embed in the form.
+	// CSRFToken is the CSRF protection token to embed in the layout.
 	CSRFToken string
 }
 
@@ -42,59 +38,4 @@ func (h *PageHandler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	if err := h.engine.Render(w, "profile/password.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-}
-
-// ChangePasswordSubmit handles the change password form submission (POST /profile/password).
-func (h *PageHandler) ChangePasswordSubmit(w http.ResponseWriter, r *http.Request) {
-	account, ok := middleware.GetAccountFromContext(r.Context())
-	if !ok {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	currentPassword := strings.TrimSpace(r.FormValue("current_password"))
-	newPassword := strings.TrimSpace(r.FormValue("new_password"))
-	confirmPassword := strings.TrimSpace(r.FormValue("confirm_password"))
-
-	renderForm := func(status int, formErrors map[string]string) {
-		w.WriteHeader(status)
-		data := changePasswordPageData{
-			IsAuthenticated: true,
-			UserName:        account.Name,
-			ActiveNav:       "profile",
-			Errors:          formErrors,
-			CSRFToken:       middleware.GetCSRFToken(r.Context()),
-		}
-		_ = h.engine.Render(w, "profile/password.html", "base", data)
-	}
-
-	if currentPassword == "" {
-		renderForm(http.StatusBadRequest, map[string]string{"current_password": "Current password is required."})
-		return
-	}
-	if newPassword == "" {
-		renderForm(http.StatusBadRequest, map[string]string{"new_password": "New password is required."})
-		return
-	}
-	if newPassword != confirmPassword {
-		renderForm(http.StatusBadRequest, map[string]string{"confirm_password": "Passwords do not match."})
-		return
-	}
-
-	if err := h.userService.ChangePassword(r.Context(), account.ID, currentPassword, newPassword); err != nil {
-		var ve *models.ValidationError
-		if models.IsValidationError(err, &ve) {
-			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
-			return
-		}
-		renderForm(http.StatusInternalServerError, map[string]string{keyGeneral: "Failed to change password. Please try again."})
-		return
-	}
-
-	http.Redirect(w, r, "/profile?password_changed="+queryTrue, http.StatusSeeOther)
 }

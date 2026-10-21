@@ -210,6 +210,29 @@ and `ProfileUpdate` page handler are removed.
 The [profile edit form preview](../docs/screenshots/profile-edit-htmx.png)
 shows the inline duplicate-username error state.
 
+### Password changes
+
+- [x] Migrate the change-password form to `PUT /api/v1/users/me/password` (PR #270).
+
+The form uses `hx-put`, `json-enc`, `hx-swap="none"`, and the shared CSRF
+header injection. Incorrect current passwords, mismatched confirmations, and
+password-strength failures use inline field errors. Confirmation is required
+for htmx requests; other API clients may omit it, but supplied confirmations
+must match. Passwords are passed unchanged, never trimmed.
+
+Successful htmx changes return `HX-Redirect: /profile?password_changed=true`
+so the profile page displays the existing success flash. Existing access and
+refresh tokens remain valid, matching the current authentication behavior;
+only subsequent password-based logins require the new password.
+The legacy `POST /profile/password` route and `ChangePasswordSubmit` handler
+are removed. A native `method="POST"` fallback prevents passwords from entering
+the URL if htmx cannot load; it fails safely rather than changing the password.
+Password values are never included in responses or request logs,
+and the shared error renderer uses only error messages, not submitted values.
+
+The [password form preview](../docs/screenshots/password-htmx.png)
+shows an inline validation error without exposing password values.
+
 ### Maintenance creation
 
 The add-maintenance page preserves the shared vehicle dropdown (including

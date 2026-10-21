@@ -224,6 +224,7 @@ func TestUserHandler_ChangePassword(t *testing.T) {
 		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 		assert.True(t, resp["success"].(bool))
 		assert.Equal(t, "Password changed successfully", resp["message"])
+		assert.Empty(t, rec.Header().Get("HX-Redirect"))
 	})
 
 	t.Run("returns 401 when not authenticated", func(t *testing.T) {
