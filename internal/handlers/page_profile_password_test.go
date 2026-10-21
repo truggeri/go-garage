@@ -3,7 +3,6 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"strings"
 	"testing"
 
@@ -37,6 +36,16 @@ func TestPageHandler_ChangePassword(t *testing.T) {
 		assert.Contains(t, body, "current_password")
 		assert.Contains(t, body, "new_password")
 		assert.Contains(t, body, "confirm_password")
+		assert.Contains(t, body, `hx-put="/api/v1/users/me/password"`)
+		assert.Contains(t, body, `hx-ext="json-enc"`)
+		assert.Contains(t, body, `hx-swap="none"`)
+		assert.Contains(t, body, `hx-validate="true"`)
+		assert.Contains(t, body, `data-form-errors role="alert"`)
+		assert.NotContains(t, body, `action="/profile/password"`)
+		assert.NotContains(t, body, `name="csrf_token"`)
+		for _, field := range []string{"current_password", "new_password", "confirm_password"} {
+			assert.Contains(t, body, `data-field="`+field+`"`)
+		}
 	})
 
 	t.Run("returns 500 when account missing from context", func(t *testing.T) {
@@ -51,131 +60,38 @@ func TestPageHandler_ChangePassword(t *testing.T) {
 	})
 }
 
-func TestPageHandler_ChangePasswordSubmit(t *testing.T) {
-	makeForm := func(current, newPass, confirm string) *strings.Reader {
-		form := url.Values{}
-		form.Set("current_password", current)
-		form.Set("new_password", newPass)
-		form.Set("confirm_password", confirm)
-		return strings.NewReader(form.Encode())
+func TestUserHandler_ChangePassword_HTMXErrors(t *testing.T) {
+	for _, test := range []struct {
+		name, body, field string
+		err               error
+		status            int
+	}{
+		{"missing current password", `{"new_password":"NewPass1","confirm_password":"NewPass1"}`, "current_password", nil, 400},
+		{"missing new password", `{"current_password":"OldPass1"}`, "new_password", nil, 400},
+		{"missing confirmation", `{"current_password":"OldPass1","new_password":"NewPass1"}`, "confirm_password", nil, 400},
+		{"mismatched confirmation", `{"current_password":"OldPass1","new_password":"NewPass1","confirm_password":"Mismatch1"}`, "confirm_password", nil, 400},
+		{"invalid confirmation type", `{"current_password":"OldPass1","new_password":"NewPass1","confirm_password":123}`, "confirm_password", nil, 400},
+		{"incorrect current password", `{"current_password":"WrongPass1","new_password":"NewPass1","confirm_password":"NewPass1"}`, "current_password", models.NewValidationError("current_password", "current password is incorrect"), 400},
+		{"weak new password", `{"current_password":"OldPass1","new_password":"short","confirm_password":"short"}`, "new_password", models.NewValidationError("password", "password must be at least 8 characters long"), 400},
+		{"unexpected failure", `{"current_password":"OldPass1","new_password":"NewPass1","confirm_password":"NewPass1"}`, "", models.NewDatabaseError("change password", assert.AnError), 500},
+		{"malformed JSON", `{"current_password":"OldPass1",`, "", nil, 400},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			handler := MakeUserAPIHandler(&stubUserSvc{changePassErr: test.err})
+			req := httptest.NewRequest(http.MethodPut, "/api/v1/users/me/password", strings.NewReader(test.body))
+			req = addAuthContext(req, "u1", "johndoe")
+			req.Header.Set("HX-Request", "true")
+			rec := httptest.NewRecorder()
+			handler.ChangePassword(rec, req)
+
+			assert.Equal(t, test.status, rec.Code)
+			assert.Empty(t, rec.Header().Get("HX-Redirect"))
+			if test.field != "" {
+				assert.Contains(t, rec.Body.String(), `"field":"`+test.field+`"`)
+			}
+			for _, password := range []string{"OldPass1", "NewPass1", "Mismatch1", "WrongPass1", "short"} {
+				assert.NotContains(t, rec.Body.String(), password)
+			}
+		})
 	}
-
-	t.Run("redirects to profile on success", func(t *testing.T) {
-		handler := newTestChangePasswordPageHandler(t, &stubUserSvc{})
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("OldPass1", "NewPass1", "NewPass1"))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = addAuthContext(req, "u1", "johndoe")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusSeeOther, rec.Code)
-		assert.Contains(t, rec.Header().Get("Location"), "/profile?password_changed=true")
-	})
-
-	t.Run("returns 500 when account missing from context", func(t *testing.T) {
-		handler := newTestChangePasswordPageHandler(t, &stubUserSvc{})
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("OldPass1", "NewPass1", "NewPass1"))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusInternalServerError, rec.Code)
-	})
-
-	t.Run("returns 400 for empty current password", func(t *testing.T) {
-		handler := newTestChangePasswordPageHandler(t, &stubUserSvc{})
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("", "NewPass1", "NewPass1"))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = addAuthContext(req, "u1", "johndoe")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.Contains(t, rec.Body.String(), "Current password is required")
-	})
-
-	t.Run("returns 400 for empty new password", func(t *testing.T) {
-		handler := newTestChangePasswordPageHandler(t, &stubUserSvc{})
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("OldPass1", "", ""))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = addAuthContext(req, "u1", "johndoe")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.Contains(t, rec.Body.String(), "New password is required")
-	})
-
-	t.Run("returns 400 when passwords do not match", func(t *testing.T) {
-		handler := newTestChangePasswordPageHandler(t, &stubUserSvc{})
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("OldPass1", "NewPass1", "Mismatch1"))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = addAuthContext(req, "u1", "johndoe")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.Contains(t, rec.Body.String(), "Passwords do not match")
-	})
-
-	t.Run("returns 400 for incorrect current password", func(t *testing.T) {
-		userStub := &stubUserSvc{
-			changePassErr: models.NewValidationError("current_password", "current password is incorrect"),
-		}
-		handler := newTestChangePasswordPageHandler(t, userStub)
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("WrongPass1", "NewPass1", "NewPass1"))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = addAuthContext(req, "u1", "johndoe")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.Contains(t, rec.Body.String(), "current password is incorrect")
-	})
-
-	t.Run("returns 400 for weak new password", func(t *testing.T) {
-		userStub := &stubUserSvc{
-			changePassErr: models.NewValidationError("password", "password must be at least 8 characters long"),
-		}
-		handler := newTestChangePasswordPageHandler(t, userStub)
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("OldPass1", "weak", "weak"))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = addAuthContext(req, "u1", "johndoe")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusBadRequest, rec.Code)
-		assert.Contains(t, rec.Body.String(), "password must be at least 8 characters long")
-	})
-
-	t.Run("returns 500 when service fails unexpectedly", func(t *testing.T) {
-		userStub := &stubUserSvc{
-			changePassErr: models.NewDatabaseError("change password", assert.AnError),
-		}
-		handler := newTestChangePasswordPageHandler(t, userStub)
-
-		req := httptest.NewRequest(http.MethodPost, "/profile/password", makeForm("OldPass1", "NewPass1", "NewPass1"))
-		req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-		req = addAuthContext(req, "u1", "johndoe")
-		rec := httptest.NewRecorder()
-
-		handler.ChangePasswordSubmit(rec, req)
-
-		assert.Equal(t, http.StatusInternalServerError, rec.Code)
-		assert.Contains(t, rec.Body.String(), "Failed to change password")
-	})
 }

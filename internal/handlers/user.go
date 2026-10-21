@@ -98,11 +98,32 @@ func (h *userAPIHandler) ChangePassword(w http.ResponseWriter, r *http.Request) 
 	currentPassword, _ := inputData["current_password"].(string)
 	newPassword, _ := inputData["new_password"].(string)
 
+	confirmation, hasConfirmation := inputData["confirm_password"]
+	if hasConfirmation || r.Header.Get("HX-Request") == queryTrue {
+		confirmPassword, ok := confirmation.(string)
+		if !ok || confirmPassword != newPassword {
+			respondWithValidationProblems(w, "Passwords do not match.", []FieldError{
+				{Field: "confirm_password", Message: "Passwords do not match."},
+			})
+			return
+		}
+	}
+
 	if changeErr := h.svc.ChangePassword(ctx, caller.ID, currentPassword, newPassword); changeErr != nil {
+		var validation *models.ValidationError
+		if r.Header.Get("HX-Request") == queryTrue && models.IsValidationError(changeErr, &validation) && validation.Field == "password" {
+			respondWithValidationProblems(w, validation.Message, []FieldError{
+				{Field: "new_password", Message: validation.Message},
+			})
+			return
+		}
 		handleDomainError(w, changeErr)
 		return
 	}
 
+	if r.Header.Get("HX-Request") == queryTrue {
+		w.Header().Set("HX-Redirect", "/profile?password_changed="+queryTrue)
+	}
 	respondWithPayload(w, 200, map[string]interface{}{
 		keySuccess: true,
 		"message":  "Password changed successfully",

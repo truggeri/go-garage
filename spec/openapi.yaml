@@ -1406,7 +1406,10 @@ paths:
   /api/v1/users/me/password:
     put:
       summary: Change user password
-      description: Change the password for the authenticated user
+      description: |
+        Change the password for the authenticated user. Existing access and refresh
+        tokens remain valid. htmx requests require confirm_password and receive
+        HX-Redirect to /profile?password_changed=true on success.
       operationId: changePassword
       tags:
         - Users
@@ -2086,6 +2089,11 @@ components:
           minLength: 8
           description: New password (at least 8 characters)
           example: NewSecurePass456!
+        confirm_password:
+          type: string
+          format: password
+          writeOnly: true
+          description: Must match new_password when supplied; required for htmx requests
 
     PaginationInfo:
       type: object
