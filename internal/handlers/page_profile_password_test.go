@@ -37,6 +37,7 @@ func TestPageHandler_ChangePassword(t *testing.T) {
 		assert.Contains(t, body, "new_password")
 		assert.Contains(t, body, "confirm_password")
 		assert.Contains(t, body, `hx-put="/api/v1/users/me/password"`)
+		assert.Contains(t, body, `<form method="POST"`)
 		assert.Contains(t, body, `hx-ext="json-enc"`)
 		assert.Contains(t, body, `hx-swap="none"`)
 		assert.Contains(t, body, `hx-validate="true"`)

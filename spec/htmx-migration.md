@@ -225,7 +225,9 @@ so the profile page displays the existing success flash. Existing access and
 refresh tokens remain valid, matching the current authentication behavior;
 only subsequent password-based logins require the new password.
 The legacy `POST /profile/password` route and `ChangePasswordSubmit` handler
-are removed. Password values are never included in responses or request logs,
+are removed. A native `method="POST"` fallback prevents passwords from entering
+the URL if htmx cannot load; it fails safely rather than changing the password.
+Password values are never included in responses or request logs,
 and the shared error renderer uses only error messages, not submitted values.
 
 The [password form preview](../docs/screenshots/password-htmx.png)
