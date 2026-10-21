@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strings"
+
 	"github.com/truggeri/go-garage/internal/models"
 	"github.com/truggeri/go-garage/internal/services"
 )
@@ -39,16 +41,20 @@ func buildUserProfilePayload(user *models.User, message ...string) map[string]in
 func extractUserUpdates(d map[string]interface{}) services.UserUpdates {
 	var u services.UserUpdates
 
-	if v, ok := d["username"].(string); ok && v != "" {
+	if v, ok := d["username"].(string); ok {
+		v = strings.TrimSpace(v)
 		u.Username = &v
 	}
-	if v, ok := d["email"].(string); ok && v != "" {
+	if v, ok := d["email"].(string); ok {
+		v = strings.TrimSpace(v)
 		u.Email = &v
 	}
-	if v, ok := d["first_name"].(string); ok && v != "" {
+	if v, ok := d["first_name"].(string); ok {
+		v = strings.TrimSpace(v)
 		u.FirstName = &v
 	}
-	if v, ok := d["last_name"].(string); ok && v != "" {
+	if v, ok := d["last_name"].(string); ok {
+		v = strings.TrimSpace(v)
 		u.LastName = &v
 	}
 

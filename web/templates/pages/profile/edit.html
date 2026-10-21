@@ -6,42 +6,32 @@
     <a href="/profile" class="btn btn-secondary">Cancel</a>
 </div>
 
-{{if .Errors.general}}
-<div class="flash flash-error" role="alert">
-    <span class="flash-text">{{.Errors.general}}</span>
-</div>
-{{end}}
-
 <div class="card">
-    <form method="POST" action="/profile/edit" novalidate>
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+    <form hx-put="/api/v1/users/me" hx-ext="json-enc" hx-swap="none" hx-validate="true">
+        <div data-form-errors role="alert" aria-live="assertive"></div>
         <div class="form-section">
             <h2 class="form-section-title">Account Information</h2>
 
             <div class="form-group">
                 <label class="form-label" for="username">Username <span class="required" aria-hidden="true">*</span></label>
-                <input class="form-input{{if .Errors.username}} is-invalid{{end}}"
+                <input class="form-input"
                        type="text" id="username" name="username"
                        value="{{.Username}}"
                        required minlength="3" maxlength="30"
                        placeholder="e.g. johndoe"
-                       {{if .Errors.username}}aria-invalid="true" {{end}}aria-describedby="username-error">
-                {{if .Errors.username}}
-                <p class="form-error" id="username-error">{{.Errors.username}}</p>
-                {{end}}
+                       aria-describedby="username-error">
+                <p class="form-error" id="username-error" data-field="username"></p>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="email">Email <span class="required" aria-hidden="true">*</span></label>
-                <input class="form-input{{if .Errors.email}} is-invalid{{end}}"
+                <input class="form-input"
                        type="email" id="email" name="email"
                        value="{{.Email}}"
                        required
                        placeholder="e.g. john@example.com"
-                       {{if .Errors.email}}aria-invalid="true" {{end}}aria-describedby="email-error">
-                {{if .Errors.email}}
-                <p class="form-error" id="email-error">{{.Errors.email}}</p>
-                {{end}}
+                       aria-describedby="email-error">
+                <p class="form-error" id="email-error" data-field="email"></p>
             </div>
         </div>
 
@@ -54,7 +44,9 @@
                     <input class="form-input"
                            type="text" id="first_name" name="first_name"
                            value="{{.FirstName}}"
-                           placeholder="e.g. John">
+                           placeholder="e.g. John"
+                           aria-describedby="first-name-error">
+                    <p class="form-error" id="first-name-error" data-field="first_name"></p>
                 </div>
 
                 <div class="form-group">
@@ -62,7 +54,9 @@
                     <input class="form-input"
                            type="text" id="last_name" name="last_name"
                            value="{{.LastName}}"
-                           placeholder="e.g. Doe">
+                           placeholder="e.g. Doe"
+                           aria-describedby="last-name-error">
+                    <p class="form-error" id="last-name-error" data-field="last_name"></p>
                 </div>
             </div>
         </div>
