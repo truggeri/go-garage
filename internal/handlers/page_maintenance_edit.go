@@ -3,11 +3,9 @@ package handlers
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/truggeri/go-garage/internal/middleware"
 	"github.com/truggeri/go-garage/internal/models"
-	"github.com/truggeri/go-garage/internal/services"
 )
 
 // maintenanceEditPageData holds the data passed to the edit-maintenance template.
@@ -94,112 +92,4 @@ func (h *PageHandler) MaintenanceEdit(w http.ResponseWriter, r *http.Request) {
 	if err := h.engine.Render(w, "maintenance/edit.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-}
-
-// MaintenanceUpdate handles the edit maintenance record form submission (POST /maintenance/{id}/edit).
-func (h *PageHandler) MaintenanceUpdate(w http.ResponseWriter, r *http.Request) {
-	account, ok := middleware.GetAccountFromContext(r.Context())
-	if !ok {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	record, vehicle, err := h.getMaintenanceRecordAndVehicle(r)
-	if err != nil {
-		writeMaintenanceRecordError(w, err)
-		return
-	}
-
-	if vehicle.UserID != account.ID {
-		http.Error(w, "Forbidden", http.StatusForbidden)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	serviceType := strings.TrimSpace(r.FormValue("service_type"))
-	customServiceType := strings.TrimSpace(r.FormValue("custom_service_type"))
-	serviceDateStr := r.FormValue("service_date")
-	mileageStr := r.FormValue("mileage_at_service")
-	costStr := r.FormValue("cost")
-	serviceProvider := strings.TrimSpace(r.FormValue("service_provider"))
-	notes := r.FormValue("notes")
-
-	vehicleTitle := fmt.Sprintf("%d %s %s", vehicle.Year, vehicle.Make, vehicle.Model)
-
-	renderForm := func(status int, formErrors map[string]string) {
-		w.WriteHeader(status)
-		data := maintenanceEditPageData{
-			IsAuthenticated:   true,
-			UserName:          account.Name,
-			ActiveNav:         "maintenance",
-			RecordID:          record.ID,
-			VehicleTitle:      vehicleTitle,
-			Errors:            formErrors,
-			CSRFToken:         middleware.GetCSRFToken(r.Context()),
-			ServiceType:       serviceType,
-			CustomServiceType: customServiceType,
-			ServiceDate:       serviceDateStr,
-			MileageAtService:  mileageStr,
-			Cost:              costStr,
-			ServiceProvider:   serviceProvider,
-			Notes:             notes,
-			ServiceTypes:      models.AllServiceTypes(),
-		}
-		_ = h.engine.Render(w, "maintenance/edit.html", "base", data)
-	}
-
-	parseResult := parseMaintenanceNewForm(serviceDateStr, mileageStr, costStr)
-	if len(parseResult.Errors) > 0 {
-		renderForm(http.StatusBadRequest, parseResult.Errors)
-		return
-	}
-
-	// Guard custom_service_type by ServiceTypeOther check.
-	effectiveCustomServiceType := ""
-	if models.ServiceType(serviceType) == models.ServiceTypeOther {
-		effectiveCustomServiceType = customServiceType
-	}
-
-	// Build a temporary record for validation.
-	validationRecord := &models.MaintenanceRecord{
-		VehicleID:         record.VehicleID,
-		ServiceType:       serviceType,
-		CustomServiceType: effectiveCustomServiceType,
-		ServiceDate:       parseResult.ServiceDate,
-		MileageAtService:  parseResult.MileageAtService,
-		Cost:              parseResult.Cost,
-		ServiceProvider:   serviceProvider,
-		Notes:             notes,
-	}
-
-	if err := models.ValidateMaintenanceRecord(validationRecord); err != nil {
-		var ve *models.ValidationError
-		if models.IsValidationError(err, &ve) {
-			renderForm(http.StatusBadRequest, map[string]string{ve.Field: ve.Message})
-			return
-		}
-		renderForm(http.StatusBadRequest, map[string]string{keyGeneral: "Invalid form data. Please check your input."})
-		return
-	}
-
-	updates := services.MaintenanceUpdates{
-		ServiceType:       &serviceType,
-		CustomServiceType: &effectiveCustomServiceType,
-		ServiceDate:       &parseResult.ServiceDate,
-		MileageAtService:  parseResult.MileageAtService,
-		Cost:              parseResult.Cost,
-		ServiceProvider:   &serviceProvider,
-		Notes:             &notes,
-	}
-
-	if _, err := h.maintenanceService.UpdateMaintenance(r.Context(), record.ID, updates); err != nil {
-		renderForm(http.StatusInternalServerError, map[string]string{keyGeneral: "Failed to update maintenance record. Please try again."})
-		return
-	}
-
-	http.Redirect(w, r, fmt.Sprintf("/maintenance/%s?updated=true", record.ID), http.StatusSeeOther)
 }

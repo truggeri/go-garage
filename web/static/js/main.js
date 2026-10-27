@@ -193,35 +193,6 @@
     }
 
     // ========================================
-    // Delete Button Loading States
-    // ========================================
-
-    /**
-     * Sets up delete buttons that use data-confirm-delete attribute.
-     * Shows a confirmation dialog, then adds a loading spinner while
-     * the hidden delete form is being submitted.
-     */
-    function initDeleteButtons() {
-        var buttons = document.querySelectorAll("[data-confirm-delete]");
-        buttons.forEach(function (btn) {
-            var formId = btn.getAttribute("data-confirm-delete");
-            var form = document.getElementById(formId);
-            if (!form) { return; }
-
-            btn.addEventListener("click", function () {
-                var message = btn.getAttribute("data-confirm-message") ||
-                    "Are you sure? This action cannot be undone.";
-                if (confirm(message)) {
-                    btn.classList.add("btn-loading");
-                    btn.setAttribute("disabled", "disabled");
-                    btn.setAttribute("aria-busy", "true");
-                    form.submit();
-                }
-            });
-        });
-    }
-
-    // ========================================
     // Initialize on DOM Ready
     // ========================================
 
@@ -234,6 +205,5 @@
         initUserDropdown();
         initThemeToggle();
         initFormSubmitLoading();
-        initDeleteButtons();
     });
 })();

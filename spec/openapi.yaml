@@ -1035,7 +1035,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/FuelRecordInput'
+              $ref: '#/components/schemas/FuelRecordCreateInput'
       responses:
         '201':
           description: Fuel record created successfully
@@ -1139,7 +1139,7 @@ paths:
 
     put:
       summary: Update fuel record
-      description: Update an existing fuel record. Fields omitted from the request body are preserved.
+      description: Update an existing fuel record. Fields omitted from the request body are preserved. Browser htmx requests must include fill_date, mileage, volume, and fuel_type.
       operationId: updateFuelRecord
       tags:
         - Fuel
@@ -1845,11 +1845,6 @@ components:
 
     FuelRecordInput:
       type: object
-      required:
-        - fill_date
-        - mileage
-        - volume
-        - fuel_type
       properties:
         fill_date:
           type: string
@@ -1919,6 +1914,16 @@ components:
           maxLength: 1000
           description: Additional notes
           example: Premium fuel for highway trip
+
+    FuelRecordCreateInput:
+      allOf:
+        - $ref: '#/components/schemas/FuelRecordInput'
+        - type: object
+          required:
+            - fill_date
+            - mileage
+            - volume
+            - fuel_type
 
     FuelRecord:
       type: object

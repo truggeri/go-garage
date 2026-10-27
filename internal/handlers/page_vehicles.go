@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"sort"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/truggeri/go-garage/internal/middleware"
@@ -165,106 +164,6 @@ func (h *PageHandler) VehicleNew(w http.ResponseWriter, r *http.Request) {
 	if err := h.engine.Render(w, "vehicles/new.html", "base", data); err != nil {
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 	}
-}
-
-// VehicleCreate handles the add vehicle form submission (POST /vehicles/new).
-func (h *PageHandler) VehicleCreate(w http.ResponseWriter, r *http.Request) {
-	account, ok := middleware.GetAccountFromContext(r.Context())
-	if !ok {
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-
-	vehicleMake := r.FormValue("make")
-	model := r.FormValue("model")
-	yearStr := r.FormValue("year")
-	vin := r.FormValue("vin")
-	displayName := r.FormValue("display_name")
-	color := r.FormValue("color")
-	licensePlate := r.FormValue("license_plate")
-	purchaseDateStr := r.FormValue("purchase_date")
-	purchasePriceStr := r.FormValue("purchase_price")
-	purchaseMileageStr := r.FormValue("purchase_mileage")
-	currentMileageStr := r.FormValue("current_mileage")
-	notes := r.FormValue("notes")
-
-	parseResult := parseVehicleNewForm(yearStr, purchaseDateStr, purchasePriceStr, purchaseMileageStr, currentMileageStr)
-	formErrors := parseResult.Errors
-
-	renderForm := func(status int) {
-		w.WriteHeader(status)
-		data := vehicleNewPageData{
-			IsAuthenticated: true,
-			UserName:        account.Name,
-			ActiveNav:       "vehicles",
-			Errors:          formErrors,
-			CSRFToken:       middleware.GetCSRFToken(r.Context()),
-			Make:            vehicleMake,
-			Model:           model,
-			Year:            yearStr,
-			VIN:             vin,
-			DisplayName:     displayName,
-			Color:           color,
-			LicensePlate:    licensePlate,
-			PurchaseDate:    purchaseDateStr,
-			PurchasePrice:   purchasePriceStr,
-			PurchaseMileage: purchaseMileageStr,
-			CurrentMileage:  currentMileageStr,
-			Notes:           notes,
-		}
-		// WriteHeader has already been called; ignore render errors since
-		// sending another response is not possible at this point.
-		_ = h.engine.Render(w, "vehicles/new.html", "base", data)
-	}
-
-	if len(formErrors) > 0 {
-		renderForm(http.StatusBadRequest)
-		return
-	}
-
-	vehicle := &models.Vehicle{
-		UserID:          account.ID,
-		DisplayName:     strings.TrimSpace(displayName),
-		VIN:             strings.ToUpper(strings.TrimSpace(vin)),
-		Make:            strings.TrimSpace(vehicleMake),
-		Model:           strings.TrimSpace(model),
-		Year:            parseResult.Year,
-		Color:           color,
-		LicensePlate:    licensePlate,
-		PurchaseDate:    parseResult.PurchaseDate,
-		PurchasePrice:   parseResult.PurchasePrice,
-		PurchaseMileage: parseResult.PurchaseMileage,
-		CurrentMileage:  parseResult.CurrentMileage,
-		Notes:           notes,
-		Status:          models.VehicleStatusActive,
-	}
-
-	if validationErrs := models.ValidateVehicleAll(vehicle); len(validationErrs) > 0 {
-		// Filter to only user-facing form field errors
-		formErrors = make(map[string]string)
-		for field, msg := range validationErrs {
-			if field != "user_id" && field != "status" {
-				formErrors[field] = msg
-			}
-		}
-		if len(formErrors) > 0 {
-			renderForm(http.StatusBadRequest)
-			return
-		}
-	}
-
-	if err := h.vehicleService.CreateVehicle(r.Context(), vehicle); err != nil {
-		formErrors = map[string]string{keyGeneral: "Failed to add vehicle. Please try again."}
-		renderForm(http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/vehicles?added=true", http.StatusSeeOther)
 }
 
 // vehicleStats holds computed statistics for a vehicle's maintenance history.

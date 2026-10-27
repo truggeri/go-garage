@@ -170,9 +170,9 @@ The add-vehicle form uses `hx-post="/api/v1/vehicles"` with `json-enc` and
 `hx-swap="none"`. The create API converts htmx's string-valued numeric inputs
 and returns field-level errors, including duplicate VIN errors. Successful
 htmx creation redirects to `/vehicles/{id}?added=true`; the detail page renders
-the success flash after navigation. The old `POST /vehicles/new` route is
-removed; the now-unused `VehicleCreate` page handler remains for cleanup in
-#246 (PR #258).
+the success flash after navigation. The old `POST /vehicles/new` route and
+unused `VehicleCreate` page handler have been removed; the migration landed in
+PR #258.
 
 The [add-vehicle form preview](../docs/screenshots/vehicle-create-htmx.png)
 shows the inline duplicate-VIN error state.
@@ -185,8 +185,8 @@ the htmx form applies all submitted fields, treating blank optional values as
 clears. Numeric inputs are normalized from `json-enc` strings and validation
 errors use the shared inline field-error rendering. Successful edits redirect
 to `/vehicles/{id}?updated=true`, where the detail page displays the success
-flash. The old `POST /vehicles/{id}/edit` route is removed; the now-unused
-`VehicleUpdate` page handler remains for cleanup in #246 (PR #263).
+flash. The old `POST /vehicles/{id}/edit` route and unused `VehicleUpdate` page
+handler have been removed; the migration landed in PR #263.
 The [vehicle edit form preview](../docs/screenshots/vehicle-edit-htmx.png)
 shows the pre-populated htmx form.
 
@@ -254,9 +254,10 @@ network failure. The final success follows
 `HX-Redirect: /maintenance/{id}?added=true`; the detail page displays the
 creation flash once through the shared layout.
 
-The old `POST /maintenance/new` route is removed. The unused
-`MaintenanceCreate` page handler and its parsing helpers remain for #246,
-consistent with the vehicle migrations. The [maintenance creation preview](../docs/screenshots/maintenance-create-htmx.png)
+The old `POST /maintenance/new` route and unused `MaintenanceCreate` page
+handler have been removed. The shared parsing helper remains in use by the
+maintenance API handler. The migration landed in PR #265. The
+[maintenance creation preview](../docs/screenshots/maintenance-create-htmx.png)
 shows a stopped bulk submission with a field error and only unsaved cards
 remaining. Focused JavaScript batching tests run with
 `node --test tests/maintenance-create.test.cjs` (PR #265).
@@ -275,8 +276,9 @@ supplied-field behavior for non-htmx API clients.
 Successful edits return `HX-Redirect: /maintenance/{id}?updated=true`; the
 detail page uses the layout's flash partial to show one success notification.
 API validation errors use the shared inline targets without replacing the
-form. The old `POST /maintenance/{id}/edit` route is removed; the unused
-`MaintenanceUpdate` page handler remains for cleanup in #246.
+form. The old `POST /maintenance/{id}/edit` route and unused
+`MaintenanceUpdate` page handler have been removed; the migration landed in
+PR #266.
 The [maintenance edit preview](../docs/screenshots/maintenance-edit-htmx.png)
 shows a future-date validation error with the submitted values preserved
 (PR #266).
@@ -289,7 +291,7 @@ and `hx-swap="none"`. Successful htmx deletion redirects to the parent vehicle
 detail at `/vehicles/{vehicleId}`; non-htmx API clients retain the JSON success
 envelope without a redirect. Cookie-authenticated deletion requires the shared
 `X-CSRF-Token` header. The old hidden POST delete form is removed; there is no
-registered maintenance page-delete route or handler to retain for #246.
+registered maintenance page-delete route or handler.
 The [maintenance delete preview](../docs/screenshots/maintenance-delete-htmx.png)
 shows the migrated controls (PR #267).
 
@@ -408,8 +410,8 @@ For each mutation being migrated:
    API clients continue to work unchanged.
 8. Test success, validation errors, authorization failures, CSRF failures,
    network failures, and delete confirmation behavior.
-9. Remove the old mutating page handler and route only after the htmx flow is
-   verified, or track the removal for the cleanup issue.
+9. Remove the old mutating page handler and route after the htmx flow is
+   verified.
 10. Update the relevant milestone/spec checkbox with the landing PR number.
 
 ## Layer review
@@ -417,7 +419,8 @@ For each mutation being migrated:
 These conventions preserve the architecture boundaries in
 `spec/architecture.md`:
 
-- Page handlers render GET pages and provide form/page data.
+- Page handlers render pages and handle full-page registration/login
+  submissions; feature mutations use htmx requests to API handlers.
 - API handlers parse requests, call services, set status/headers, and encode
   JSON; they do not render templates.
 - Services retain business rules, validation orchestration, and ownership

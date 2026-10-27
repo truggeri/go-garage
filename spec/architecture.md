@@ -138,7 +138,9 @@ Handlers are the HTTP boundary. They are responsible for:
 - Converting raw string inputs into typed values (e.g. `strconv.Atoi`)
 - Calling the appropriate service method
 - Mapping service results/errors to HTTP status codes and response bodies
-- Rendering templates (page handlers) or encoding JSON (API handlers)
+- Rendering page templates and handling full-page registration/login submissions
+- Encoding JSON in API handlers; browser mutations for vehicles, maintenance,
+  fuel, and profile use htmx requests to the REST API
 
 Handlers must **not** contain:
 

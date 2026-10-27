@@ -312,11 +312,11 @@ web/static/
 #### Core Functionality
 
 - [ ] Form validation
-- [ ] AJAX requests for dynamic updates
+- [x] AJAX requests for dynamic updates via htmx and the REST API (PR #257, #258, #263, #264, #265, #266, #267, #269, #270)
 - [ ] Modal dialogs
 - [ ] Date pickers
 - [ ] Auto-complete for vehicle makes/models
-- [ ] Confirmation prompts
+- [x] Confirmation prompts for destructive actions via htmx `hx-confirm` (PR #257, #264, #267)
 
 ### 14. Testing
 
