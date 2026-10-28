@@ -27,7 +27,7 @@ module.exports = defineConfig({
             ...process.env,
             SERVER_HOST: "127.0.0.1",
             APP_PORT: port,
-            DB_PATH: path.join(os.tmpdir(), `go-garage-e2e-${process.pid}.db`),
+            DB_PATH: path.join(os.tmpdir(), `go-garage-e2e-${randomBytes(16).toString("hex")}.db`),
             JWT_SECRET: randomBytes(32).toString("hex"),
             CSRF_SECRET: randomBytes(32).toString("hex"),
             ENVIRONMENT: "development",
