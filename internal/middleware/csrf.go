@@ -16,6 +16,9 @@ const csrfTokenContextKey contextKey = "csrfToken"
 // csrfFormField is the name of the hidden form field that carries the CSRF token.
 const csrfFormField = "csrf_token"
 
+// csrfCookieName stores anonymous CSRF tokens in the browser for double-submit validation.
+const csrfCookieName = "csrf_token"
+
 // csrfHeaderName is the name of the request header that carries the CSRF token
 // for requests without a form-encoded body (e.g. htmx JSON requests).
 const csrfHeaderName = "X-CSRF-Token"
@@ -36,9 +39,10 @@ func GetCSRFToken(ctx context.Context) string {
 // CSRFProtection creates middleware that implements HMAC-based CSRF protection.
 // On every request it generates a new CSRF token using the user's session ID
 // (from AccountInfo if present) and a cryptographic nonce, signed with the
-// provided secret. On state-changing requests (POST, PUT, DELETE) it validates
-// that the token supplied in the X-CSRF-Token header or the form field was
-// signed with the same session ID and secret.
+// provided secret. On state-changing requests it validates that the token
+// supplied in the X-CSRF-Token header or the form field was signed with the
+// same session ID and secret. Anonymous requests must also submit the token
+// stored in their cookie.
 func CSRFProtection(secret string) func(http.Handler) http.Handler {
 	return csrfMiddleware(secret, func(*http.Request) bool { return true }, writePageCSRFError)
 }
@@ -68,13 +72,28 @@ func csrfMiddleware(
 			sessionID := sessionIDFromContext(r.Context())
 
 			if isStateChanging(r.Method) && shouldEnforce(r) {
-				if !validateCSRFToken(csrfTokenFromRequest(r), sessionID, secretBytes) {
+				token := csrfTokenFromRequest(r)
+				if !validateCSRFToken(token, sessionID, secretBytes) ||
+					(sessionID == "" && !matchesCSRFCookie(r, token)) {
 					writeError(w)
 					return
 				}
 			}
 
 			token := generateCSRFToken(sessionID, secretBytes)
+			if sessionID == "" && shouldEnforce(r) {
+				if cookie, err := r.Cookie(csrfCookieName); err == nil && validateCSRFToken(cookie.Value, sessionID, secretBytes) {
+					token = cookie.Value
+				}
+				http.SetCookie(w, &http.Cookie{
+					Name:     csrfCookieName,
+					Value:    token,
+					Path:     "/",
+					HttpOnly: true,
+					Secure:   r.TLS != nil,
+					SameSite: http.SameSiteStrictMode,
+				})
+			}
 			ctx := context.WithValue(r.Context(), csrfTokenContextKey, token)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -84,7 +103,12 @@ func csrfMiddleware(
 // isStateChanging reports whether an HTTP method mutates server state and
 // therefore requires CSRF validation.
 func isStateChanging(method string) bool {
-	return method == http.MethodPost || method == http.MethodPut || method == http.MethodDelete
+	return method == http.MethodPost || method == http.MethodPut || method == http.MethodPatch || method == http.MethodDelete
+}
+
+func matchesCSRFCookie(r *http.Request, token string) bool {
+	cookie, err := r.Cookie(csrfCookieName)
+	return err == nil && hmac.Equal([]byte(token), []byte(cookie.Value))
 }
 
 // isCookieAuthenticated reports whether the request was authenticated with

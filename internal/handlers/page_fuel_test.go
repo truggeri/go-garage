@@ -93,7 +93,7 @@ func TestPageHandler_FuelList(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.FuelList(rec, req)
+		serveHTMXPage(t, handler.FuelList, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
@@ -199,7 +199,7 @@ func TestPageHandler_FuelDetail(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.FuelDetail(rec, req)
+		serveHTMXPage(t, handler.FuelDetail, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
@@ -270,7 +270,7 @@ func TestPageHandler_FuelNew(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.FuelNew(rec, req)
+		serveHTMXPage(t, handler.FuelNew, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
@@ -343,7 +343,7 @@ func TestPageHandler_FuelEdit(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.FuelEdit(rec, req)
+		serveHTMXPage(t, handler.FuelEdit, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()

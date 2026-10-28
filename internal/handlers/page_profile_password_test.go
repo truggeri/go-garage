@@ -28,7 +28,7 @@ func TestPageHandler_ChangePassword(t *testing.T) {
 		req = addAuthContext(req, "u1", "johndoe")
 		rec := httptest.NewRecorder()
 
-		handler.ChangePassword(rec, req)
+		serveHTMXPage(t, handler.ChangePassword, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
@@ -43,7 +43,7 @@ func TestPageHandler_ChangePassword(t *testing.T) {
 		assert.Contains(t, body, `hx-validate="true"`)
 		assert.Contains(t, body, `data-form-errors role="alert"`)
 		assert.NotContains(t, body, `action="/profile/password"`)
-		assert.NotContains(t, body, `name="csrf_token"`)
+		assert.Contains(t, body, `name="csrf_token"`)
 		for _, field := range []string{"current_password", "new_password", "confirm_password"} {
 			assert.Contains(t, body, `data-field="`+field+`"`)
 		}

@@ -32,7 +32,7 @@ func TestPageHandler_VehicleEdit(t *testing.T) {
 		req = addResourceContext(req, baseVehicle)
 		rec := httptest.NewRecorder()
 
-		handler.VehicleEdit(rec, req)
+		serveHTMXPage(t, handler.VehicleEdit, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()

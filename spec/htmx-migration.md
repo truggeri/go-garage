@@ -55,7 +55,7 @@ Implemented by `middleware.HybridAuthGuard` in
 
 ## CSRF protection
 
-Cookie-authenticated `POST`, `PUT`, and `DELETE` requests to `/api/v1` must include a valid `X-CSRF-Token` header. The API router must apply CSRF middleware after hybrid authentication; that middleware must validate this header for JSON requests while retaining `csrf_token` form-field validation for full-page forms. Bearer-authenticated requests skip this additional check.
+Cookie-authenticated `POST`, `PUT`, `PATCH`, and `DELETE` requests to `/api/v1` must include a valid `X-CSRF-Token` header. The API router must apply CSRF middleware after hybrid authentication; that middleware must validate this header for JSON requests while retaining `csrf_token` form-field validation for full-page forms. Bearer-authenticated requests skip this additional check.
 
 After header support is implemented, authenticated layouts must expose the generated token as:
 
@@ -65,7 +65,10 @@ After header support is implemented, authenticated layouts must expose the gener
 
 The shared htmx module reads this value and adds it to every htmx request.
 The existing `csrf_token` hidden form field remains the convention for
-full-page forms, including login and registration.
+full-page forms, including login and registration. Anonymous forms also use a
+host-only, `HttpOnly`, `SameSite=Strict` `csrf_token` cookie and require the
+submitted token to match it, binding the HMAC token to the browser that fetched
+the form. The cookie is marked `Secure` for TLS requests.
 
 CSRF failures from API requests use the normal JSON error envelope with HTTP
 `403`; they must not render an HTML error page.
@@ -74,7 +77,8 @@ Implemented by `middleware.APICSRFProtection` in `internal/middleware/csrf.go`,
 applied to the protected `/api/v1` subrouter after `HybridAuthGuard`. The shared
 `CSRFProtection` middleware now accepts the token from the `X-CSRF-Token` header
 in addition to the `csrf_token` form field, and `web/templates/layouts/base.html`
-renders the `csrf-token` meta tag (PR #250).
+renders the `csrf-token` meta tag (PR #250). Anonymous form tokens are paired
+with the browser cookie, and PATCH requests are treated as state-changing.
 
 ## Front-end assets
 
