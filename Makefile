@@ -1,4 +1,4 @@
-.PHONY: help build test run clean fmt lint vet install-tools seed db-backup
+.PHONY: help build test e2e run clean fmt lint vet install-tools seed db-backup
 
 # Default target when just running 'make'
 help:
@@ -6,6 +6,7 @@ help:
 	@echo "=============================="
 	@echo "make build        - Compile the application"
 	@echo "make test         - Execute all tests"
+	@echo "make e2e          - Run browser end-to-end smoke tests"
 	@echo "make run          - Start the application"
 	@echo "make clean        - Remove build artifacts"
 	@echo "make fmt          - Format code with gofmt"
@@ -24,6 +25,10 @@ build:
 test:
 	@echo "Running tests..."
 	@go test -v -cover ./...
+
+# Run browser end-to-end smoke tests
+e2e:
+	@npx playwright test
 
 # Start the application
 run:

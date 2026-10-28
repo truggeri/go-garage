@@ -11,6 +11,37 @@ env:
   VEHICLE_APP_NAME: go-garage
 
 jobs:
+  browser-e2e-tests:
+    name: Browser End-to-End Smoke Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout go-garage repository
+        uses: actions/checkout@v5
+
+      - name: Setup Go toolchain for go-garage
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION_SPEC }}
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install browser test dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Run browser smoke test
+        run: make e2e
+
   code-quality-checks:
     name: Code Quality & Testing
     runs-on: ubuntu-latest

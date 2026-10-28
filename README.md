@@ -138,6 +138,25 @@ go test -v ./...
 go test -cover ./...
 ```
 
+### Browser End-to-End Smoke Test
+
+The Playwright smoke test uses Chromium to register an account, log in, and add a vehicle through the web interface. It starts its own server with a temporary SQLite database.
+
+Install Node.js 22 or later, then install the test dependencies and Chromium once:
+
+```shell
+npm ci
+npx playwright install chromium
+```
+
+Run the browser test with:
+
+```shell
+make e2e
+```
+
+The test server listens on port `4173`; set `E2E_PORT` to use a different port.
+
 ### Code Quality
 
 ```shell
