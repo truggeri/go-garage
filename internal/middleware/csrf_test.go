@@ -51,6 +51,32 @@ func TestCSRFProtection_AnonymousRequestSetsSecureCSRFCookie(t *testing.T) {
 	assert.Equal(t, "/", cookie.Path)
 }
 
+func TestCSRFProtection_AnonymousFormRoundTrip(t *testing.T) {
+	var token string
+	getHandler := CSRFProtection(testCSRFSecret)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		token = GetCSRFToken(r.Context())
+		w.WriteHeader(http.StatusOK)
+	}))
+	getRec := httptest.NewRecorder()
+	getHandler.ServeHTTP(getRec, httptest.NewRequest(http.MethodGet, "/login", nil))
+
+	cookies := getRec.Result().Cookies()
+	require.Len(t, cookies, 1)
+	require.Equal(t, csrfCookieName, cookies[0].Name)
+	require.Equal(t, token, cookies[0].Value)
+
+	form := url.Values{csrfFormField: []string{token}}
+	postReq := httptest.NewRequest(http.MethodPost, "/login", strings.NewReader(form.Encode()))
+	postReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	postReq.AddCookie(cookies[0])
+	postRec := httptest.NewRecorder()
+	CSRFProtection(testCSRFSecret)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})).ServeHTTP(postRec, postReq)
+
+	assert.Equal(t, http.StatusOK, postRec.Code)
+}
+
 func TestCSRFProtection_GeneratesUniqueTokens(t *testing.T) {
 	var token1, token2 string
 
