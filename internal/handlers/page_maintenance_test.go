@@ -45,7 +45,7 @@ func TestPageHandler_MaintenanceList(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.MaintenanceList(rec, req)
+		serveHTMXPage(t, handler.MaintenanceList, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()

@@ -32,20 +32,23 @@ func TestCSRFProtection_SetsTokenInContext(t *testing.T) {
 	assert.Contains(t, ctxToken, csrfTokenSeparator, "token should contain nonce.signature")
 }
 
-func TestCSRFProtection_NoCookieSet(t *testing.T) {
+func TestCSRFProtection_AnonymousRequestSetsSecureCSRFCookie(t *testing.T) {
 	handler := CSRFProtection(testCSRFSecret)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	req := httptest.NewRequest(http.MethodGet, "/form", nil)
+	req := httptest.NewRequest(http.MethodGet, "https://example.com/form", nil)
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
 
-	cookies := rec.Result().Cookies()
-	for _, c := range cookies {
-		assert.NotEqual(t, "csrf_token", c.Name, "HMAC CSRF should not set a csrf_token cookie")
-	}
+	cookie := rec.Result().Cookies()[0]
+	assert.Equal(t, csrfCookieName, cookie.Name)
+	assert.NotEmpty(t, cookie.Value)
+	assert.True(t, cookie.HttpOnly)
+	assert.True(t, cookie.Secure)
+	assert.Equal(t, http.SameSiteStrictMode, cookie.SameSite)
+	assert.Equal(t, "/", cookie.Path)
 }
 
 func TestCSRFProtection_GeneratesUniqueTokens(t *testing.T) {
@@ -82,11 +85,29 @@ func TestCSRFProtection_POST_ValidToken_NoSession(t *testing.T) {
 
 	req := httptest.NewRequest(http.MethodPost, "/submit", strings.NewReader(form.Encode()))
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.AddCookie(&http.Cookie{Name: csrfCookieName, Value: token})
 	rec := httptest.NewRecorder()
 
 	handler.ServeHTTP(rec, req)
 
 	assert.Equal(t, http.StatusOK, rec.Code)
+}
+
+func TestCSRFProtection_POST_AnonymousTokenRequiresMatchingCookie(t *testing.T) {
+	token := generateCSRFToken("", []byte(testCSRFSecret))
+	handler := CSRFProtection(testCSRFSecret)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	form := url.Values{csrfFormField: []string{token}}
+	req := httptest.NewRequest(http.MethodPost, "/submit", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.AddCookie(&http.Cookie{Name: csrfCookieName, Value: "another-browser-token"})
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	assert.Equal(t, http.StatusForbidden, rec.Code)
 }
 
 func TestCSRFProtection_POST_ValidToken_WithSession(t *testing.T) {
@@ -291,7 +312,7 @@ func TestAPICSRFProtection_CookieAuth_MissingToken(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	for _, httpMethod := range []string{http.MethodPost, http.MethodPut, http.MethodDelete} {
+	for _, httpMethod := range []string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
 		t.Run(httpMethod, func(t *testing.T) {
 			rec := httptest.NewRecorder()
 			handler.ServeHTTP(rec, newAPICSRFRequest(t, httpMethod, AuthMethodCookie, ""))
@@ -321,7 +342,7 @@ func TestAPICSRFProtection_BearerAuth_NoTokenRequired(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	for _, httpMethod := range []string{http.MethodPost, http.MethodPut, http.MethodDelete} {
+	for _, httpMethod := range []string{http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete} {
 		t.Run(httpMethod, func(t *testing.T) {
 			rec := httptest.NewRecorder()
 			handler.ServeHTTP(rec, newAPICSRFRequest(t, httpMethod, AuthMethodBearer, ""))

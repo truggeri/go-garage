@@ -41,7 +41,7 @@ func TestPageHandler_ProfileEdit(t *testing.T) {
 		req = addAuthContext(req, "u1", "johndoe")
 		rec := httptest.NewRecorder()
 
-		handler.ProfileEdit(rec, req)
+		serveHTMXPage(t, handler.ProfileEdit, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()

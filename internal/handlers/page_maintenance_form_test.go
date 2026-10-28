@@ -90,7 +90,7 @@ func TestPageHandler_MaintenanceNew(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.MaintenanceNew(rec, req)
+		serveHTMXPage(t, handler.MaintenanceNew, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()

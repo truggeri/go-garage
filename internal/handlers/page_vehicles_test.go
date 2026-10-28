@@ -47,7 +47,7 @@ func TestPageHandler_VehicleList(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.VehicleList(rec, req)
+		serveHTMXPage(t, handler.VehicleList, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
@@ -208,7 +208,7 @@ func TestPageHandler_VehicleNew(t *testing.T) {
 		req = addAuthContext(req, "u1", "testuser")
 		rec := httptest.NewRecorder()
 
-		handler.VehicleNew(rec, req)
+		serveHTMXPage(t, handler.VehicleNew, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
@@ -260,7 +260,7 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 		req = addResourceContext(req, baseVehicle)
 		rec := httptest.NewRecorder()
 
-		handler.VehicleDetail(rec, req)
+		serveHTMXPage(t, handler.VehicleDetail, rec, req)
 
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
