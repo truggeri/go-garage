@@ -38,7 +38,7 @@ Ensure the application is production-ready through comprehensive testing, comple
 
 #### End-to-End Tests
 
-- [ ] Test complete user workflows
+- [x] Test complete user workflows (Issue #274)
 - [ ] User registration and login
 - [ ] Add, edit, delete vehicle
 - [ ] Add, edit, delete maintenance record
