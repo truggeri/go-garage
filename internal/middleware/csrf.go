@@ -82,6 +82,9 @@ func csrfMiddleware(
 
 			token := generateCSRFToken(sessionID, secretBytes)
 			if sessionID == "" && shouldEnforce(r) {
+				if cookie, err := r.Cookie(csrfCookieName); err == nil && validateCSRFToken(cookie.Value, sessionID, secretBytes) {
+					token = cookie.Value
+				}
 				http.SetCookie(w, &http.Cookie{
 					Name:     csrfCookieName,
 					Value:    token,
