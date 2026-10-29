@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -311,6 +312,7 @@ func TestPageHandler_VehicleDetail(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		body := rec.Body.String()
 		assert.Contains(t, body, "Vehicle updated successfully")
+		assert.Equal(t, 1, strings.Count(body, "Vehicle updated successfully."))
 	})
 
 	t.Run("shows success flash after htmx creation redirect", func(t *testing.T) {
