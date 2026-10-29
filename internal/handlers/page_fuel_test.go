@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -210,6 +211,22 @@ func TestPageHandler_FuelDetail(t *testing.T) {
 		assert.Contains(t, body, "2020")
 		assert.Contains(t, body, `hx-delete="/api/v1/fuel/f1"`)
 		assert.NotContains(t, body, "/fuel/f1/delete")
+	})
+
+	t.Run("shows one success flash when updated=true", func(t *testing.T) {
+		fuelStub := &stubFuelSvc{getResult: baseRecord}
+		vehicleStub := &stubVehicleSvc{getResult: baseVehicle}
+		handler := newTestFuelPageHandler(t, vehicleStub, fuelStub)
+
+		req := httptest.NewRequest(http.MethodGet, "/fuel/f1?updated=true", nil)
+		req = mux.SetURLVars(req, map[string]string{"id": "f1"})
+		req = addAuthContext(req, "u1", "testuser")
+		rec := httptest.NewRecorder()
+
+		handler.FuelDetail(rec, req)
+
+		assert.Equal(t, http.StatusOK, rec.Code)
+		assert.Equal(t, 1, strings.Count(rec.Body.String(), "Fuel record updated successfully."))
 	})
 
 	t.Run("returns 404 when record not found", func(t *testing.T) {
